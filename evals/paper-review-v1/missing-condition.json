@@ -1,0 +1,95 @@
+{
+  "schema": "nat-paper-review-v1",
+  "document": {
+    "id": "missing-condition",
+    "version": 1,
+    "title": "乘法消去：缺少必要条件",
+    "text": "定理：自然数 a、b、c 满足 a × b = a × c 时，必有 b = c。\n证明：在等式两边约去共同因子 a，得到 b = c。"
+  },
+  "variables": [
+    "a",
+    "b",
+    "c"
+  ],
+  "assumptions": [
+    {
+      "op": "eq",
+      "left": {
+        "op": "mul",
+        "left": {
+          "op": "var",
+          "name": "a"
+        },
+        "right": {
+          "op": "var",
+          "name": "b"
+        }
+      },
+      "right": {
+        "op": "mul",
+        "left": {
+          "op": "var",
+          "name": "a"
+        },
+        "right": {
+          "op": "var",
+          "name": "c"
+        }
+      }
+    }
+  ],
+  "conclusion": {
+    "op": "eq",
+    "left": {
+      "op": "var",
+      "name": "b"
+    },
+    "right": {
+      "op": "var",
+      "name": "c"
+    }
+  },
+  "claim_span": [
+    1,
+    1
+  ],
+  "claim_plan": {
+    "direction": "refute",
+    "strategy": "counterexample",
+    "witnesses": [
+      0,
+      1,
+      0
+    ]
+  },
+  "steps": [
+    {
+      "id": "s1",
+      "span": [
+        2,
+        2
+      ],
+      "formula": {
+        "op": "eq",
+        "left": {
+          "op": "var",
+          "name": "b"
+        },
+        "right": {
+          "op": "var",
+          "name": "c"
+        }
+      },
+      "depends_on": [],
+      "plan": {
+        "direction": "refute",
+        "strategy": "counterexample",
+        "witnesses": [
+          0,
+          1,
+          0
+        ]
+      }
+    }
+  ]
+}

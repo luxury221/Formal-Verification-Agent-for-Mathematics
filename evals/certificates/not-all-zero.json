@@ -1,0 +1,65 @@
+{
+  "schema_version": "1",
+  "format": "kernel-expression-certificate-v1",
+  "claim_fingerprint": "070aab65dde26f769d70922d054bb8d56b3409b3edc27569c3001398d656c03a",
+  "formalization_fingerprint": "395a7bd7f8da190c432faa044d2442926fbace4628e9ad76c6b971911d2fa8de",
+  "proof": {
+    "op": "lam",
+    "type": {
+      "op": "forall",
+      "type": {
+        "op": "const",
+        "name": "Nat",
+        "levels": []
+      },
+      "body": {
+        "op": "app",
+        "fn": {
+          "op": "app",
+          "fn": {
+            "op": "app",
+            "fn": {
+              "op": "const",
+              "name": "Eq",
+              "levels": [
+                1
+              ]
+            },
+            "arg": {
+              "op": "const",
+              "name": "Nat",
+              "levels": []
+            }
+          },
+          "arg": {
+            "op": "bvar",
+            "index": 0
+          }
+        },
+        "arg": {
+          "op": "nat",
+          "value": 0
+        }
+      }
+    },
+    "body": {
+      "op": "app",
+      "fn": {
+        "op": "const",
+        "name": "Nat.one_ne_zero",
+        "levels": []
+      },
+      "arg": {
+        "op": "app",
+        "fn": {
+          "op": "bvar",
+          "index": 0
+        },
+        "arg": {
+          "op": "nat",
+          "value": 1
+        }
+      }
+    }
+  }
+}

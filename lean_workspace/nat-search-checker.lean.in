@@ -1,0 +1,62 @@
+import Mathlib.Data.Nat.Basic
+import Lean
+import LeanExport.Basic
+
+set_option autoImplicit false
+set_option Elab.async false
+set_option maxHeartbeats 200000
+
+namespace MraCandidate
+theorem result : __MRA_STATEMENT__ := __MRA_PROOF__
+end MraCandidate
+
+open Lean Elab Command in
+run_cmd do
+  let env ← getEnv
+  let some (.thmInfo info) := env.find? `MraCandidate.result
+    | throwError "MRA_MISSING_TARGET"
+  let actualType ← liftTermElabM do
+    let expected ← Lean.Elab.Term.elabType (← `(term| __MRA_STATEMENT__))
+    unless ← Lean.Meta.isDefEq info.type expected do
+      throwError "MRA_TARGET_MISMATCH"
+    return (← Lean.Meta.ppExpr info.type).pretty
+  let axioms ← Lean.collectAxioms `MraCandidate.result
+  if axioms.contains `sorryAx then
+    throwError "MRA_NAT_INCOMPLETE_PROOF"
+  let locals := env.checked.get.constants.foldStage2
+    (fun names name _ => names.push name) (#[] : Array Name)
+  let localSet := locals.foldl (fun (names : NameHashSet) name => names.insert name) {}
+  -- Imported definitions are loaded from the sealed base again during replay.
+  -- Export their names in expressions, but do not recursively export their bodies.
+  let imported := env.constants.toList.foldl
+    (fun (names : NameHashSet) entry =>
+      if localSet.contains entry.1 then names else names.insert entry.1) {}
+  let mut localAxioms : Array String := #[]
+  let mut allAxioms : Array Name := #[]
+  for name in locals do
+    if let some (.axiomInfo _) := env.find? name then
+      localAxioms := localAxioms.push name.toString
+    for ax in ← Lean.collectAxioms name do
+      if !allAxioms.contains ax then
+        allAxioms := allAxioms.push ax
+  let report := Json.mkObj [
+    ("target", toJson "MraCandidate.result"),
+    ("declaration_kind", toJson "theorem"),
+    ("type_matches", toJson true),
+    ("actual_type", toJson actualType),
+    ("input_mode", toJson "nat-bounded-search-v1"),
+    ("candidate_source_executed", toJson false),
+    ("source_origin", toJson "host-owned-formula-and-bounded-strategy"),
+    ("local_axioms", toJson localAxioms),
+    ("local_dependency_axioms", toJson (allAxioms.map Name.toString)),
+    ("axioms", toJson (axioms.map Name.toString))]
+  logInfo m!"MRA_AUDIT:{report.compress}"
+  liftIO do
+    IO.println "MRA_EXPORT_BEGIN"
+    LeanExport.M.run env do
+      LeanExport.initState env
+      modify fun state => { state with visitedConstants := imported }
+      LeanExport.dumpMetadata
+      for name in locals do
+        LeanExport.dumpConstant name
+    IO.println "MRA_EXPORT_END"

@@ -1,0 +1,108 @@
+{
+  "schema": "nat-paper-review-v1",
+  "document": {
+    "id": "true-claim-bad-proof",
+    "version": 1,
+    "title": "命题成立，原证明有缺口",
+    "text": "定理：对任意自然数 n，n + 2 > n。\n第一步：断言 n = n + 1。\n第二步：由第一步推出 n + 2 > n。"
+  },
+  "variables": [
+    "n"
+  ],
+  "assumptions": [],
+  "conclusion": {
+    "op": "lt",
+    "left": {
+      "op": "var",
+      "name": "n"
+    },
+    "right": {
+      "op": "add",
+      "left": {
+        "op": "var",
+        "name": "n"
+      },
+      "right": {
+        "op": "num",
+        "value": 2
+      }
+    }
+  },
+  "claim_span": [
+    1,
+    1
+  ],
+  "claim_plan": {
+    "direction": "prove",
+    "strategy": "omega",
+    "witnesses": []
+  },
+  "steps": [
+    {
+      "id": "s1",
+      "span": [
+        2,
+        2
+      ],
+      "formula": {
+        "op": "eq",
+        "left": {
+          "op": "var",
+          "name": "n"
+        },
+        "right": {
+          "op": "add",
+          "left": {
+            "op": "var",
+            "name": "n"
+          },
+          "right": {
+            "op": "num",
+            "value": 1
+          }
+        }
+      },
+      "depends_on": [],
+      "plan": {
+        "direction": "refute",
+        "strategy": "counterexample",
+        "witnesses": [
+          0
+        ]
+      }
+    },
+    {
+      "id": "s2",
+      "span": [
+        3,
+        3
+      ],
+      "formula": {
+        "op": "lt",
+        "left": {
+          "op": "var",
+          "name": "n"
+        },
+        "right": {
+          "op": "add",
+          "left": {
+            "op": "var",
+            "name": "n"
+          },
+          "right": {
+            "op": "num",
+            "value": 2
+          }
+        }
+      },
+      "depends_on": [
+        "s1"
+      ],
+      "plan": {
+        "direction": "prove",
+        "strategy": "omega",
+        "witnesses": []
+      }
+    }
+  ]
+}

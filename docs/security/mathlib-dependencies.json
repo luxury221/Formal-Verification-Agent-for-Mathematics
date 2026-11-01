@@ -1,0 +1,90 @@
+[
+  {
+    "name": "plausible",
+    "url": "https://github.com/leanprover-community/plausible",
+    "commit": "dfa4f38190d07c37e315953e08b90fe2d95b3c24",
+    "licenses": [
+      {
+        "file": "LICENSE",
+        "sha256": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4"
+      }
+    ]
+  },
+  {
+    "name": "LeanSearchClient",
+    "url": "https://github.com/leanprover-community/LeanSearchClient",
+    "commit": "d6b4c7be5be75ec4917c873ac50c756dc1436372",
+    "licenses": [
+      {
+        "file": "LICENSE",
+        "sha256": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4"
+      }
+    ]
+  },
+  {
+    "name": "importGraph",
+    "url": "https://github.com/leanprover-community/import-graph",
+    "commit": "a41f0e9a4dea23188ea9cc1c41ac9f8bbafe0b93",
+    "licenses": [
+      {
+        "file": "LICENSE",
+        "sha256": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4"
+      }
+    ]
+  },
+  {
+    "name": "proofwidgets",
+    "url": "https://github.com/leanprover-community/ProofWidgets4",
+    "commit": "df72b022e558978a1c50264cfc4d7fec86fa8e04",
+    "licenses": [
+      {
+        "file": "LICENSE",
+        "sha256": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4"
+      }
+    ]
+  },
+  {
+    "name": "aesop",
+    "url": "https://github.com/leanprover-community/aesop",
+    "commit": "4a174c490d8707121c4a9290800489f105d85e07",
+    "licenses": [
+      {
+        "file": "LICENSE",
+        "sha256": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4"
+      }
+    ]
+  },
+  {
+    "name": "Qq",
+    "url": "https://github.com/leanprover-community/quote4",
+    "commit": "dce0ad79c486cb1fb504af04f953c3466b0c6db8",
+    "licenses": [
+      {
+        "file": "LICENSE",
+        "sha256": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4"
+      }
+    ]
+  },
+  {
+    "name": "batteries",
+    "url": "https://github.com/leanprover-community/batteries",
+    "commit": "66e469188fe07963e5cf666c7d4433f45b8131c5",
+    "licenses": [
+      {
+        "file": "LICENSE",
+        "sha256": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4"
+      }
+    ]
+  },
+  {
+    "name": "Cli",
+    "url": "https://github.com/leanprover/lean4-cli",
+    "commit": "c24fe6078c630e89b489bffe59b3e20ac30d12c8",
+    "licenses": [
+      {
+        "file": "LICENSE",
+        "sha256": "f7e95706807e931782b6efd9a9d2789508a52423ad67b56ee7e5e324362d4aac"
+      }
+    ]
+  }
+]

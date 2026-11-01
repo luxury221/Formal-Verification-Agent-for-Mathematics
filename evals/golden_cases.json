@@ -1,0 +1,113 @@
+[
+  {
+    "id": "nat_add_zero",
+    "original_statement": "对任意自然数 n，有 n + 0 = n。",
+    "formal_statement": "∀ n : Nat, n + 0 = n",
+    "direction": "prove",
+    "proof": "by intro n; exact Nat.add_zero n",
+    "extra_declarations": "",
+    "expected_status": "COMPLETED",
+    "expected_verdict": "PROVED",
+    "expected_level": "E4_ALIGNED_AND_VERIFIED"
+  },
+  {
+    "id": "false_all_nat_zero",
+    "original_statement": "所有自然数都等于零。",
+    "formal_statement": "∀ n : Nat, n = 0",
+    "direction": "refute",
+    "proof": "by intro h; have bad : (1 : Nat) = 0 := h 1; cases bad",
+    "extra_declarations": "",
+    "expected_status": "COMPLETED",
+    "expected_verdict": "REFUTED",
+    "expected_level": "E4_ALIGNED_AND_VERIFIED"
+  },
+  {
+    "id": "sorry_placeholder",
+    "original_statement": "对任意自然数 n，有 n + 0 = n。",
+    "formal_statement": "∀ n : Nat, n + 0 = n",
+    "direction": "prove",
+    "proof": "by sorry",
+    "extra_declarations": "",
+    "expected_status": "POLICY_BLOCKED",
+    "expected_verdict": "UNKNOWN",
+    "expected_level": "E2_FORMALIZED"
+  },
+  {
+    "id": "admit_placeholder",
+    "original_statement": "对任意自然数 n，有 n + 0 = n。",
+    "formal_statement": "∀ n : Nat, n + 0 = n",
+    "direction": "prove",
+    "proof": "by admit",
+    "extra_declarations": "",
+    "expected_status": "POLICY_BLOCKED",
+    "expected_verdict": "UNKNOWN",
+    "expected_level": "E2_FORMALIZED"
+  },
+  {
+    "id": "injected_axiom",
+    "original_statement": "所有自然数都等于零。",
+    "formal_statement": "∀ n : Nat, n = 0",
+    "direction": "prove",
+    "proof": "by intro n; exact injected n",
+    "extra_declarations": "axiom injected : ∀ n : Nat, n = 0",
+    "expected_status": "POLICY_BLOCKED",
+    "expected_verdict": "UNKNOWN",
+    "expected_level": "E2_FORMALIZED"
+  },
+  {
+    "id": "invalid_proof",
+    "original_statement": "所有自然数都等于零。",
+    "formal_statement": "∀ n : Nat, n = 0",
+    "direction": "prove",
+    "proof": "by intro n; rfl",
+    "extra_declarations": "",
+    "expected_status": "COMPLETED",
+    "expected_verdict": "UNKNOWN",
+    "expected_level": "E2_FORMALIZED"
+  },
+  {
+    "id": "weakened_statement",
+    "original_statement": "所有自然数都等于零。",
+    "formal_statement": "∀ n : Nat, n = 0",
+    "checked_statement_override": "(0 : Nat) = 0",
+    "direction": "prove",
+    "proof": "rfl",
+    "extra_declarations": "",
+    "expected_status": "POLICY_BLOCKED",
+    "expected_verdict": "UNKNOWN",
+    "expected_level": "E2_FORMALIZED"
+  },
+  {
+    "id": "unused_injected_axiom",
+    "original_statement": "对任意自然数 n，有 n + 0 = n。",
+    "formal_statement": "∀ n : Nat, n + 0 = n",
+    "direction": "prove",
+    "proof": "by intro n; exact Nat.add_zero n",
+    "extra_declarations": "axiom injectedUnused : False",
+    "expected_status": "POLICY_BLOCKED",
+    "expected_verdict": "UNKNOWN",
+    "expected_level": "E2_FORMALIZED"
+  },
+  {
+    "id": "hidden_placeholder",
+    "original_statement": "对任意自然数 n，有 n + 0 = n。",
+    "formal_statement": "∀ n : Nat, n + 0 = n",
+    "direction": "prove",
+    "proof": "by intro n; exact Nat.add_zero n",
+    "extra_declarations": "theorem unfinishedHelper : False := by sorry",
+    "expected_status": "POLICY_BLOCKED",
+    "expected_verdict": "UNKNOWN",
+    "expected_level": "E2_FORMALIZED"
+  },
+  {
+    "id": "sandbox_boundary",
+    "original_statement": "对任意自然数 n，有 n + 0 = n。",
+    "formal_statement": "∀ n : Nat, n + 0 = n",
+    "direction": "prove",
+    "proof": "by intro n; exact Nat.add_zero n",
+    "extra_declarations": "run_cmd do\n  let probe ← IO.Process.output {cmd := \"/usr/bin/python3\", args := #[\"-c\", \"import pathlib, resource, socket\\nassert not pathlib.Path('/home/blacklions').exists(), 'host home leaked'\\nassert not pathlib.Path('/mnt/d').exists(), 'Windows drive leaked'\\nassert len(pathlib.Path('/proc/net/route').read_text().splitlines()) <= 1, 'host routes leaked'\\ntry:\\n    pathlib.Path('/work/unauthorized-write').write_text('bad')\\nexcept OSError:\\n    pass\\nelse:\\n    raise AssertionError('input mount writable')\\ns = socket.socket()\\nassert s.connect_ex(('198.51.100.1', 53)) != 0, 'network unexpectedly available'\\nassert resource.getrlimit(resource.RLIMIT_AS)[0] == 16384 * 1048576\\nprint('ISOLATION_PROBE_OK')\\n\"]}\n  if probe.exitCode != 0 then\n    throwError \"ISOLATION_PROBE_FAILED: {probe.stderr}\"\n  Lean.logInfo m!\"{probe.stdout}\"",
+    "expected_status": "COMPLETED",
+    "expected_verdict": "PROVED",
+    "expected_level": "E4_ALIGNED_AND_VERIFIED"
+  }
+]

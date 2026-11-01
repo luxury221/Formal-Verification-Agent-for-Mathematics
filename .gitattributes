@@ -1,0 +1,8 @@
+# Source hashes are part of the evidence protocol. Preserve exact bytes across
+# Windows and Linux checkouts instead of applying automatic newline conversion.
+* -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
+# Markdown uses trailing spaces for hard line breaks; upstream files retain
+# their original formatting and license notices.
+*.md whitespace=-blank-at-eol,-blank-at-eof,cr-at-eol
+mra/web/vendor/** -whitespace
+docs/security/upstream/** -whitespace

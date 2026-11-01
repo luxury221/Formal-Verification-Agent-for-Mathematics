@@ -1,0 +1,76 @@
+[
+  {
+    "model": "deepseek-ai/DeepSeek-Prover-V2-7B",
+    "date": "2026-10-19",
+    "adopted": false,
+    "weights_downloaded": false,
+    "revision": "a8d9e14432b2e8dd9df2a4d4e70f1ba9bc8d9b7b",
+    "declared_license": null,
+    "files": [
+      {
+        "name": "LICENSE",
+        "url": "https://huggingface.co/deepseek-ai/DeepSeek-Prover-V2-7B/resolve/a8d9e14432b2e8dd9df2a4d4e70f1ba9bc8d9b7b/LICENSE",
+        "sha256": "1c8f573e830ca9b3ebfeb7ace1823146e22b66f99ee223840e7637c9e745e1c7"
+      },
+      {
+        "name": "README.md",
+        "url": "https://huggingface.co/deepseek-ai/DeepSeek-Prover-V2-7B/resolve/a8d9e14432b2e8dd9df2a4d4e70f1ba9bc8d9b7b/README.md",
+        "sha256": "9b401b7ddeba804aa7595c4a4bc44ebc3b5865e8f76ac47b3938a30624ed1e21"
+      }
+    ],
+    "status": "metadata_audited_not_approved_for_deployment"
+  },
+  {
+    "model": "deepseek-ai/DeepSeek-Prover-V2-671B",
+    "date": "2026-10-19",
+    "adopted": false,
+    "weights_downloaded": false,
+    "revision": "a51f899d0599838aa934b21b45b4c1ae7fbce2d3",
+    "declared_license": null,
+    "files": [
+      {
+        "name": "LICENSE",
+        "url": "https://huggingface.co/deepseek-ai/DeepSeek-Prover-V2-671B/resolve/a51f899d0599838aa934b21b45b4c1ae7fbce2d3/LICENSE",
+        "sha256": "1c8f573e830ca9b3ebfeb7ace1823146e22b66f99ee223840e7637c9e745e1c7"
+      },
+      {
+        "name": "README.md",
+        "url": "https://huggingface.co/deepseek-ai/DeepSeek-Prover-V2-671B/resolve/a51f899d0599838aa934b21b45b4c1ae7fbce2d3/README.md",
+        "sha256": "9d27d9edc53340cd7aa24e214f0eb930cbc75afa0e9ed999a37a5e55e0ce0535"
+      }
+    ],
+    "status": "metadata_audited_not_approved_for_deployment"
+  },
+  {
+    "model": "Goedel-LM/Goedel-Prover-V2-8B",
+    "date": "2026-10-19",
+    "adopted": false,
+    "weights_downloaded": false,
+    "revision": "dfd02e6271a58375dfbf3ece0175277cf6b6a89a",
+    "declared_license": "apache-2.0",
+    "files": [
+      {
+        "name": "README.md",
+        "url": "https://huggingface.co/Goedel-LM/Goedel-Prover-V2-8B/resolve/dfd02e6271a58375dfbf3ece0175277cf6b6a89a/README.md",
+        "sha256": "93acf6260300f969d1fac1e92d9f10cae70183aa2e937ad4a82c518402bfeeb5"
+      }
+    ],
+    "status": "metadata_audited_not_approved_for_deployment"
+  },
+  {
+    "model": "Goedel-LM/Goedel-Prover-V2-32B",
+    "date": "2026-10-19",
+    "adopted": false,
+    "weights_downloaded": false,
+    "revision": "851bf85d329b0f819e1a44db30e05d16e07d15c0",
+    "declared_license": "apache-2.0",
+    "files": [
+      {
+        "name": "README.md",
+        "url": "https://huggingface.co/Goedel-LM/Goedel-Prover-V2-32B/resolve/851bf85d329b0f819e1a44db30e05d16e07d15c0/README.md",
+        "sha256": "9b7435a21396136f19460b84aad57e3d15ee2c3216cdc629e950e12aa2a10a34"
+      }
+    ],
+    "status": "metadata_audited_not_approved_for_deployment"
+  }
+]

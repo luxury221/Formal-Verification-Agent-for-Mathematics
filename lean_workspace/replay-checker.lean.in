@@ -1,0 +1,71 @@
+import Mathlib.Data.Nat.Basic
+import LeanExport.Parse
+import Lean.Replay
+
+set_option autoImplicit false
+set_option Elab.async false
+set_option maxHeartbeats 200000
+
+open Lean Elab Command in
+run_cmd do
+  -- Elaborate the host-owned target before reading candidate data.
+  let expected ← liftTermElabM do
+    let e ← Lean.Elab.Term.elabType (← `(term| __MRA_EXPECTED_STATEMENT__))
+    Lean.Elab.Term.synthesizeSyntheticMVarsNoPostponing
+    instantiateMVars e
+  let base ← getEnv
+  let policyText ← liftIO <| IO.FS.readFile "/work/policy.json"
+  let .ok policy := Json.parse policyText | throwError "MRA_REPLAY_INVALID_POLICY"
+  let .ok allowed := policy.getObjValAs? (Array String) "allowed_axioms"
+    | throwError "MRA_REPLAY_INVALID_POLICY"
+  let .ok forbidden := policy.getObjValAs? (Array String) "forbidden_axioms"
+    | throwError "MRA_REPLAY_INVALID_POLICY"
+  let exported ← liftIO <| IO.FS.withFile "/work/proof.ndjson" .read fun h =>
+    LeanExport.parseStream (.ofHandle h)
+  let mut locals : Std.HashMap Name ConstantInfo := {}
+  for (name, info) in exported.constMap do
+    -- Imported definitions always come from the sealed base, never the export.
+    if (base.find? name).isNone then
+      unless (`MraCandidate).isPrefixOf name do
+        throwError "MRA_REPLAY_UNAPPROVED_NAME {name}"
+      if info.isUnsafe || info.isPartial then
+        throwError "MRA_REPLAY_UNSAFE_DECLARATION {name}"
+      match info with
+      | .thmInfo _ | .defnInfo _ | .opaqueInfo _ => pure ()
+      | _ => throwError "MRA_REPLAY_UNAPPROVED_DECLARATION {name}"
+      locals := locals.insert name info
+  let kernel ← liftIO <| base.toKernelEnv.replay locals
+  let some (.thmInfo info) := kernel.find? `MraCandidate.result
+    | throwError "MRA_REPLAY_MISSING_THEOREM"
+  -- This bridge asks the kernel to check the exact host target too.
+  let bridge : Declaration := .thmDecl {
+    name := `MraVerifiedGoal
+    levelParams := []
+    type := expected
+    value := mkConst `MraCandidate.result
+  }
+  let kernel ← match kernel.addDeclCore 0 0 bridge (cancelTk? := none) with
+    | .ok env => pure env
+    | .error err => throwError "MRA_REPLAY_TARGET_MISMATCH: {← err.toMessageData {} |>.toString}"
+  setEnv (Environment.ofKernelEnv kernel)
+  let axioms ← Lean.collectAxioms `MraCandidate.result
+  let mut allAxioms : Array String := #[]
+  for (name, _) in locals do
+    for ax in ← Lean.collectAxioms name do
+      let value := ax.toString
+      unless allowed.contains value && !forbidden.contains value do
+        throwError "MRA_REPLAY_FORBIDDEN_AXIOM {ax}"
+      if !allAxioms.contains value then
+        allAxioms := allAxioms.push value
+  let report := Json.mkObj [
+    ("mode", toJson "data-only-kernel-replay-v1"),
+    ("target", toJson "MraCandidate.result"),
+    ("declaration_kind", toJson "theorem"),
+    ("type_matches", toJson true),
+    ("candidate_module_imported", toJson false),
+    ("replayed_declarations", toJson locals.size),
+    ("axioms", toJson (axioms.map Name.toString)),
+    ("local_dependency_axioms", toJson allAxioms),
+    ("local_axioms", toJson (#[] : Array String))]
+  let _ := info
+  logInfo m!"MRA_REPLAY:{report.compress}"

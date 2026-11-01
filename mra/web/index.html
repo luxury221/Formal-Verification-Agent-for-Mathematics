@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>MRA · 形式验证</title>
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <link rel="stylesheet" href="/workspace.css">
+  <script src="/shell.js" defer></script>
+  <script src="/app.js" defer></script>
+</head>
+<body>
+  <a class="skip-link" href="#page">跳至主要内容</a>
+  <main class="app-main">
+  <div class="page-container" id="page" tabindex="-1">
+    <section class="page-heading"><div><div class="eyebrow">FORMAL VERIFICATION</div><h1>让每个确定的结论，经得起检查。</h1><p>核对确切命题，运行真实 Lean 验证，并保留可追溯的证据。</p></div><div class="heading-actions"><a class="button secondary" href="/ideas">探索一个新猜想 →</a></div></section>
+    <div id="error" class="error" role="alert" hidden></div>
+    <div class="workspace">
+      <section class="card input-card">
+        <div class="card-title"><span class="step">01</span><h2>选择并核对命题</h2><span class="badge">固定目标</span></div>
+        <form id="submit-form">
+          <label for="target">待验证命题</label><select id="target" required></select>
+          <div class="statement"><span class="field-label">原始陈述</span><p id="original">读取中…</p><span class="field-label">实际检查的形式化</span><pre id="formal"></pre><p id="direction" class="hint"></p><p id="assumptions" class="hint"></p></div>
+          <div class="row"><div><label for="mode">证明输入</label><select id="mode"><option value="repository-lean-reference-v1">仓库参考证明</option><option value="kernel-expression-certificate-v1">JSON 证明证书</option></select></div><div class="budget"><label for="timeout">检查预算 / 秒</label><input id="timeout" type="number" value="30" min="0.001" max="120" step="any" required></div></div>
+          <div id="certificate-panel" hidden>
+            <label for="certificate">证明证书 JSON</label><textarea id="certificate" rows="9" spellcheck="false" placeholder="粘贴与此目标绑定的证明证书"></textarea>
+            <div class="sample-row"><select id="sample" aria-label="作者证书示例"></select><button id="use-sample" class="secondary" type="button">填入作者示例</button></div>
+            <p class="hint">示例由项目作者提供，未使用模型生成。证书限 64 KiB。</p>
+          </div>
+          <details id="alignment-panel"><summary>语义对齐确认 <span>可选</span></summary><p class="hint">确认仅针对此处原文、量词、定义域、前提与实际检查目标。未确认时，内核通过仍保持 UNKNOWN / E3。</p><label for="reviewer">确认者姓名</label><input id="reviewer" maxlength="200" placeholder="具名本地声明"><label class="check-row"><input id="confirmed" type="checkbox"><span>我已核对上述映射，并明确确认其语义一致。</span></label><p class="hint">姓名是本地声明，未进行身份认证。确认后需要重新运行检查。</p></details>
+          <button id="submit" class="primary" type="submit">提交并验证 <span>→</span></button><p class="hint footnote">两阶段共用检查预算。模型调用 0 次，模型费用 0；页面用时另计。</p>
+        </form>
+      </section>
+      <section class="card result-card" aria-live="polite">
+        <div class="card-title"><span class="step">02</span><h2>检查进度与结果</h2><span id="state" class="badge">待提交</span></div>
+        <div id="empty" class="empty"><div class="empty-symbol">⊢</div><h3>从一个明确的命题开始</h3><p>提交后将显示实际阶段、数学判断和证据等级。运行完成本身不代表命题已获证明。</p></div>
+        <div id="result" hidden>
+          <p id="task-id" class="task-id"></p>
+          <div class="verdict-row"><div><span class="field-label">数学判断</span><h3 id="verdict">UNKNOWN</h3></div><div><span class="field-label">证据等级</span><strong id="level">E0</strong></div></div>
+          <p id="explanation" class="explanation"></p>
+          <dl class="metrics"><div><dt>当前阶段</dt><dd id="stage">—</dd></div><div><dt>检查状态</dt><dd id="run-status">—</dd></div><div><dt>尝试次数</dt><dd id="attempts">0 / 3</dd></div><div><dt>本次用时</dt><dd id="elapsed">—</dd></div></dl>
+          <div class="actions"><button id="cancel" class="secondary" type="button" disabled>取消任务</button><button id="retry" class="secondary" type="button" disabled>按原预算重试</button><button id="review-again" class="secondary" type="button" hidden>确认映射并重新验证</button></div>
+          <div class="evidence-heading"><h3>证据与范围</h3><button id="evidence-button" class="text-button" type="button">查看检查工件</button></div>
+          <p id="artifact-status" class="hint"></p><p id="checked-statement" class="checked-statement"></p><p id="alignment-status" class="hint"></p>
+          <details><summary>实时事件</summary><ol id="events" class="events"></ol></details>
+          <details id="evidence-details"><summary>检查记录</summary><p class="hint">历史工件摘要核对不代表当前环境重新认证。新的认证需重新运行检查。</p><pre id="evidence">点击“查看检查工件”读取记录。</pre></details>
+        </div>
+      </section>
+    </div>
+    <section class="panel recent-section"><div class="panel-heading"><h2>最近验证任务</h2><div><span id="worker-state">连接中</span><button id="refresh" class="icon-button" title="刷新任务" aria-label="刷新任务">↻</button></div></div><div id="history" class="history"><p class="muted">正在读取任务…</p></div><form id="lookup-form" class="lookup"><label for="lookup">按任务 ID 查询</label><div class="inline"><input id="lookup" placeholder="task-…" required><button class="secondary" type="submit">查看</button></div></form></section>
+    <footer class="page-footer"><span>当前支持两个固定目标 · 仓库参考或受限证明证书 · 真实 Lean 两阶段验证</span><span>MRA · FORMAL VERIFICATION</span></footer>
+  </div>
+  </main>
+</body>
+</html>

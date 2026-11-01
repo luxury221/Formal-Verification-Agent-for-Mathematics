@@ -1,0 +1,1523 @@
+{
+  "schema": "structure-generalization-diagnostics-v1",
+  "authorship": "Local authored, fully author-visible correlated diagnostics; no held-out or independent research claim. No reference proof.",
+  "selection": "First non-rfl proposal from each generator, one complete check, 20 shared candidate/replay seconds. Renamed variant uses the browser. No retry.",
+  "cases": [
+    {
+      "id": "action-model",
+      "target": {
+        "schema": "explicit-structures-v1",
+        "title": "重复变换的作用与递推模型一致",
+        "original": "在显式复合作用律、单位作用律和model的零／后继递推下，对任意count与初态state，apply(power(operator_f,count),state)=model(count,state)。所有四条原前提均保留。",
+        "carriers": [
+          {
+            "name": "maps",
+            "original": "任意变换载体，不预设其元素就是函数。"
+          },
+          {
+            "name": "states",
+            "original": "任意状态载体。"
+          }
+        ],
+        "operations": [
+          {
+            "name": "compose",
+            "parameters": [
+              "maps",
+              "maps"
+            ],
+            "result_type": "maps",
+            "original": "显式变换复合运算。"
+          },
+          {
+            "name": "identity",
+            "parameters": [],
+            "result_type": "maps",
+            "original": "显式单位变换参数。"
+          },
+          {
+            "name": "apply",
+            "parameters": [
+              "maps",
+              "states"
+            ],
+            "result_type": "states",
+            "original": "显式变换作用。"
+          },
+          {
+            "name": "model",
+            "parameters": [
+              "Nat",
+              "states"
+            ],
+            "result_type": "states",
+            "original": "满足下列零及后继递推原前提的抽象模型。"
+          }
+        ],
+        "definitions": [
+          {
+            "name": "power",
+            "original": "power(f,0)=identity，power(f,k+1)=compose(power(f,k),f)。",
+            "parameters": [
+              {
+                "name": "f",
+                "type": "maps"
+              },
+              {
+                "name": "n",
+                "type": "Nat"
+              }
+            ],
+            "result_type": "maps",
+            "body": {
+              "nat_fold": {
+                "index": {
+                  "var": "n"
+                },
+                "zero": {
+                  "call": {
+                    "name": "identity",
+                    "args": []
+                  }
+                },
+                "step": {
+                  "index": "j",
+                  "value": "acc",
+                  "body": {
+                    "call": {
+                      "name": "compose",
+                      "args": [
+                        {
+                          "var": "acc"
+                        },
+                        {
+                          "var": "f"
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          }
+        ],
+        "variables": [
+          {
+            "name": "operator_f",
+            "type": "maps"
+          },
+          {
+            "name": "state",
+            "type": "states"
+          },
+          {
+            "name": "count",
+            "type": "Nat"
+          }
+        ],
+        "assumptions": [
+          {
+            "name": "action",
+            "formula": {
+              "forall": {
+                "binders": [
+                  {
+                    "name": "p",
+                    "type": "maps"
+                  },
+                  {
+                    "name": "q",
+                    "type": "maps"
+                  },
+                  {
+                    "name": "y",
+                    "type": "states"
+                  }
+                ],
+                "body": {
+                  "eq": [
+                    {
+                      "call": {
+                        "name": "apply",
+                        "args": [
+                          {
+                            "call": {
+                              "name": "compose",
+                              "args": [
+                                {
+                                  "var": "p"
+                                },
+                                {
+                                  "var": "q"
+                                }
+                              ]
+                            }
+                          },
+                          {
+                            "var": "y"
+                          }
+                        ]
+                      }
+                    },
+                    {
+                      "call": {
+                        "name": "apply",
+                        "args": [
+                          {
+                            "var": "p"
+                          },
+                          {
+                            "call": {
+                              "name": "apply",
+                              "args": [
+                                {
+                                  "var": "q"
+                                },
+                                {
+                                  "var": "y"
+                                }
+                              ]
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          {
+            "name": "identity_action",
+            "formula": {
+              "forall": {
+                "binders": [
+                  {
+                    "name": "y",
+                    "type": "states"
+                  }
+                ],
+                "body": {
+                  "eq": [
+                    {
+                      "call": {
+                        "name": "apply",
+                        "args": [
+                          {
+                            "call": {
+                              "name": "identity",
+                              "args": []
+                            }
+                          },
+                          {
+                            "var": "y"
+                          }
+                        ]
+                      }
+                    },
+                    {
+                      "var": "y"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          {
+            "name": "model_zero",
+            "formula": {
+              "forall": {
+                "binders": [
+                  {
+                    "name": "y",
+                    "type": "states"
+                  }
+                ],
+                "body": {
+                  "eq": [
+                    {
+                      "call": {
+                        "name": "model",
+                        "args": [
+                          {
+                            "nat": 0
+                          },
+                          {
+                            "var": "y"
+                          }
+                        ]
+                      }
+                    },
+                    {
+                      "var": "y"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          {
+            "name": "model_step",
+            "formula": {
+              "forall": {
+                "binders": [
+                  {
+                    "name": "k",
+                    "type": "Nat"
+                  },
+                  {
+                    "name": "y",
+                    "type": "states"
+                  }
+                ],
+                "body": {
+                  "eq": [
+                    {
+                      "call": {
+                        "name": "model",
+                        "args": [
+                          {
+                            "add": [
+                              {
+                                "var": "k"
+                              },
+                              {
+                                "nat": 1
+                              }
+                            ]
+                          },
+                          {
+                            "var": "y"
+                          }
+                        ]
+                      }
+                    },
+                    {
+                      "call": {
+                        "name": "model",
+                        "args": [
+                          {
+                            "var": "k"
+                          },
+                          {
+                            "call": {
+                              "name": "apply",
+                              "args": [
+                                {
+                                  "var": "operator_f"
+                                },
+                                {
+                                  "var": "y"
+                                }
+                              ]
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        ],
+        "goal": {
+          "eq": [
+            {
+              "call": {
+                "name": "apply",
+                "args": [
+                  {
+                    "call": {
+                      "name": "power",
+                      "args": [
+                        {
+                          "var": "operator_f"
+                        },
+                        {
+                          "var": "count"
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "var": "state"
+                  }
+                ]
+              }
+            },
+            {
+              "call": {
+                "name": "model",
+                "args": [
+                  {
+                    "var": "count"
+                  },
+                  {
+                    "var": "state"
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        "timeout_seconds": 20
+      },
+      "real": "paired",
+      "provenance": {
+        "kind": "local-author-diagnostic",
+        "origin": "this dataset, authored in MRA068",
+        "transformation": "explicit right-composition action and abstract model recurrence",
+        "exposure": "author-visible",
+        "reference_proof_excluded": true
+      }
+    },
+    {
+      "id": "renamed-action",
+      "target": {
+        "schema": "explicit-structures-v1",
+        "title": "重命名及声明换序的重复变换作用",
+        "original": "在相同四类完整原前提下，evaluate(repeat(transform,length),initial)=trace(length,initial)。",
+        "carriers": [
+          {
+            "name": "maps",
+            "original": "任意变换载体，不预设其元素就是函数。"
+          },
+          {
+            "name": "states",
+            "original": "任意状态载体。"
+          }
+        ],
+        "operations": [
+          {
+            "name": "chain",
+            "parameters": [
+              "maps",
+              "maps"
+            ],
+            "result_type": "maps",
+            "original": "显式变换复合运算。"
+          },
+          {
+            "name": "neutral",
+            "parameters": [],
+            "result_type": "maps",
+            "original": "显式单位变换参数。"
+          },
+          {
+            "name": "evaluate",
+            "parameters": [
+              "maps",
+              "states"
+            ],
+            "result_type": "states",
+            "original": "显式变换作用。"
+          },
+          {
+            "name": "trace",
+            "parameters": [
+              "Nat",
+              "states"
+            ],
+            "result_type": "states",
+            "original": "满足下列零及后继递推原前提的抽象模型。"
+          }
+        ],
+        "definitions": [
+          {
+            "name": "repeat",
+            "original": "power(f,0)=identity，power(f,k+1)=compose(power(f,k),f)。",
+            "parameters": [
+              {
+                "name": "f",
+                "type": "maps"
+              },
+              {
+                "name": "n",
+                "type": "Nat"
+              }
+            ],
+            "result_type": "maps",
+            "body": {
+              "nat_fold": {
+                "index": {
+                  "var": "n"
+                },
+                "zero": {
+                  "call": {
+                    "name": "neutral",
+                    "args": []
+                  }
+                },
+                "step": {
+                  "index": "j",
+                  "value": "acc",
+                  "body": {
+                    "call": {
+                      "name": "chain",
+                      "args": [
+                        {
+                          "var": "acc"
+                        },
+                        {
+                          "var": "f"
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          }
+        ],
+        "variables": [
+          {
+            "name": "length",
+            "type": "Nat"
+          },
+          {
+            "name": "initial",
+            "type": "states"
+          },
+          {
+            "name": "transform",
+            "type": "maps"
+          }
+        ],
+        "assumptions": [
+          {
+            "name": "law_one",
+            "formula": {
+              "forall": {
+                "binders": [
+                  {
+                    "name": "p",
+                    "type": "maps"
+                  },
+                  {
+                    "name": "q",
+                    "type": "maps"
+                  },
+                  {
+                    "name": "y",
+                    "type": "states"
+                  }
+                ],
+                "body": {
+                  "eq": [
+                    {
+                      "call": {
+                        "name": "evaluate",
+                        "args": [
+                          {
+                            "call": {
+                              "name": "chain",
+                              "args": [
+                                {
+                                  "var": "p"
+                                },
+                                {
+                                  "var": "q"
+                                }
+                              ]
+                            }
+                          },
+                          {
+                            "var": "y"
+                          }
+                        ]
+                      }
+                    },
+                    {
+                      "call": {
+                        "name": "evaluate",
+                        "args": [
+                          {
+                            "var": "p"
+                          },
+                          {
+                            "call": {
+                              "name": "evaluate",
+                              "args": [
+                                {
+                                  "var": "q"
+                                },
+                                {
+                                  "var": "y"
+                                }
+                              ]
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          {
+            "name": "law_two",
+            "formula": {
+              "forall": {
+                "binders": [
+                  {
+                    "name": "y",
+                    "type": "states"
+                  }
+                ],
+                "body": {
+                  "eq": [
+                    {
+                      "call": {
+                        "name": "evaluate",
+                        "args": [
+                          {
+                            "call": {
+                              "name": "neutral",
+                              "args": []
+                            }
+                          },
+                          {
+                            "var": "y"
+                          }
+                        ]
+                      }
+                    },
+                    {
+                      "var": "y"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          {
+            "name": "law_three",
+            "formula": {
+              "forall": {
+                "binders": [
+                  {
+                    "name": "y",
+                    "type": "states"
+                  }
+                ],
+                "body": {
+                  "eq": [
+                    {
+                      "call": {
+                        "name": "trace",
+                        "args": [
+                          {
+                            "nat": 0
+                          },
+                          {
+                            "var": "y"
+                          }
+                        ]
+                      }
+                    },
+                    {
+                      "var": "y"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          {
+            "name": "law_four",
+            "formula": {
+              "forall": {
+                "binders": [
+                  {
+                    "name": "k",
+                    "type": "Nat"
+                  },
+                  {
+                    "name": "y",
+                    "type": "states"
+                  }
+                ],
+                "body": {
+                  "eq": [
+                    {
+                      "call": {
+                        "name": "trace",
+                        "args": [
+                          {
+                            "add": [
+                              {
+                                "var": "k"
+                              },
+                              {
+                                "nat": 1
+                              }
+                            ]
+                          },
+                          {
+                            "var": "y"
+                          }
+                        ]
+                      }
+                    },
+                    {
+                      "call": {
+                        "name": "trace",
+                        "args": [
+                          {
+                            "var": "k"
+                          },
+                          {
+                            "call": {
+                              "name": "evaluate",
+                              "args": [
+                                {
+                                  "var": "transform"
+                                },
+                                {
+                                  "var": "y"
+                                }
+                              ]
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        ],
+        "goal": {
+          "eq": [
+            {
+              "call": {
+                "name": "evaluate",
+                "args": [
+                  {
+                    "call": {
+                      "name": "repeat",
+                      "args": [
+                        {
+                          "var": "transform"
+                        },
+                        {
+                          "var": "length"
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "var": "initial"
+                  }
+                ]
+              }
+            },
+            {
+              "call": {
+                "name": "trace",
+                "args": [
+                  {
+                    "var": "length"
+                  },
+                  {
+                    "var": "initial"
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        "timeout_seconds": 20
+      },
+      "real": "browser",
+      "provenance": {
+        "kind": "local-author-diagnostic",
+        "origin": "action-model",
+        "transformation": "rename symbols/laws/variables and reverse declarations",
+        "exposure": "author-visible",
+        "reference_proof_excluded": true
+      }
+    },
+    {
+      "id": "two-state-observation",
+      "target": {
+        "schema": "explicit-structures-v1",
+        "title": "两初态观察的重复变换与递推模型",
+        "original": "在显式复合观察律、单位观察律及二状态model零／后继条件下，apply(power(operator_f,count),state,other)=model(count,state,other)。两个状态均为原目标的自由参数，全部四条原条件保留。",
+        "carriers": [
+          {
+            "name": "maps",
+            "original": "任意变换载体，不预设其元素就是函数。"
+          },
+          {
+            "name": "states",
+            "original": "任意状态载体。"
+          }
+        ],
+        "operations": [
+          {
+            "name": "compose",
+            "parameters": [
+              "maps",
+              "maps"
+            ],
+            "result_type": "maps",
+            "original": "显式变换复合运算。"
+          },
+          {
+            "name": "identity",
+            "parameters": [],
+            "result_type": "maps",
+            "original": "显式单位变换参数。"
+          },
+          {
+            "name": "apply",
+            "parameters": [
+              "maps",
+              "states",
+              "states"
+            ],
+            "result_type": "states",
+            "original": "变换在两初态上的观察。"
+          },
+          {
+            "name": "model",
+            "parameters": [
+              "Nat",
+              "states",
+              "states"
+            ],
+            "result_type": "states",
+            "original": "两初态的递推观察模型。"
+          },
+          {
+            "name": "advance",
+            "parameters": [
+              "maps",
+              "states"
+            ],
+            "result_type": "states",
+            "original": "变换对单个状态的作用。"
+          },
+          {
+            "name": "observe",
+            "parameters": [
+              "states",
+              "states"
+            ],
+            "result_type": "states",
+            "original": "初始观察操作。"
+          }
+        ],
+        "definitions": [
+          {
+            "name": "power",
+            "original": "power(f,0)=identity，power(f,k+1)=compose(power(f,k),f)。",
+            "parameters": [
+              {
+                "name": "f",
+                "type": "maps"
+              },
+              {
+                "name": "n",
+                "type": "Nat"
+              }
+            ],
+            "result_type": "maps",
+            "body": {
+              "nat_fold": {
+                "index": {
+                  "var": "n"
+                },
+                "zero": {
+                  "call": {
+                    "name": "identity",
+                    "args": []
+                  }
+                },
+                "step": {
+                  "index": "j",
+                  "value": "acc",
+                  "body": {
+                    "call": {
+                      "name": "compose",
+                      "args": [
+                        {
+                          "var": "acc"
+                        },
+                        {
+                          "var": "f"
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          }
+        ],
+        "variables": [
+          {
+            "name": "operator_f",
+            "type": "maps"
+          },
+          {
+            "name": "state",
+            "type": "states"
+          },
+          {
+            "name": "other",
+            "type": "states"
+          },
+          {
+            "name": "count",
+            "type": "Nat"
+          }
+        ],
+        "assumptions": [
+          {
+            "name": "action",
+            "formula": {
+              "forall": {
+                "binders": [
+                  {
+                    "name": "p",
+                    "type": "maps"
+                  },
+                  {
+                    "name": "q",
+                    "type": "maps"
+                  },
+                  {
+                    "name": "x",
+                    "type": "states"
+                  },
+                  {
+                    "name": "y",
+                    "type": "states"
+                  }
+                ],
+                "body": {
+                  "eq": [
+                    {
+                      "call": {
+                        "name": "apply",
+                        "args": [
+                          {
+                            "call": {
+                              "name": "compose",
+                              "args": [
+                                {
+                                  "var": "p"
+                                },
+                                {
+                                  "var": "q"
+                                }
+                              ]
+                            }
+                          },
+                          {
+                            "var": "x"
+                          },
+                          {
+                            "var": "y"
+                          }
+                        ]
+                      }
+                    },
+                    {
+                      "call": {
+                        "name": "apply",
+                        "args": [
+                          {
+                            "var": "p"
+                          },
+                          {
+                            "call": {
+                              "name": "advance",
+                              "args": [
+                                {
+                                  "var": "q"
+                                },
+                                {
+                                  "var": "x"
+                                }
+                              ]
+                            }
+                          },
+                          {
+                            "call": {
+                              "name": "advance",
+                              "args": [
+                                {
+                                  "var": "q"
+                                },
+                                {
+                                  "var": "y"
+                                }
+                              ]
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          {
+            "name": "identity_action",
+            "formula": {
+              "forall": {
+                "binders": [
+                  {
+                    "name": "x",
+                    "type": "states"
+                  },
+                  {
+                    "name": "y",
+                    "type": "states"
+                  }
+                ],
+                "body": {
+                  "eq": [
+                    {
+                      "call": {
+                        "name": "apply",
+                        "args": [
+                          {
+                            "call": {
+                              "name": "identity",
+                              "args": []
+                            }
+                          },
+                          {
+                            "var": "x"
+                          },
+                          {
+                            "var": "y"
+                          }
+                        ]
+                      }
+                    },
+                    {
+                      "call": {
+                        "name": "observe",
+                        "args": [
+                          {
+                            "var": "x"
+                          },
+                          {
+                            "var": "y"
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          {
+            "name": "model_zero",
+            "formula": {
+              "forall": {
+                "binders": [
+                  {
+                    "name": "x",
+                    "type": "states"
+                  },
+                  {
+                    "name": "y",
+                    "type": "states"
+                  }
+                ],
+                "body": {
+                  "eq": [
+                    {
+                      "call": {
+                        "name": "model",
+                        "args": [
+                          {
+                            "nat": 0
+                          },
+                          {
+                            "var": "x"
+                          },
+                          {
+                            "var": "y"
+                          }
+                        ]
+                      }
+                    },
+                    {
+                      "call": {
+                        "name": "observe",
+                        "args": [
+                          {
+                            "var": "x"
+                          },
+                          {
+                            "var": "y"
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          {
+            "name": "model_step",
+            "formula": {
+              "forall": {
+                "binders": [
+                  {
+                    "name": "k",
+                    "type": "Nat"
+                  },
+                  {
+                    "name": "x",
+                    "type": "states"
+                  },
+                  {
+                    "name": "y",
+                    "type": "states"
+                  }
+                ],
+                "body": {
+                  "eq": [
+                    {
+                      "call": {
+                        "name": "model",
+                        "args": [
+                          {
+                            "add": [
+                              {
+                                "var": "k"
+                              },
+                              {
+                                "nat": 1
+                              }
+                            ]
+                          },
+                          {
+                            "var": "x"
+                          },
+                          {
+                            "var": "y"
+                          }
+                        ]
+                      }
+                    },
+                    {
+                      "call": {
+                        "name": "model",
+                        "args": [
+                          {
+                            "var": "k"
+                          },
+                          {
+                            "call": {
+                              "name": "advance",
+                              "args": [
+                                {
+                                  "var": "operator_f"
+                                },
+                                {
+                                  "var": "x"
+                                }
+                              ]
+                            }
+                          },
+                          {
+                            "call": {
+                              "name": "advance",
+                              "args": [
+                                {
+                                  "var": "operator_f"
+                                },
+                                {
+                                  "var": "y"
+                                }
+                              ]
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        ],
+        "goal": {
+          "eq": [
+            {
+              "call": {
+                "name": "apply",
+                "args": [
+                  {
+                    "call": {
+                      "name": "power",
+                      "args": [
+                        {
+                          "var": "operator_f"
+                        },
+                        {
+                          "var": "count"
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "var": "state"
+                  },
+                  {
+                    "var": "other"
+                  }
+                ]
+              }
+            },
+            {
+              "call": {
+                "name": "model",
+                "args": [
+                  {
+                    "var": "count"
+                  },
+                  {
+                    "var": "state"
+                  },
+                  {
+                    "var": "other"
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        "timeout_seconds": 20
+      },
+      "real": "paired",
+      "provenance": {
+        "kind": "local-author-diagnostic",
+        "origin": "action-model",
+        "transformation": "two state parameters; composite observation evolves both states",
+        "exposure": "author-visible",
+        "reference_proof_excluded": true
+      }
+    },
+    {
+      "id": "missing-step",
+      "target": {
+        "schema": "explicit-structures-v1",
+        "title": "缺少模型后继递推条件",
+        "original": "仅有作用复合、单位作用和model零分支，尝试同一完整目标；缺少后继递推不能补作前提。",
+        "carriers": [
+          {
+            "name": "maps",
+            "original": "任意变换载体，不预设其元素就是函数。"
+          },
+          {
+            "name": "states",
+            "original": "任意状态载体。"
+          }
+        ],
+        "operations": [
+          {
+            "name": "compose",
+            "parameters": [
+              "maps",
+              "maps"
+            ],
+            "result_type": "maps",
+            "original": "显式变换复合运算。"
+          },
+          {
+            "name": "identity",
+            "parameters": [],
+            "result_type": "maps",
+            "original": "显式单位变换参数。"
+          },
+          {
+            "name": "apply",
+            "parameters": [
+              "maps",
+              "states"
+            ],
+            "result_type": "states",
+            "original": "显式变换作用。"
+          },
+          {
+            "name": "model",
+            "parameters": [
+              "Nat",
+              "states"
+            ],
+            "result_type": "states",
+            "original": "满足下列零及后继递推原前提的抽象模型。"
+          }
+        ],
+        "definitions": [
+          {
+            "name": "power",
+            "original": "power(f,0)=identity，power(f,k+1)=compose(power(f,k),f)。",
+            "parameters": [
+              {
+                "name": "f",
+                "type": "maps"
+              },
+              {
+                "name": "n",
+                "type": "Nat"
+              }
+            ],
+            "result_type": "maps",
+            "body": {
+              "nat_fold": {
+                "index": {
+                  "var": "n"
+                },
+                "zero": {
+                  "call": {
+                    "name": "identity",
+                    "args": []
+                  }
+                },
+                "step": {
+                  "index": "j",
+                  "value": "acc",
+                  "body": {
+                    "call": {
+                      "name": "compose",
+                      "args": [
+                        {
+                          "var": "acc"
+                        },
+                        {
+                          "var": "f"
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          }
+        ],
+        "variables": [
+          {
+            "name": "operator_f",
+            "type": "maps"
+          },
+          {
+            "name": "state",
+            "type": "states"
+          },
+          {
+            "name": "count",
+            "type": "Nat"
+          }
+        ],
+        "assumptions": [
+          {
+            "name": "action",
+            "formula": {
+              "forall": {
+                "binders": [
+                  {
+                    "name": "p",
+                    "type": "maps"
+                  },
+                  {
+                    "name": "q",
+                    "type": "maps"
+                  },
+                  {
+                    "name": "y",
+                    "type": "states"
+                  }
+                ],
+                "body": {
+                  "eq": [
+                    {
+                      "call": {
+                        "name": "apply",
+                        "args": [
+                          {
+                            "call": {
+                              "name": "compose",
+                              "args": [
+                                {
+                                  "var": "p"
+                                },
+                                {
+                                  "var": "q"
+                                }
+                              ]
+                            }
+                          },
+                          {
+                            "var": "y"
+                          }
+                        ]
+                      }
+                    },
+                    {
+                      "call": {
+                        "name": "apply",
+                        "args": [
+                          {
+                            "var": "p"
+                          },
+                          {
+                            "call": {
+                              "name": "apply",
+                              "args": [
+                                {
+                                  "var": "q"
+                                },
+                                {
+                                  "var": "y"
+                                }
+                              ]
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          {
+            "name": "identity_action",
+            "formula": {
+              "forall": {
+                "binders": [
+                  {
+                    "name": "y",
+                    "type": "states"
+                  }
+                ],
+                "body": {
+                  "eq": [
+                    {
+                      "call": {
+                        "name": "apply",
+                        "args": [
+                          {
+                            "call": {
+                              "name": "identity",
+                              "args": []
+                            }
+                          },
+                          {
+                            "var": "y"
+                          }
+                        ]
+                      }
+                    },
+                    {
+                      "var": "y"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          {
+            "name": "model_zero",
+            "formula": {
+              "forall": {
+                "binders": [
+                  {
+                    "name": "y",
+                    "type": "states"
+                  }
+                ],
+                "body": {
+                  "eq": [
+                    {
+                      "call": {
+                        "name": "model",
+                        "args": [
+                          {
+                            "nat": 0
+                          },
+                          {
+                            "var": "y"
+                          }
+                        ]
+                      }
+                    },
+                    {
+                      "var": "y"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        ],
+        "goal": {
+          "eq": [
+            {
+              "call": {
+                "name": "apply",
+                "args": [
+                  {
+                    "call": {
+                      "name": "power",
+                      "args": [
+                        {
+                          "var": "operator_f"
+                        },
+                        {
+                          "var": "count"
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "var": "state"
+                  }
+                ]
+              }
+            },
+            {
+              "call": {
+                "name": "model",
+                "args": [
+                  {
+                    "var": "count"
+                  },
+                  {
+                    "var": "state"
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        "timeout_seconds": 20
+      },
+      "real": "paired",
+      "provenance": {
+        "kind": "local-author-diagnostic",
+        "origin": "action-model",
+        "transformation": "remove original model_step premise only; retain exact goal",
+        "exposure": "author-visible",
+        "reference_proof_excluded": true
+      }
+    }
+  ]
+}

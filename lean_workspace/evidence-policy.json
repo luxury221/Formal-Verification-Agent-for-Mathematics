@@ -1,0 +1,20 @@
+{
+  "schema_version": "1",
+  "policy_id": "mra-p1-certificate-v1",
+  "certificate_mode": "kernel-expression-certificate-v1",
+  "certificate_targets": ["nat_add_zero", "false_all_nat_zero"],
+  "nat_search_mode": "nat-bounded-search-v1",
+  "nat_formula_schema": "nat-formula-v1",
+  "nat_strategies": ["omega", "simp", "decide", "counterexample"],
+  "int_search_mode": "int-bounded-search-v1",
+  "int_formula_schema": "int-formula-v1",
+  "int_strategies": ["omega", "simp", "decide", "counterexample"],
+  "require_independent_replay": true,
+  "replay_mode": "data-only-kernel-replay-v1",
+  "allowed_axioms": ["propext", "Classical.choice", "Quot.sound"],
+  "forbidden_axioms": ["sorryAx", "Lean.ofReduceBool"],
+  "require_theorem_declaration": true,
+  "require_exact_target_type": true,
+  "require_alignment_for_verdict": true,
+  "input_scope": "repository-references-fixed-certificates-and-explicitly-typed-Nat-Int-arithmetic"
+}

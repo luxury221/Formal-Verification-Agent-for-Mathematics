@@ -1,0 +1,720 @@
+{
+  "schema": "number-theory-search-evaluation-v1",
+  "authorship": "Project-authored structured targets without reference proofs; internal functional evaluation.",
+  "visibility": "All cases are repository-visible and inspected during development. Not independent, blind or held-out.",
+  "training_use": false,
+  "cases": [
+    {
+      "id": "gcd_self",
+      "split": "development",
+      "family": "gcd_self",
+      "note": "直接引用；不提供手写证明。",
+      "target": {
+        "schema": "mathlib-nat-gcd-v1",
+        "title": "自身的 gcd",
+        "original": "对任意自然数 a，gcd(a,a)=a。",
+        "variables": [
+          "a"
+        ],
+        "assumptions": [],
+        "goal": {
+          "eq": [
+            {
+              "gcd": [
+                {
+                  "var": "a"
+                },
+                {
+                  "var": "a"
+                }
+              ]
+            },
+            {
+              "var": "a"
+            }
+          ]
+        },
+        "timeout_seconds": 30
+      }
+    },
+    {
+      "id": "zero_boundary",
+      "split": "development",
+      "family": "zero_boundary",
+      "note": "保持零的边界与等价式。",
+      "target": {
+        "schema": "mathlib-nat-gcd-v1",
+        "title": "零与互素的边界",
+        "original": "对任意自然数 a，0 与 a 互素当且仅当 a=1。",
+        "variables": [
+          "a"
+        ],
+        "assumptions": [],
+        "goal": {
+          "iff": [
+            {
+              "coprime": [
+                {
+                  "nat": 0
+                },
+                {
+                  "var": "a"
+                }
+              ]
+            },
+            {
+              "eq": [
+                {
+                  "var": "a"
+                },
+                {
+                  "nat": 1
+                }
+              ]
+            }
+          ]
+        },
+        "timeout_seconds": 30
+      }
+    },
+    {
+      "id": "one_coprime",
+      "split": "development",
+      "family": "one_coprime",
+      "note": "直接引用。",
+      "target": {
+        "schema": "mathlib-nat-gcd-v1",
+        "title": "一与任意自然数互素",
+        "original": "对任意自然数 a，1 与 a 互素。",
+        "variables": [
+          "a"
+        ],
+        "assumptions": [],
+        "goal": {
+          "coprime": [
+            {
+              "nat": 1
+            },
+            {
+              "var": "a"
+            }
+          ]
+        },
+        "timeout_seconds": 30
+      }
+    },
+    {
+      "id": "right_multiple",
+      "split": "development",
+      "family": "right_multiple",
+      "note": "显式参数顺序。",
+      "target": {
+        "schema": "mathlib-nat-gcd-v1",
+        "title": "整除右倍数",
+        "original": "对任意自然数 a、b，a 整除 a*b。",
+        "variables": [
+          "a",
+          "b"
+        ],
+        "assumptions": [],
+        "goal": {
+          "dvd": [
+            {
+              "var": "a"
+            },
+            {
+              "mul": [
+                {
+                  "var": "a"
+                },
+                {
+                  "var": "b"
+                }
+              ]
+            }
+          ]
+        },
+        "timeout_seconds": 30
+      }
+    },
+    {
+      "id": "common_divisor",
+      "split": "regression",
+      "family": "common_divisor",
+      "note": "两个前提均需保留。",
+      "target": {
+        "schema": "mathlib-nat-gcd-v1",
+        "title": "公因子整除 gcd",
+        "original": "对任意自然数 d、a、b，若 d 整除 a 且 d 整除 b，则 d 整除 gcd(a,b)。",
+        "variables": [
+          "d",
+          "a",
+          "b"
+        ],
+        "assumptions": [
+          {
+            "name": "ha",
+            "formula": {
+              "dvd": [
+                {
+                  "var": "d"
+                },
+                {
+                  "var": "a"
+                }
+              ]
+            }
+          },
+          {
+            "name": "hb",
+            "formula": {
+              "dvd": [
+                {
+                  "var": "d"
+                },
+                {
+                  "var": "b"
+                }
+              ]
+            }
+          }
+        ],
+        "goal": {
+          "dvd": [
+            {
+              "var": "d"
+            },
+            {
+              "gcd": [
+                {
+                  "var": "a"
+                },
+                {
+                  "var": "b"
+                }
+              ]
+            }
+          ]
+        },
+        "timeout_seconds": 30
+      }
+    },
+    {
+      "id": "nested_add_gcd",
+      "split": "regression",
+      "family": "nested_add_gcd",
+      "note": "多层组合，不能额外添加条件。",
+      "target": {
+        "schema": "mathlib-nat-gcd-v1",
+        "title": "加法与 gcd 的多层组合",
+        "original": "对任意自然数 d、a、b，若 d 整除 a 且 d 整除 b，则 d 整除 gcd(a+b,a)。",
+        "variables": [
+          "d",
+          "a",
+          "b"
+        ],
+        "assumptions": [
+          {
+            "name": "ha",
+            "formula": {
+              "dvd": [
+                {
+                  "var": "d"
+                },
+                {
+                  "var": "a"
+                }
+              ]
+            }
+          },
+          {
+            "name": "hb",
+            "formula": {
+              "dvd": [
+                {
+                  "var": "d"
+                },
+                {
+                  "var": "b"
+                }
+              ]
+            }
+          }
+        ],
+        "goal": {
+          "dvd": [
+            {
+              "var": "d"
+            },
+            {
+              "gcd": [
+                {
+                  "add": [
+                    {
+                      "var": "a"
+                    },
+                    {
+                      "var": "b"
+                    }
+                  ]
+                },
+                {
+                  "var": "a"
+                }
+              ]
+            }
+          ]
+        },
+        "timeout_seconds": 30
+      }
+    },
+    {
+      "id": "transitive_middle",
+      "split": "regression",
+      "family": "transitive_middle",
+      "note": "中间项必须来自有限输入子项池。",
+      "target": {
+        "schema": "mathlib-nat-gcd-v1",
+        "title": "寻找传递中间项",
+        "original": "对任意自然数 a、b、c，若 a 整除 b 且 b 整除 c，则 a 整除 c。",
+        "variables": [
+          "a",
+          "b",
+          "c"
+        ],
+        "assumptions": [
+          {
+            "name": "hab",
+            "formula": {
+              "dvd": [
+                {
+                  "var": "a"
+                },
+                {
+                  "var": "b"
+                }
+              ]
+            }
+          },
+          {
+            "name": "hbc",
+            "formula": {
+              "dvd": [
+                {
+                  "var": "b"
+                },
+                {
+                  "var": "c"
+                }
+              ]
+            }
+          }
+        ],
+        "goal": {
+          "dvd": [
+            {
+              "var": "a"
+            },
+            {
+              "var": "c"
+            }
+          ]
+        },
+        "timeout_seconds": 30
+      }
+    },
+    {
+      "id": "gcd_pair",
+      "split": "regression",
+      "family": "gcd_pair",
+      "note": "需要合取构造。",
+      "target": {
+        "schema": "mathlib-nat-gcd-v1",
+        "title": "gcd 同时整除原数",
+        "original": "对任意自然数 a、b，gcd(a,b) 同时整除 a 与 b。",
+        "variables": [
+          "a",
+          "b"
+        ],
+        "assumptions": [],
+        "goal": {
+          "and": [
+            {
+              "dvd": [
+                {
+                  "gcd": [
+                    {
+                      "var": "a"
+                    },
+                    {
+                      "var": "b"
+                    }
+                  ]
+                },
+                {
+                  "var": "a"
+                }
+              ]
+            },
+            {
+              "dvd": [
+                {
+                  "gcd": [
+                    {
+                      "var": "a"
+                    },
+                    {
+                      "var": "b"
+                    }
+                  ]
+                },
+                {
+                  "var": "b"
+                }
+              ]
+            }
+          ]
+        },
+        "timeout_seconds": 30
+      }
+    },
+    {
+      "id": "coprime_to_gcd",
+      "split": "regression",
+      "family": "coprime_to_gcd",
+      "note": "显式证明前提或等价式应用。",
+      "target": {
+        "schema": "mathlib-nat-gcd-v1",
+        "title": "互素得到 gcd 等于一",
+        "original": "对任意自然数 a、b，若 a 与 b 互素，则 gcd(a,b)=1。",
+        "variables": [
+          "a",
+          "b"
+        ],
+        "assumptions": [
+          {
+            "name": "hcp",
+            "formula": {
+              "coprime": [
+                {
+                  "var": "a"
+                },
+                {
+                  "var": "b"
+                }
+              ]
+            }
+          }
+        ],
+        "goal": {
+          "eq": [
+            {
+              "gcd": [
+                {
+                  "var": "a"
+                },
+                {
+                  "var": "b"
+                }
+              ]
+            },
+            {
+              "nat": 1
+            }
+          ]
+        },
+        "timeout_seconds": 30
+      }
+    },
+    {
+      "id": "gcd_to_coprime",
+      "split": "regression",
+      "family": "gcd_to_coprime",
+      "note": "需要等价式反向应用。",
+      "target": {
+        "schema": "mathlib-nat-gcd-v1",
+        "title": "gcd 等于一得到互素",
+        "original": "对任意自然数 a、b，若 gcd(a,b)=1，则 a 与 b 互素。",
+        "variables": [
+          "a",
+          "b"
+        ],
+        "assumptions": [
+          {
+            "name": "hg",
+            "formula": {
+              "eq": [
+                {
+                  "gcd": [
+                    {
+                      "var": "a"
+                    },
+                    {
+                      "var": "b"
+                    }
+                  ]
+                },
+                {
+                  "nat": 1
+                }
+              ]
+            }
+          }
+        ],
+        "goal": {
+          "coprime": [
+            {
+              "var": "a"
+            },
+            {
+              "var": "b"
+            }
+          ]
+        },
+        "timeout_seconds": 30
+      }
+    },
+    {
+      "id": "divisibility_equality",
+      "split": "regression",
+      "family": "divisibility_equality",
+      "note": "保持两个方向的前提。",
+      "target": {
+        "schema": "mathlib-nat-gcd-v1",
+        "title": "双向整除得到相等",
+        "original": "对任意自然数 a、b，若 a 整除 b 且 b 整除 a，则 a=b。",
+        "variables": [
+          "a",
+          "b"
+        ],
+        "assumptions": [
+          {
+            "name": "hab",
+            "formula": {
+              "dvd": [
+                {
+                  "var": "a"
+                },
+                {
+                  "var": "b"
+                }
+              ]
+            }
+          },
+          {
+            "name": "hba",
+            "formula": {
+              "dvd": [
+                {
+                  "var": "b"
+                },
+                {
+                  "var": "a"
+                }
+              ]
+            }
+          }
+        ],
+        "goal": {
+          "eq": [
+            {
+              "var": "a"
+            },
+            {
+              "var": "b"
+            }
+          ]
+        },
+        "timeout_seconds": 30
+      }
+    },
+    {
+      "id": "truncated_subtraction",
+      "split": "regression",
+      "family": "truncated_subtraction",
+      "note": "析取前提直接给出，不擅自证明析取。",
+      "target": {
+        "schema": "mathlib-nat-gcd-v1",
+        "title": "从确切条件得到截断减法整除",
+        "original": "对任意自然数 a、b，若 b=0 或 a≤b，则 a 整除自然数截断减法 a-b。",
+        "variables": [
+          "a",
+          "b"
+        ],
+        "assumptions": [
+          {
+            "name": "h",
+            "formula": {
+              "or": [
+                {
+                  "eq": [
+                    {
+                      "var": "b"
+                    },
+                    {
+                      "nat": 0
+                    }
+                  ]
+                },
+                {
+                  "le": [
+                    {
+                      "var": "a"
+                    },
+                    {
+                      "var": "b"
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ],
+        "goal": {
+          "dvd": [
+            {
+              "var": "a"
+            },
+            {
+              "sub": [
+                {
+                  "var": "a"
+                },
+                {
+                  "var": "b"
+                }
+              ]
+            }
+          ]
+        },
+        "timeout_seconds": 30
+      }
+    },
+    {
+      "id": "missing_condition",
+      "split": "regression",
+      "family": "missing_condition",
+      "note": "失败对照；保持未知，不能补入 d 整除 b。",
+      "target": {
+        "schema": "mathlib-nat-gcd-v1",
+        "title": "遗漏另一个公因子条件",
+        "original": "对任意自然数 d、a、b，仅假定 d 整除 a，尝试证明 d 整除 gcd(a,b)。",
+        "variables": [
+          "d",
+          "a",
+          "b"
+        ],
+        "assumptions": [
+          {
+            "name": "ha",
+            "formula": {
+              "dvd": [
+                {
+                  "var": "d"
+                },
+                {
+                  "var": "a"
+                }
+              ]
+            }
+          }
+        ],
+        "goal": {
+          "dvd": [
+            {
+              "var": "d"
+            },
+            {
+              "gcd": [
+                {
+                  "var": "a"
+                },
+                {
+                  "var": "b"
+                }
+              ]
+            }
+          ]
+        },
+        "timeout_seconds": 30
+      }
+    },
+    {
+      "id": "zero_zero_coprime",
+      "split": "regression",
+      "family": "zero_zero_coprime",
+      "note": "失败对照；搜索失败仍不能标为 REFUTED。",
+      "target": {
+        "schema": "mathlib-nat-gcd-v1",
+        "title": "零与零互素的错误目标",
+        "original": "尝试证明自然数 0 与 0 互素。",
+        "variables": [],
+        "assumptions": [],
+        "goal": {
+          "coprime": [
+            {
+              "nat": 0
+            },
+            {
+              "nat": 0
+            }
+          ]
+        },
+        "timeout_seconds": 30
+      }
+    },
+    {
+      "id": "unconstrained_equality",
+      "split": "regression",
+      "family": "unconstrained_equality",
+      "note": "失败对照；不得弱化全称量词。",
+      "target": {
+        "schema": "mathlib-nat-gcd-v1",
+        "title": "没有相等前提",
+        "original": "对任意自然数 a、b，尝试证明 a=b。",
+        "variables": [
+          "a",
+          "b"
+        ],
+        "assumptions": [],
+        "goal": {
+          "eq": [
+            {
+              "var": "a"
+            },
+            {
+              "var": "b"
+            }
+          ]
+        },
+        "timeout_seconds": 30
+      }
+    },
+    {
+      "id": "unsupported_order_strategy",
+      "split": "regression",
+      "family": "unsupported_order_strategy",
+      "note": "该目标为真，但当前规则未提供顺序自反性；检查未知是否如实保留。",
+      "target": {
+        "schema": "mathlib-nat-gcd-v1",
+        "title": "语言可表达但缺少顺序策略",
+        "original": "对任意自然数 a，a≤a。",
+        "variables": [
+          "a"
+        ],
+        "assumptions": [],
+        "goal": {
+          "le": [
+            {
+              "var": "a"
+            },
+            {
+              "var": "a"
+            }
+          ]
+        },
+        "timeout_seconds": 30
+      }
+    }
+  ]
+}

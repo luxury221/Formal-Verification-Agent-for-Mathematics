@@ -1,0 +1,551 @@
+{
+  "schema_version": "1",
+  "cases": [
+    {
+      "id": "natv1_add_comm",
+      "original_statement": "对任意自然数 a、b，有 a + b = b + a。",
+      "formal_statement": "∀ a b : Nat, a + b = b + a",
+      "direction": "prove",
+      "proof": "by intro a b; exact Nat.add_comm a b",
+      "extra_declarations": "",
+      "expected_status": "COMPLETED",
+      "expected_verdict": "PROVED",
+      "expected_level": "E4_ALIGNED_AND_VERIFIED",
+      "annotation": {
+        "variables": [
+          {
+            "name": "a",
+            "domain": "Nat",
+            "quantifier": "forall"
+          },
+          {
+            "name": "b",
+            "domain": "Nat",
+            "quantifier": "forall"
+          }
+        ],
+        "assumptions": [],
+        "witnesses": {},
+        "alignment_note": "项目作者核对自然数定义域、全称量词及列出的前提；证明检查原式，反驳检查完整原式的否定。该记录不是独立数学专家审核。"
+      }
+    },
+    {
+      "id": "natv1_add_absorbs",
+      "original_statement": "对任意自然数 a、b，有 a + b = a。",
+      "formal_statement": "∀ a b : Nat, a + b = a",
+      "direction": "refute",
+      "proof": "by intro h; have bad : (1 : Nat) = 0 := h 0 1; cases bad",
+      "extra_declarations": "",
+      "expected_status": "COMPLETED",
+      "expected_verdict": "REFUTED",
+      "expected_level": "E4_ALIGNED_AND_VERIFIED",
+      "annotation": {
+        "variables": [
+          {
+            "name": "a",
+            "domain": "Nat",
+            "quantifier": "forall"
+          },
+          {
+            "name": "b",
+            "domain": "Nat",
+            "quantifier": "forall"
+          }
+        ],
+        "assumptions": [],
+        "witnesses": {
+          "a": "0",
+          "b": "1"
+        },
+        "alignment_note": "项目作者核对自然数定义域、全称量词及列出的前提；证明检查原式，反驳检查完整原式的否定。该记录不是独立数学专家审核。"
+      }
+    },
+    {
+      "id": "natv1_succ_injective",
+      "original_statement": "对任意自然数 a、b，如果 a 的后继等于 b 的后继，则 a = b。",
+      "formal_statement": "∀ a b : Nat, Nat.succ a = Nat.succ b → a = b",
+      "direction": "prove",
+      "proof": "by intro a b h; exact Nat.succ.inj h",
+      "extra_declarations": "",
+      "expected_status": "COMPLETED",
+      "expected_verdict": "PROVED",
+      "expected_level": "E4_ALIGNED_AND_VERIFIED",
+      "annotation": {
+        "variables": [
+          {
+            "name": "a",
+            "domain": "Nat",
+            "quantifier": "forall"
+          },
+          {
+            "name": "b",
+            "domain": "Nat",
+            "quantifier": "forall"
+          }
+        ],
+        "assumptions": [
+          "Nat.succ a = Nat.succ b"
+        ],
+        "witnesses": {},
+        "alignment_note": "项目作者核对自然数定义域、全称量词及列出的前提；证明检查原式，反驳检查完整原式的否定。该记录不是独立数学专家审核。"
+      }
+    },
+    {
+      "id": "natv1_succ_fixed",
+      "original_statement": "对任意自然数 n，n 的后继等于 n。",
+      "formal_statement": "∀ n : Nat, Nat.succ n = n",
+      "direction": "refute",
+      "proof": "by intro h; have bad : (1 : Nat) = 0 := h 0; cases bad",
+      "extra_declarations": "",
+      "expected_status": "COMPLETED",
+      "expected_verdict": "REFUTED",
+      "expected_level": "E4_ALIGNED_AND_VERIFIED",
+      "annotation": {
+        "variables": [
+          {
+            "name": "n",
+            "domain": "Nat",
+            "quantifier": "forall"
+          }
+        ],
+        "assumptions": [],
+        "witnesses": {
+          "n": "0"
+        },
+        "alignment_note": "项目作者核对自然数定义域、全称量词及列出的前提；证明检查原式，反驳检查完整原式的否定。该记录不是独立数学专家审核。"
+      }
+    },
+    {
+      "id": "natv1_le_reflexive",
+      "original_statement": "对任意自然数 n，有 n ≤ n。",
+      "formal_statement": "∀ n : Nat, n ≤ n",
+      "direction": "prove",
+      "proof": "by intro n; exact Nat.le_refl n",
+      "extra_declarations": "",
+      "expected_status": "COMPLETED",
+      "expected_verdict": "PROVED",
+      "expected_level": "E4_ALIGNED_AND_VERIFIED",
+      "annotation": {
+        "variables": [
+          {
+            "name": "n",
+            "domain": "Nat",
+            "quantifier": "forall"
+          }
+        ],
+        "assumptions": [],
+        "witnesses": {},
+        "alignment_note": "项目作者核对自然数定义域、全称量词及列出的前提；证明检查原式，反驳检查完整原式的否定。该记录不是独立数学专家审核。"
+      }
+    },
+    {
+      "id": "natv1_lt_reflexive",
+      "original_statement": "对任意自然数 n，有 n < n。",
+      "formal_statement": "∀ n : Nat, n < n",
+      "direction": "refute",
+      "proof": "by intro h; exact (Nat.lt_irrefl 0) (h 0)",
+      "extra_declarations": "",
+      "expected_status": "COMPLETED",
+      "expected_verdict": "REFUTED",
+      "expected_level": "E4_ALIGNED_AND_VERIFIED",
+      "annotation": {
+        "variables": [
+          {
+            "name": "n",
+            "domain": "Nat",
+            "quantifier": "forall"
+          }
+        ],
+        "assumptions": [],
+        "witnesses": {
+          "n": "0"
+        },
+        "alignment_note": "项目作者核对自然数定义域、全称量词及列出的前提；证明检查原式，反驳检查完整原式的否定。该记录不是独立数学专家审核。"
+      }
+    },
+    {
+      "id": "natv1_sub_restore_guarded",
+      "original_statement": "对任意自然数 a、b，如果 b ≤ a，则 (a - b) + b = a，其中减法是自然数截断减法。",
+      "formal_statement": "∀ a b : Nat, b ≤ a → a - b + b = a",
+      "direction": "prove",
+      "proof": "by intro a b h; exact Nat.sub_add_cancel h",
+      "extra_declarations": "",
+      "expected_status": "COMPLETED",
+      "expected_verdict": "PROVED",
+      "expected_level": "E4_ALIGNED_AND_VERIFIED",
+      "annotation": {
+        "variables": [
+          {
+            "name": "a",
+            "domain": "Nat",
+            "quantifier": "forall"
+          },
+          {
+            "name": "b",
+            "domain": "Nat",
+            "quantifier": "forall"
+          }
+        ],
+        "assumptions": [
+          "b ≤ a"
+        ],
+        "witnesses": {},
+        "alignment_note": "项目作者核对自然数定义域、全称量词及列出的前提；证明检查原式，反驳检查完整原式的否定。该记录不是独立数学专家审核。"
+      }
+    },
+    {
+      "id": "natv1_sub_restore_unconditional",
+      "original_statement": "对任意自然数 a、b，都有 (a - b) + b = a，其中减法是自然数截断减法。",
+      "formal_statement": "∀ a b : Nat, a - b + b = a",
+      "direction": "refute",
+      "proof": "by intro h; have bad : (1 : Nat) = 0 := h 0 1; cases bad",
+      "extra_declarations": "",
+      "expected_status": "COMPLETED",
+      "expected_verdict": "REFUTED",
+      "expected_level": "E4_ALIGNED_AND_VERIFIED",
+      "annotation": {
+        "variables": [
+          {
+            "name": "a",
+            "domain": "Nat",
+            "quantifier": "forall"
+          },
+          {
+            "name": "b",
+            "domain": "Nat",
+            "quantifier": "forall"
+          }
+        ],
+        "assumptions": [],
+        "witnesses": {
+          "a": "0",
+          "b": "1"
+        },
+        "alignment_note": "项目作者核对自然数定义域、全称量词及列出的前提；证明检查原式，反驳检查完整原式的否定。该记录不是独立数学专家审核。"
+      }
+    },
+    {
+      "id": "natv1_add_cancel",
+      "original_statement": "对任意自然数 a、b、c，如果 a + b = a + c，则 b = c。",
+      "formal_statement": "∀ a b c : Nat, a + b = a + c → b = c",
+      "direction": "prove",
+      "proof": "by intro a b c h; exact Nat.add_left_cancel h",
+      "extra_declarations": "",
+      "expected_status": "COMPLETED",
+      "expected_verdict": "PROVED",
+      "expected_level": "E4_ALIGNED_AND_VERIFIED",
+      "annotation": {
+        "variables": [
+          {
+            "name": "a",
+            "domain": "Nat",
+            "quantifier": "forall"
+          },
+          {
+            "name": "b",
+            "domain": "Nat",
+            "quantifier": "forall"
+          },
+          {
+            "name": "c",
+            "domain": "Nat",
+            "quantifier": "forall"
+          }
+        ],
+        "assumptions": [
+          "a + b = a + c"
+        ],
+        "witnesses": {},
+        "alignment_note": "项目作者核对自然数定义域、全称量词及列出的前提；证明检查原式，反驳检查完整原式的否定。该记录不是独立数学专家审核。"
+      }
+    },
+    {
+      "id": "natv1_mul_cancel_unconditional",
+      "original_statement": "对任意自然数 a、b、c，如果 a × b = a × c，则 b = c。",
+      "formal_statement": "∀ a b c : Nat, a * b = a * c → b = c",
+      "direction": "refute",
+      "proof": "by intro h; have bad : (0 : Nat) = 1 := h 0 0 1 rfl; cases bad",
+      "extra_declarations": "",
+      "expected_status": "COMPLETED",
+      "expected_verdict": "REFUTED",
+      "expected_level": "E4_ALIGNED_AND_VERIFIED",
+      "annotation": {
+        "variables": [
+          {
+            "name": "a",
+            "domain": "Nat",
+            "quantifier": "forall"
+          },
+          {
+            "name": "b",
+            "domain": "Nat",
+            "quantifier": "forall"
+          },
+          {
+            "name": "c",
+            "domain": "Nat",
+            "quantifier": "forall"
+          }
+        ],
+        "assumptions": [
+          "a * b = a * c"
+        ],
+        "witnesses": {
+          "a": "0",
+          "b": "0",
+          "c": "1"
+        },
+        "alignment_note": "项目作者核对自然数定义域、全称量词及列出的前提；证明检查原式，反驳检查完整原式的否定。该记录不是独立数学专家审核。"
+      }
+    },
+    {
+      "id": "natv1_mul_add",
+      "original_statement": "对任意自然数 a、b、c，有 a × (b + c) = a × b + a × c。",
+      "formal_statement": "∀ a b c : Nat, a * (b + c) = a * b + a * c",
+      "direction": "prove",
+      "proof": "by intro a b c; exact Nat.mul_add a b c",
+      "extra_declarations": "",
+      "expected_status": "COMPLETED",
+      "expected_verdict": "PROVED",
+      "expected_level": "E4_ALIGNED_AND_VERIFIED",
+      "annotation": {
+        "variables": [
+          {
+            "name": "a",
+            "domain": "Nat",
+            "quantifier": "forall"
+          },
+          {
+            "name": "b",
+            "domain": "Nat",
+            "quantifier": "forall"
+          },
+          {
+            "name": "c",
+            "domain": "Nat",
+            "quantifier": "forall"
+          }
+        ],
+        "assumptions": [],
+        "witnesses": {},
+        "alignment_note": "项目作者核对自然数定义域、全称量词及列出的前提；证明检查原式，反驳检查完整原式的否定。该记录不是独立数学专家审核。"
+      }
+    },
+    {
+      "id": "natv1_square_add",
+      "original_statement": "对任意自然数 a、b，有 (a + b) × (a + b) = a × a + b × b。",
+      "formal_statement": "∀ a b : Nat, (a + b) * (a + b) = a * a + b * b",
+      "direction": "refute",
+      "proof": "by intro h; have bad : (4 : Nat) = 2 := h 1 1; cases bad",
+      "extra_declarations": "",
+      "expected_status": "COMPLETED",
+      "expected_verdict": "REFUTED",
+      "expected_level": "E4_ALIGNED_AND_VERIFIED",
+      "annotation": {
+        "variables": [
+          {
+            "name": "a",
+            "domain": "Nat",
+            "quantifier": "forall"
+          },
+          {
+            "name": "b",
+            "domain": "Nat",
+            "quantifier": "forall"
+          }
+        ],
+        "assumptions": [],
+        "witnesses": {
+          "a": "1",
+          "b": "1"
+        },
+        "alignment_note": "项目作者核对自然数定义域、全称量词及列出的前提；证明检查原式，反驳检查完整原式的否定。该记录不是独立数学专家审核。"
+      }
+    },
+    {
+      "id": "natv1_mul_zero_factor_or",
+      "original_statement": "对任意自然数 a、b，如果 a × b = 0，则 a = 0 或 b = 0。",
+      "formal_statement": "∀ a b : Nat, a * b = 0 → a = 0 ∨ b = 0",
+      "direction": "prove",
+      "proof": "by intro a b h; exact Nat.mul_eq_zero.mp h",
+      "extra_declarations": "",
+      "expected_status": "COMPLETED",
+      "expected_verdict": "PROVED",
+      "expected_level": "E4_ALIGNED_AND_VERIFIED",
+      "annotation": {
+        "variables": [
+          {
+            "name": "a",
+            "domain": "Nat",
+            "quantifier": "forall"
+          },
+          {
+            "name": "b",
+            "domain": "Nat",
+            "quantifier": "forall"
+          }
+        ],
+        "assumptions": [
+          "a * b = 0"
+        ],
+        "witnesses": {},
+        "alignment_note": "项目作者核对自然数定义域、全称量词及列出的前提；证明检查原式，反驳检查完整原式的否定。该记录不是独立数学专家审核。"
+      }
+    },
+    {
+      "id": "natv1_mul_zero_factor_and",
+      "original_statement": "对任意自然数 a、b，如果 a × b = 0，则 a = 0 且 b = 0。",
+      "formal_statement": "∀ a b : Nat, a * b = 0 → a = 0 ∧ b = 0",
+      "direction": "refute",
+      "proof": "by intro h; have bad : (1 : Nat) = 0 := (h 0 1 rfl).2; cases bad",
+      "extra_declarations": "",
+      "expected_status": "COMPLETED",
+      "expected_verdict": "REFUTED",
+      "expected_level": "E4_ALIGNED_AND_VERIFIED",
+      "annotation": {
+        "variables": [
+          {
+            "name": "a",
+            "domain": "Nat",
+            "quantifier": "forall"
+          },
+          {
+            "name": "b",
+            "domain": "Nat",
+            "quantifier": "forall"
+          }
+        ],
+        "assumptions": [
+          "a * b = 0"
+        ],
+        "witnesses": {
+          "a": "0",
+          "b": "1"
+        },
+        "alignment_note": "项目作者核对自然数定义域、全称量词及列出的前提；证明检查原式，反驳检查完整原式的否定。该记录不是独立数学专家审核。"
+      }
+    },
+    {
+      "id": "natv1_add_monotone",
+      "original_statement": "对任意自然数 a、b、c，如果 a ≤ b，则 a + c ≤ b + c。",
+      "formal_statement": "∀ a b c : Nat, a ≤ b → a + c ≤ b + c",
+      "direction": "prove",
+      "proof": "by intro a b c h; exact Nat.add_le_add_right h c",
+      "extra_declarations": "",
+      "expected_status": "COMPLETED",
+      "expected_verdict": "PROVED",
+      "expected_level": "E4_ALIGNED_AND_VERIFIED",
+      "annotation": {
+        "variables": [
+          {
+            "name": "a",
+            "domain": "Nat",
+            "quantifier": "forall"
+          },
+          {
+            "name": "b",
+            "domain": "Nat",
+            "quantifier": "forall"
+          },
+          {
+            "name": "c",
+            "domain": "Nat",
+            "quantifier": "forall"
+          }
+        ],
+        "assumptions": [
+          "a ≤ b"
+        ],
+        "witnesses": {},
+        "alignment_note": "项目作者核对自然数定义域、全称量词及列出的前提；证明检查原式，反驳检查完整原式的否定。该记录不是独立数学专家审核。"
+      }
+    },
+    {
+      "id": "natv1_add_strict_from_le",
+      "original_statement": "对任意自然数 a、b、c，如果 a ≤ b，则 a + c < b + c。",
+      "formal_statement": "∀ a b c : Nat, a ≤ b → a + c < b + c",
+      "direction": "refute",
+      "proof": "by intro h; exact (Nat.lt_irrefl 0) (h 0 0 0 (Nat.le_refl 0))",
+      "extra_declarations": "",
+      "expected_status": "COMPLETED",
+      "expected_verdict": "REFUTED",
+      "expected_level": "E4_ALIGNED_AND_VERIFIED",
+      "annotation": {
+        "variables": [
+          {
+            "name": "a",
+            "domain": "Nat",
+            "quantifier": "forall"
+          },
+          {
+            "name": "b",
+            "domain": "Nat",
+            "quantifier": "forall"
+          },
+          {
+            "name": "c",
+            "domain": "Nat",
+            "quantifier": "forall"
+          }
+        ],
+        "assumptions": [
+          "a ≤ b"
+        ],
+        "witnesses": {
+          "a": "0",
+          "b": "0",
+          "c": "0"
+        },
+        "alignment_note": "项目作者核对自然数定义域、全称量词及列出的前提；证明检查原式，反驳检查完整原式的否定。该记录不是独立数学专家审核。"
+      }
+    },
+    {
+      "id": "natv1_mul_one",
+      "original_statement": "对任意自然数 n，有 n × 1 = n。",
+      "formal_statement": "∀ n : Nat, n * 1 = n",
+      "direction": "prove",
+      "proof": "by intro n; exact Nat.mul_one n",
+      "extra_declarations": "",
+      "expected_status": "COMPLETED",
+      "expected_verdict": "PROVED",
+      "expected_level": "E4_ALIGNED_AND_VERIFIED",
+      "annotation": {
+        "variables": [
+          {
+            "name": "n",
+            "domain": "Nat",
+            "quantifier": "forall"
+          }
+        ],
+        "assumptions": [],
+        "witnesses": {},
+        "alignment_note": "项目作者核对自然数定义域、全称量词及列出的前提；证明检查原式，反驳检查完整原式的否定。该记录不是独立数学专家审核。"
+      }
+    },
+    {
+      "id": "natv1_mul_zero_identity",
+      "original_statement": "对任意自然数 n，有 n × 0 = n。",
+      "formal_statement": "∀ n : Nat, n * 0 = n",
+      "direction": "refute",
+      "proof": "by intro h; have bad : (0 : Nat) = 1 := h 1; cases bad",
+      "extra_declarations": "",
+      "expected_status": "COMPLETED",
+      "expected_verdict": "REFUTED",
+      "expected_level": "E4_ALIGNED_AND_VERIFIED",
+      "annotation": {
+        "variables": [
+          {
+            "name": "n",
+            "domain": "Nat",
+            "quantifier": "forall"
+          }
+        ],
+        "assumptions": [],
+        "witnesses": {
+          "n": "1"
+        },
+        "alignment_note": "项目作者核对自然数定义域、全称量词及列出的前提；证明检查原式，反驳检查完整原式的否定。该记录不是独立数学专家审核。"
+      }
+    }
+  ]
+}

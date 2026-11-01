@@ -1,0 +1,893 @@
+{
+  "schema": "proof-reuse-evaluation-v1",
+  "authorship": "Project-authored visible diagnostic programs; inspected before execution.",
+  "training_use": false,
+  "cases": [
+    {
+      "id": "repeated_divisibility",
+      "source": {
+        "schema": "mathlib-nat-gcd-v1",
+        "title": "完整整除传递：a整除b且b整除c，则a整除c",
+        "original": "完整整除传递：a整除b且b整除c，则a整除c",
+        "variables": [
+          "a",
+          "b",
+          "c"
+        ],
+        "assumptions": [
+          {
+            "name": "ab",
+            "formula": {
+              "dvd": [
+                {
+                  "var": "a"
+                },
+                {
+                  "var": "b"
+                }
+              ]
+            }
+          },
+          {
+            "name": "bc",
+            "formula": {
+              "dvd": [
+                {
+                  "var": "b"
+                },
+                {
+                  "var": "c"
+                }
+              ]
+            }
+          }
+        ],
+        "goal": {
+          "dvd": [
+            {
+              "var": "a"
+            },
+            {
+              "var": "c"
+            }
+          ]
+        },
+        "proof": {
+          "ref": "Nat.dvd_trans",
+          "terms": [
+            {
+              "var": "a"
+            },
+            {
+              "var": "b"
+            },
+            {
+              "var": "c"
+            }
+          ],
+          "proofs": [
+            {
+              "hyp": "ab"
+            },
+            {
+              "hyp": "bc"
+            }
+          ]
+        },
+        "timeout_seconds": 30
+      },
+      "source_available": true,
+      "target": {
+        "schema": "mathlib-nat-gcd-v1",
+        "title": "若y整除x且x整除z，则y整除z且y整除z",
+        "original": "若y整除x且x整除z，则y整除z且y整除z",
+        "variables": [
+          "x",
+          "y",
+          "z"
+        ],
+        "assumptions": [
+          {
+            "name": "yx",
+            "formula": {
+              "dvd": [
+                {
+                  "var": "y"
+                },
+                {
+                  "var": "x"
+                }
+              ]
+            }
+          },
+          {
+            "name": "xz",
+            "formula": {
+              "dvd": [
+                {
+                  "var": "x"
+                },
+                {
+                  "var": "z"
+                }
+              ]
+            }
+          }
+        ],
+        "goal": {
+          "and": [
+            {
+              "dvd": [
+                {
+                  "var": "y"
+                },
+                {
+                  "var": "z"
+                }
+              ]
+            },
+            {
+              "dvd": [
+                {
+                  "var": "y"
+                },
+                {
+                  "var": "z"
+                }
+              ]
+            }
+          ]
+        },
+        "timeout_seconds": 30
+      },
+      "proof": {
+        "pair": [
+          {
+            "lemma": "prior",
+            "terms": [
+              {
+                "var": "y"
+              },
+              {
+                "var": "x"
+              },
+              {
+                "var": "z"
+              }
+            ],
+            "proofs": [
+              {
+                "hyp": "yx"
+              },
+              {
+                "hyp": "xz"
+              }
+            ]
+          },
+          {
+            "lemma": "prior",
+            "terms": [
+              {
+                "var": "y"
+              },
+              {
+                "var": "x"
+              },
+              {
+                "var": "z"
+              }
+            ],
+            "proofs": [
+              {
+                "hyp": "yx"
+              },
+              {
+                "hyp": "xz"
+              }
+            ]
+          }
+        ]
+      },
+      "note": "Repeated use and swapped binder names; both arms get the complete source program."
+    },
+    {
+      "id": "complete_coprime_premise",
+      "source": {
+        "schema": "mathlib-nat-gcd-v1",
+        "title": "互素a和b的最大公因数为一",
+        "original": "互素a和b的最大公因数为一",
+        "variables": [
+          "a",
+          "b"
+        ],
+        "assumptions": [
+          {
+            "name": "co",
+            "formula": {
+              "coprime": [
+                {
+                  "var": "a"
+                },
+                {
+                  "var": "b"
+                }
+              ]
+            }
+          }
+        ],
+        "goal": {
+          "eq": [
+            {
+              "gcd": [
+                {
+                  "var": "a"
+                },
+                {
+                  "var": "b"
+                }
+              ]
+            },
+            {
+              "nat": 1
+            }
+          ]
+        },
+        "proof": {
+          "ref": "Nat.Coprime.gcd_eq_one",
+          "terms": [
+            {
+              "var": "a"
+            },
+            {
+              "var": "b"
+            }
+          ],
+          "proofs": [
+            {
+              "hyp": "co"
+            }
+          ]
+        },
+        "timeout_seconds": 30
+      },
+      "source_available": true,
+      "target": {
+        "schema": "mathlib-nat-gcd-v1",
+        "title": "若x与y互素，则它们的最大公因数为一",
+        "original": "若x与y互素，则它们的最大公因数为一",
+        "variables": [
+          "x",
+          "y"
+        ],
+        "assumptions": [
+          {
+            "name": "condition",
+            "formula": {
+              "coprime": [
+                {
+                  "var": "x"
+                },
+                {
+                  "var": "y"
+                }
+              ]
+            }
+          }
+        ],
+        "goal": {
+          "eq": [
+            {
+              "gcd": [
+                {
+                  "var": "x"
+                },
+                {
+                  "var": "y"
+                }
+              ]
+            },
+            {
+              "nat": 1
+            }
+          ]
+        },
+        "timeout_seconds": 30
+      },
+      "proof": {
+        "lemma": "prior",
+        "terms": [
+          {
+            "var": "x"
+          },
+          {
+            "var": "y"
+          }
+        ],
+        "proofs": [
+          {
+            "hyp": "condition"
+          }
+        ]
+      },
+      "note": "Every original coprimality premise is passed explicitly."
+    },
+    {
+      "id": "wrong_premise",
+      "source": {
+        "schema": "mathlib-nat-gcd-v1",
+        "title": "互素a和b的最大公因数为一",
+        "original": "互素a和b的最大公因数为一",
+        "variables": [
+          "a",
+          "b"
+        ],
+        "assumptions": [
+          {
+            "name": "co",
+            "formula": {
+              "coprime": [
+                {
+                  "var": "a"
+                },
+                {
+                  "var": "b"
+                }
+              ]
+            }
+          }
+        ],
+        "goal": {
+          "eq": [
+            {
+              "gcd": [
+                {
+                  "var": "a"
+                },
+                {
+                  "var": "b"
+                }
+              ]
+            },
+            {
+              "nat": 1
+            }
+          ]
+        },
+        "proof": {
+          "ref": "Nat.Coprime.gcd_eq_one",
+          "terms": [
+            {
+              "var": "a"
+            },
+            {
+              "var": "b"
+            }
+          ],
+          "proofs": [
+            {
+              "hyp": "co"
+            }
+          ]
+        },
+        "timeout_seconds": 30
+      },
+      "source_available": true,
+      "target": {
+        "schema": "mathlib-nat-gcd-v1",
+        "title": "待检候选：若x整除y，则其最大公因数为一",
+        "original": "待检候选：若x整除y，则其最大公因数为一",
+        "variables": [
+          "x",
+          "y"
+        ],
+        "assumptions": [
+          {
+            "name": "condition",
+            "formula": {
+              "dvd": [
+                {
+                  "var": "x"
+                },
+                {
+                  "var": "y"
+                }
+              ]
+            }
+          }
+        ],
+        "goal": {
+          "eq": [
+            {
+              "gcd": [
+                {
+                  "var": "x"
+                },
+                {
+                  "var": "y"
+                }
+              ]
+            },
+            {
+              "nat": 1
+            }
+          ]
+        },
+        "timeout_seconds": 30
+      },
+      "proof": {
+        "lemma": "prior",
+        "terms": [
+          {
+            "var": "x"
+          },
+          {
+            "var": "y"
+          }
+        ],
+        "proofs": [
+          {
+            "hyp": "condition"
+          }
+        ]
+      },
+      "note": "Deliberately wrong premise proof; rejection is UNKNOWN, never refutation."
+    },
+    {
+      "id": "source_unavailable",
+      "source": {
+        "schema": "mathlib-nat-gcd-v1",
+        "title": "自然数a整除自身",
+        "original": "自然数a整除自身",
+        "variables": [
+          "a"
+        ],
+        "assumptions": [],
+        "goal": {
+          "dvd": [
+            {
+              "var": "a"
+            },
+            {
+              "var": "a"
+            }
+          ]
+        },
+        "proof": {
+          "ref": "Nat.dvd_refl",
+          "terms": [
+            {
+              "var": "a"
+            }
+          ],
+          "proofs": []
+        },
+        "timeout_seconds": 30
+      },
+      "source_available": false,
+      "target": {
+        "schema": "mathlib-nat-gcd-v1",
+        "title": "自然数x整除自身：无可用归档",
+        "original": "自然数x整除自身：无可用归档",
+        "variables": [
+          "x"
+        ],
+        "assumptions": [],
+        "goal": {
+          "dvd": [
+            {
+              "var": "x"
+            },
+            {
+              "var": "x"
+            }
+          ]
+        },
+        "timeout_seconds": 30
+      },
+      "proof": {
+        "lemma": "prior",
+        "terms": [
+          {
+            "var": "x"
+          }
+        ],
+        "proofs": []
+      },
+      "note": "The program remains visible to inline; import has no live proof data."
+    },
+    {
+      "id": "inline_structure_limit",
+      "source": {
+        "schema": "mathlib-nat-gcd-v1",
+        "title": "冗长但有效的自然数自整除程序",
+        "original": "冗长但有效的自然数自整除程序",
+        "variables": [
+          "a"
+        ],
+        "assumptions": [],
+        "goal": {
+          "dvd": [
+            {
+              "var": "a"
+            },
+            {
+              "var": "a"
+            }
+          ]
+        },
+        "proof": {
+          "ref": "Nat.dvd_trans",
+          "terms": [
+            {
+              "var": "a"
+            },
+            {
+              "var": "a"
+            },
+            {
+              "var": "a"
+            }
+          ],
+          "proofs": [
+            {
+              "ref": "Nat.dvd_refl",
+              "terms": [
+                {
+                  "var": "a"
+                }
+              ],
+              "proofs": []
+            },
+            {
+              "ref": "Nat.dvd_trans",
+              "terms": [
+                {
+                  "var": "a"
+                },
+                {
+                  "var": "a"
+                },
+                {
+                  "var": "a"
+                }
+              ],
+              "proofs": [
+                {
+                  "ref": "Nat.dvd_refl",
+                  "terms": [
+                    {
+                      "var": "a"
+                    }
+                  ],
+                  "proofs": []
+                },
+                {
+                  "ref": "Nat.dvd_trans",
+                  "terms": [
+                    {
+                      "var": "a"
+                    },
+                    {
+                      "var": "a"
+                    },
+                    {
+                      "var": "a"
+                    }
+                  ],
+                  "proofs": [
+                    {
+                      "ref": "Nat.dvd_refl",
+                      "terms": [
+                        {
+                          "var": "a"
+                        }
+                      ],
+                      "proofs": []
+                    },
+                    {
+                      "ref": "Nat.dvd_trans",
+                      "terms": [
+                        {
+                          "var": "a"
+                        },
+                        {
+                          "var": "a"
+                        },
+                        {
+                          "var": "a"
+                        }
+                      ],
+                      "proofs": [
+                        {
+                          "ref": "Nat.dvd_refl",
+                          "terms": [
+                            {
+                              "var": "a"
+                            }
+                          ],
+                          "proofs": []
+                        },
+                        {
+                          "ref": "Nat.dvd_trans",
+                          "terms": [
+                            {
+                              "var": "a"
+                            },
+                            {
+                              "var": "a"
+                            },
+                            {
+                              "var": "a"
+                            }
+                          ],
+                          "proofs": [
+                            {
+                              "ref": "Nat.dvd_refl",
+                              "terms": [
+                                {
+                                  "var": "a"
+                                }
+                              ],
+                              "proofs": []
+                            },
+                            {
+                              "ref": "Nat.dvd_trans",
+                              "terms": [
+                                {
+                                  "var": "a"
+                                },
+                                {
+                                  "var": "a"
+                                },
+                                {
+                                  "var": "a"
+                                }
+                              ],
+                              "proofs": [
+                                {
+                                  "ref": "Nat.dvd_refl",
+                                  "terms": [
+                                    {
+                                      "var": "a"
+                                    }
+                                  ],
+                                  "proofs": []
+                                },
+                                {
+                                  "ref": "Nat.dvd_trans",
+                                  "terms": [
+                                    {
+                                      "var": "a"
+                                    },
+                                    {
+                                      "var": "a"
+                                    },
+                                    {
+                                      "var": "a"
+                                    }
+                                  ],
+                                  "proofs": [
+                                    {
+                                      "ref": "Nat.dvd_refl",
+                                      "terms": [
+                                        {
+                                          "var": "a"
+                                        }
+                                      ],
+                                      "proofs": []
+                                    },
+                                    {
+                                      "ref": "Nat.dvd_trans",
+                                      "terms": [
+                                        {
+                                          "var": "a"
+                                        },
+                                        {
+                                          "var": "a"
+                                        },
+                                        {
+                                          "var": "a"
+                                        }
+                                      ],
+                                      "proofs": [
+                                        {
+                                          "ref": "Nat.dvd_refl",
+                                          "terms": [
+                                            {
+                                              "var": "a"
+                                            }
+                                          ],
+                                          "proofs": []
+                                        },
+                                        {
+                                          "ref": "Nat.dvd_trans",
+                                          "terms": [
+                                            {
+                                              "var": "a"
+                                            },
+                                            {
+                                              "var": "a"
+                                            },
+                                            {
+                                              "var": "a"
+                                            }
+                                          ],
+                                          "proofs": [
+                                            {
+                                              "ref": "Nat.dvd_refl",
+                                              "terms": [
+                                                {
+                                                  "var": "a"
+                                                }
+                                              ],
+                                              "proofs": []
+                                            },
+                                            {
+                                              "ref": "Nat.dvd_trans",
+                                              "terms": [
+                                                {
+                                                  "var": "a"
+                                                },
+                                                {
+                                                  "var": "a"
+                                                },
+                                                {
+                                                  "var": "a"
+                                                }
+                                              ],
+                                              "proofs": [
+                                                {
+                                                  "ref": "Nat.dvd_refl",
+                                                  "terms": [
+                                                    {
+                                                      "var": "a"
+                                                    }
+                                                  ],
+                                                  "proofs": []
+                                                },
+                                                {
+                                                  "ref": "Nat.dvd_refl",
+                                                  "terms": [
+                                                    {
+                                                      "var": "a"
+                                                    }
+                                                  ],
+                                                  "proofs": []
+                                                }
+                                              ]
+                                            }
+                                          ]
+                                        }
+                                      ]
+                                    }
+                                  ]
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        "timeout_seconds": 30
+      },
+      "source_available": true,
+      "target": {
+        "schema": "mathlib-nat-gcd-v1",
+        "title": "自然数x四次自整除的合取",
+        "original": "自然数x四次自整除的合取",
+        "variables": [
+          "x"
+        ],
+        "assumptions": [],
+        "goal": {
+          "and": [
+            {
+              "and": [
+                {
+                  "dvd": [
+                    {
+                      "var": "x"
+                    },
+                    {
+                      "var": "x"
+                    }
+                  ]
+                },
+                {
+                  "dvd": [
+                    {
+                      "var": "x"
+                    },
+                    {
+                      "var": "x"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "and": [
+                {
+                  "dvd": [
+                    {
+                      "var": "x"
+                    },
+                    {
+                      "var": "x"
+                    }
+                  ]
+                },
+                {
+                  "dvd": [
+                    {
+                      "var": "x"
+                    },
+                    {
+                      "var": "x"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        "timeout_seconds": 30
+      },
+      "proof": {
+        "pair": [
+          {
+            "pair": [
+              {
+                "lemma": "prior",
+                "terms": [
+                  {
+                    "var": "x"
+                  }
+                ],
+                "proofs": []
+              },
+              {
+                "lemma": "prior",
+                "terms": [
+                  {
+                    "var": "x"
+                  }
+                ],
+                "proofs": []
+              }
+            ]
+          },
+          {
+            "pair": [
+              {
+                "lemma": "prior",
+                "terms": [
+                  {
+                    "var": "x"
+                  }
+                ],
+                "proofs": []
+              },
+              {
+                "lemma": "prior",
+                "terms": [
+                  {
+                    "var": "x"
+                  }
+                ],
+                "proofs": []
+              }
+            ]
+          }
+        ]
+      },
+      "note": "Unchanged bounded compiler may block expansion; this is a representation limit, not solving ability."
+    }
+  ]
+}

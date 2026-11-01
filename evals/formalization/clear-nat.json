@@ -1,0 +1,7 @@
+{
+  "schema_version": "1",
+  "id": "natural-add-zero",
+  "version": 1,
+  "statement": "对任意自然数 n，有 n + 0 = n。",
+  "context": []
+}

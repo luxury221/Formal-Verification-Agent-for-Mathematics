@@ -1,0 +1,1958 @@
+{
+  "schema": "structure-obligation-diagnostics-v1",
+  "exposure": "Known observed failure plus author-derived correlated tasks; no blind or held-out evaluation.",
+  "budget": {
+    "max_candidates": 2,
+    "max_expansions": 800,
+    "max_rewrite_steps": 4,
+    "shared_worker_seconds_per_candidate": 20
+  },
+  "cases": [
+    {
+      "id": "observed-composition",
+      "target": {
+        "schema": "explicit-structures-v1",
+        "title": "保留交换条件和全部迭代定义，另给任意观察映射h，证明h(iter_fg(n,x))=h(iter_f(n,iter_g(n,x)))。要求完整观察目标自己的证明。",
+        "original": "保留交换条件和全部迭代定义，另给任意观察映射h，证明h(iter_fg(n,x))=h(iter_f(n,iter_g(n,x)))。要求完整观察目标自己的证明。",
+        "carriers": [
+          {
+            "name": "a",
+            "original": "任意 a 类型，不附加未声明结构"
+          }
+        ],
+        "operations": [
+          {
+            "name": "f",
+            "parameters": [
+              "a"
+            ],
+            "result_type": "a",
+            "original": "显式函数参数 f"
+          },
+          {
+            "name": "g",
+            "parameters": [
+              "a"
+            ],
+            "result_type": "a",
+            "original": "显式函数参数 g"
+          },
+          {
+            "name": "h",
+            "parameters": [
+              "a"
+            ],
+            "result_type": "a",
+            "original": "显式函数 h"
+          }
+        ],
+        "definitions": [
+          {
+            "name": "iter_f",
+            "original": "iter_f(0,x)=x；iter_f(n+1,x)=f(iter_f(n,x))，以Nat.rec显式定义。",
+            "parameters": [
+              {
+                "name": "n",
+                "type": "Nat"
+              },
+              {
+                "name": "x",
+                "type": "a"
+              }
+            ],
+            "result_type": "a",
+            "body": {
+              "nat_fold": {
+                "index": {
+                  "var": "n"
+                },
+                "zero": {
+                  "var": "x"
+                },
+                "step": {
+                  "index": "k",
+                  "value": "acc",
+                  "body": {
+                    "call": {
+                      "name": "f",
+                      "args": [
+                        {
+                          "var": "acc"
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          },
+          {
+            "name": "iter_g",
+            "original": "iter_g(0,x)=x；iter_g(n+1,x)=g(iter_g(n,x))，以Nat.rec显式定义。",
+            "parameters": [
+              {
+                "name": "n",
+                "type": "Nat"
+              },
+              {
+                "name": "x",
+                "type": "a"
+              }
+            ],
+            "result_type": "a",
+            "body": {
+              "nat_fold": {
+                "index": {
+                  "var": "n"
+                },
+                "zero": {
+                  "var": "x"
+                },
+                "step": {
+                  "index": "k",
+                  "value": "acc",
+                  "body": {
+                    "call": {
+                      "name": "g",
+                      "args": [
+                        {
+                          "var": "acc"
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          },
+          {
+            "name": "iter_fg",
+            "original": "iter_fg(0,x)=x；iter_fg(n+1,x)=f(g(iter_fg(n,x)))，显式Nat.rec定义。",
+            "parameters": [
+              {
+                "name": "n",
+                "type": "Nat"
+              },
+              {
+                "name": "x",
+                "type": "a"
+              }
+            ],
+            "result_type": "a",
+            "body": {
+              "nat_fold": {
+                "index": {
+                  "var": "n"
+                },
+                "zero": {
+                  "var": "x"
+                },
+                "step": {
+                  "index": "k",
+                  "value": "acc",
+                  "body": {
+                    "call": {
+                      "name": "f",
+                      "args": [
+                        {
+                          "call": {
+                            "name": "g",
+                            "args": [
+                              {
+                                "var": "acc"
+                              }
+                            ]
+                          }
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          }
+        ],
+        "variables": [
+          {
+            "name": "n",
+            "type": "Nat"
+          },
+          {
+            "name": "x",
+            "type": "a"
+          }
+        ],
+        "assumptions": [
+          {
+            "name": "commutes",
+            "formula": {
+              "forall": {
+                "binders": [
+                  {
+                    "name": "u",
+                    "type": "a"
+                  }
+                ],
+                "body": {
+                  "eq": [
+                    {
+                      "call": {
+                        "name": "f",
+                        "args": [
+                          {
+                            "call": {
+                              "name": "g",
+                              "args": [
+                                {
+                                  "var": "u"
+                                }
+                              ]
+                            }
+                          }
+                        ]
+                      }
+                    },
+                    {
+                      "call": {
+                        "name": "g",
+                        "args": [
+                          {
+                            "call": {
+                              "name": "f",
+                              "args": [
+                                {
+                                  "var": "u"
+                                }
+                              ]
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        ],
+        "goal": {
+          "eq": [
+            {
+              "call": {
+                "name": "h",
+                "args": [
+                  {
+                    "call": {
+                      "name": "iter_fg",
+                      "args": [
+                        {
+                          "var": "n"
+                        },
+                        {
+                          "var": "x"
+                        }
+                      ]
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "call": {
+                "name": "h",
+                "args": [
+                  {
+                    "call": {
+                      "name": "iter_f",
+                      "args": [
+                        {
+                          "var": "n"
+                        },
+                        {
+                          "call": {
+                            "name": "iter_g",
+                            "args": [
+                              {
+                                "var": "n"
+                              },
+                              {
+                                "var": "x"
+                              }
+                            ]
+                          }
+                        }
+                      ]
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        "timeout_seconds": 20
+      },
+      "negative": false,
+      "provenance": {
+        "kind": "reused-known-MRA073-failure",
+        "exposure": "author-visible-before-genuine-checks",
+        "reference_proof_supplied": false
+      }
+    },
+    {
+      "id": "nested-observers",
+      "target": {
+        "schema": "explicit-structures-v1",
+        "title": "在两个任意观察函数j与h之后证明交换复合迭代等式，不要求观察函数单射。",
+        "original": "在两个任意观察函数j与h之后证明交换复合迭代等式，不要求观察函数单射。",
+        "carriers": [
+          {
+            "name": "a",
+            "original": "任意 a 类型，不附加未声明结构"
+          }
+        ],
+        "operations": [
+          {
+            "name": "f",
+            "parameters": [
+              "a"
+            ],
+            "result_type": "a",
+            "original": "显式函数参数 f"
+          },
+          {
+            "name": "g",
+            "parameters": [
+              "a"
+            ],
+            "result_type": "a",
+            "original": "显式函数参数 g"
+          },
+          {
+            "name": "h",
+            "parameters": [
+              "a"
+            ],
+            "result_type": "a",
+            "original": "显式函数 h"
+          },
+          {
+            "name": "j",
+            "parameters": [
+              "a"
+            ],
+            "result_type": "a",
+            "original": "显式任意运算 j，不附加结构定律"
+          }
+        ],
+        "definitions": [
+          {
+            "name": "iter_f",
+            "original": "iter_f(0,x)=x；iter_f(n+1,x)=f(iter_f(n,x))，以Nat.rec显式定义。",
+            "parameters": [
+              {
+                "name": "n",
+                "type": "Nat"
+              },
+              {
+                "name": "x",
+                "type": "a"
+              }
+            ],
+            "result_type": "a",
+            "body": {
+              "nat_fold": {
+                "index": {
+                  "var": "n"
+                },
+                "zero": {
+                  "var": "x"
+                },
+                "step": {
+                  "index": "k",
+                  "value": "acc",
+                  "body": {
+                    "call": {
+                      "name": "f",
+                      "args": [
+                        {
+                          "var": "acc"
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          },
+          {
+            "name": "iter_g",
+            "original": "iter_g(0,x)=x；iter_g(n+1,x)=g(iter_g(n,x))，以Nat.rec显式定义。",
+            "parameters": [
+              {
+                "name": "n",
+                "type": "Nat"
+              },
+              {
+                "name": "x",
+                "type": "a"
+              }
+            ],
+            "result_type": "a",
+            "body": {
+              "nat_fold": {
+                "index": {
+                  "var": "n"
+                },
+                "zero": {
+                  "var": "x"
+                },
+                "step": {
+                  "index": "k",
+                  "value": "acc",
+                  "body": {
+                    "call": {
+                      "name": "g",
+                      "args": [
+                        {
+                          "var": "acc"
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          },
+          {
+            "name": "iter_fg",
+            "original": "iter_fg(0,x)=x；iter_fg(n+1,x)=f(g(iter_fg(n,x)))，显式Nat.rec定义。",
+            "parameters": [
+              {
+                "name": "n",
+                "type": "Nat"
+              },
+              {
+                "name": "x",
+                "type": "a"
+              }
+            ],
+            "result_type": "a",
+            "body": {
+              "nat_fold": {
+                "index": {
+                  "var": "n"
+                },
+                "zero": {
+                  "var": "x"
+                },
+                "step": {
+                  "index": "k",
+                  "value": "acc",
+                  "body": {
+                    "call": {
+                      "name": "f",
+                      "args": [
+                        {
+                          "call": {
+                            "name": "g",
+                            "args": [
+                              {
+                                "var": "acc"
+                              }
+                            ]
+                          }
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          }
+        ],
+        "variables": [
+          {
+            "name": "n",
+            "type": "Nat"
+          },
+          {
+            "name": "x",
+            "type": "a"
+          }
+        ],
+        "assumptions": [
+          {
+            "name": "commutes",
+            "formula": {
+              "forall": {
+                "binders": [
+                  {
+                    "name": "u",
+                    "type": "a"
+                  }
+                ],
+                "body": {
+                  "eq": [
+                    {
+                      "call": {
+                        "name": "f",
+                        "args": [
+                          {
+                            "call": {
+                              "name": "g",
+                              "args": [
+                                {
+                                  "var": "u"
+                                }
+                              ]
+                            }
+                          }
+                        ]
+                      }
+                    },
+                    {
+                      "call": {
+                        "name": "g",
+                        "args": [
+                          {
+                            "call": {
+                              "name": "f",
+                              "args": [
+                                {
+                                  "var": "u"
+                                }
+                              ]
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        ],
+        "goal": {
+          "eq": [
+            {
+              "call": {
+                "name": "j",
+                "args": [
+                  {
+                    "call": {
+                      "name": "h",
+                      "args": [
+                        {
+                          "call": {
+                            "name": "iter_fg",
+                            "args": [
+                              {
+                                "var": "n"
+                              },
+                              {
+                                "var": "x"
+                              }
+                            ]
+                          }
+                        }
+                      ]
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "call": {
+                "name": "j",
+                "args": [
+                  {
+                    "call": {
+                      "name": "h",
+                      "args": [
+                        {
+                          "call": {
+                            "name": "iter_f",
+                            "args": [
+                              {
+                                "var": "n"
+                              },
+                              {
+                                "call": {
+                                  "name": "iter_g",
+                                  "args": [
+                                    {
+                                      "var": "n"
+                                    },
+                                    {
+                                      "var": "x"
+                                    }
+                                  ]
+                                }
+                              }
+                            ]
+                          }
+                        }
+                      ]
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        "timeout_seconds": 20
+      },
+      "negative": false,
+      "provenance": {
+        "kind": "author-derived-related-mechanism",
+        "exposure": "author-visible-before-genuine-checks",
+        "reference_proof_supplied": false
+      }
+    },
+    {
+      "id": "binary-context",
+      "target": {
+        "schema": "explicit-structures-v1",
+        "title": "任意二元运算combine的第二个参数为观察复合迭代，第一参数同为x；不附加combine代数条件。",
+        "original": "任意二元运算combine的第二个参数为观察复合迭代，第一参数同为x；不附加combine代数条件。",
+        "carriers": [
+          {
+            "name": "a",
+            "original": "任意 a 类型，不附加未声明结构"
+          }
+        ],
+        "operations": [
+          {
+            "name": "f",
+            "parameters": [
+              "a"
+            ],
+            "result_type": "a",
+            "original": "显式函数参数 f"
+          },
+          {
+            "name": "g",
+            "parameters": [
+              "a"
+            ],
+            "result_type": "a",
+            "original": "显式函数参数 g"
+          },
+          {
+            "name": "h",
+            "parameters": [
+              "a"
+            ],
+            "result_type": "a",
+            "original": "显式函数 h"
+          },
+          {
+            "name": "combine",
+            "parameters": [
+              "a",
+              "a"
+            ],
+            "result_type": "a",
+            "original": "显式任意运算 combine，不附加结构定律"
+          }
+        ],
+        "definitions": [
+          {
+            "name": "iter_f",
+            "original": "iter_f(0,x)=x；iter_f(n+1,x)=f(iter_f(n,x))，以Nat.rec显式定义。",
+            "parameters": [
+              {
+                "name": "n",
+                "type": "Nat"
+              },
+              {
+                "name": "x",
+                "type": "a"
+              }
+            ],
+            "result_type": "a",
+            "body": {
+              "nat_fold": {
+                "index": {
+                  "var": "n"
+                },
+                "zero": {
+                  "var": "x"
+                },
+                "step": {
+                  "index": "k",
+                  "value": "acc",
+                  "body": {
+                    "call": {
+                      "name": "f",
+                      "args": [
+                        {
+                          "var": "acc"
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          },
+          {
+            "name": "iter_g",
+            "original": "iter_g(0,x)=x；iter_g(n+1,x)=g(iter_g(n,x))，以Nat.rec显式定义。",
+            "parameters": [
+              {
+                "name": "n",
+                "type": "Nat"
+              },
+              {
+                "name": "x",
+                "type": "a"
+              }
+            ],
+            "result_type": "a",
+            "body": {
+              "nat_fold": {
+                "index": {
+                  "var": "n"
+                },
+                "zero": {
+                  "var": "x"
+                },
+                "step": {
+                  "index": "k",
+                  "value": "acc",
+                  "body": {
+                    "call": {
+                      "name": "g",
+                      "args": [
+                        {
+                          "var": "acc"
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          },
+          {
+            "name": "iter_fg",
+            "original": "iter_fg(0,x)=x；iter_fg(n+1,x)=f(g(iter_fg(n,x)))，显式Nat.rec定义。",
+            "parameters": [
+              {
+                "name": "n",
+                "type": "Nat"
+              },
+              {
+                "name": "x",
+                "type": "a"
+              }
+            ],
+            "result_type": "a",
+            "body": {
+              "nat_fold": {
+                "index": {
+                  "var": "n"
+                },
+                "zero": {
+                  "var": "x"
+                },
+                "step": {
+                  "index": "k",
+                  "value": "acc",
+                  "body": {
+                    "call": {
+                      "name": "f",
+                      "args": [
+                        {
+                          "call": {
+                            "name": "g",
+                            "args": [
+                              {
+                                "var": "acc"
+                              }
+                            ]
+                          }
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          }
+        ],
+        "variables": [
+          {
+            "name": "n",
+            "type": "Nat"
+          },
+          {
+            "name": "x",
+            "type": "a"
+          }
+        ],
+        "assumptions": [
+          {
+            "name": "commutes",
+            "formula": {
+              "forall": {
+                "binders": [
+                  {
+                    "name": "u",
+                    "type": "a"
+                  }
+                ],
+                "body": {
+                  "eq": [
+                    {
+                      "call": {
+                        "name": "f",
+                        "args": [
+                          {
+                            "call": {
+                              "name": "g",
+                              "args": [
+                                {
+                                  "var": "u"
+                                }
+                              ]
+                            }
+                          }
+                        ]
+                      }
+                    },
+                    {
+                      "call": {
+                        "name": "g",
+                        "args": [
+                          {
+                            "call": {
+                              "name": "f",
+                              "args": [
+                                {
+                                  "var": "u"
+                                }
+                              ]
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        ],
+        "goal": {
+          "eq": [
+            {
+              "call": {
+                "name": "combine",
+                "args": [
+                  {
+                    "var": "x"
+                  },
+                  {
+                    "call": {
+                      "name": "h",
+                      "args": [
+                        {
+                          "call": {
+                            "name": "iter_fg",
+                            "args": [
+                              {
+                                "var": "n"
+                              },
+                              {
+                                "var": "x"
+                              }
+                            ]
+                          }
+                        }
+                      ]
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "call": {
+                "name": "combine",
+                "args": [
+                  {
+                    "var": "x"
+                  },
+                  {
+                    "call": {
+                      "name": "h",
+                      "args": [
+                        {
+                          "call": {
+                            "name": "iter_f",
+                            "args": [
+                              {
+                                "var": "n"
+                              },
+                              {
+                                "call": {
+                                  "name": "iter_g",
+                                  "args": [
+                                    {
+                                      "var": "n"
+                                    },
+                                    {
+                                      "var": "x"
+                                    }
+                                  ]
+                                }
+                              }
+                            ]
+                          }
+                        }
+                      ]
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        "timeout_seconds": 20
+      },
+      "negative": false,
+      "provenance": {
+        "kind": "author-derived-related-mechanism",
+        "exposure": "author-visible-before-genuine-checks",
+        "reference_proof_supplied": false
+      }
+    },
+    {
+      "id": "observed-addition",
+      "target": {
+        "schema": "explicit-structures-v1",
+        "title": "任意观察映射observe之后的迭代次数相加，完整索引和定义保留。",
+        "original": "任意观察映射observe之后的迭代次数相加，完整索引和定义保留。",
+        "carriers": [
+          {
+            "name": "a",
+            "original": "任意 a 类型，不附加未声明结构"
+          }
+        ],
+        "operations": [
+          {
+            "name": "f",
+            "parameters": [
+              "a"
+            ],
+            "result_type": "a",
+            "original": "显式函数参数 f"
+          },
+          {
+            "name": "observe",
+            "parameters": [
+              "a"
+            ],
+            "result_type": "a",
+            "original": "显式任意运算 observe，不附加结构定律"
+          }
+        ],
+        "definitions": [
+          {
+            "name": "iter_f",
+            "original": "iter_f(0,x)=x；iter_f(n+1,x)=f(iter_f(n,x))，以Nat.rec显式定义。",
+            "parameters": [
+              {
+                "name": "n",
+                "type": "Nat"
+              },
+              {
+                "name": "x",
+                "type": "a"
+              }
+            ],
+            "result_type": "a",
+            "body": {
+              "nat_fold": {
+                "index": {
+                  "var": "n"
+                },
+                "zero": {
+                  "var": "x"
+                },
+                "step": {
+                  "index": "k",
+                  "value": "acc",
+                  "body": {
+                    "call": {
+                      "name": "f",
+                      "args": [
+                        {
+                          "var": "acc"
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          }
+        ],
+        "variables": [
+          {
+            "name": "m",
+            "type": "Nat"
+          },
+          {
+            "name": "n",
+            "type": "Nat"
+          },
+          {
+            "name": "x",
+            "type": "a"
+          }
+        ],
+        "assumptions": [],
+        "goal": {
+          "eq": [
+            {
+              "call": {
+                "name": "observe",
+                "args": [
+                  {
+                    "call": {
+                      "name": "iter_f",
+                      "args": [
+                        {
+                          "add": [
+                            {
+                              "var": "m"
+                            },
+                            {
+                              "var": "n"
+                            }
+                          ]
+                        },
+                        {
+                          "var": "x"
+                        }
+                      ]
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "call": {
+                "name": "observe",
+                "args": [
+                  {
+                    "call": {
+                      "name": "iter_f",
+                      "args": [
+                        {
+                          "var": "m"
+                        },
+                        {
+                          "call": {
+                            "name": "iter_f",
+                            "args": [
+                              {
+                                "var": "n"
+                              },
+                              {
+                                "var": "x"
+                              }
+                            ]
+                          }
+                        }
+                      ]
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        "timeout_seconds": 20
+      },
+      "negative": false,
+      "provenance": {
+        "kind": "author-derived-additive-mechanism",
+        "exposure": "author-visible-before-genuine-checks",
+        "reference_proof_supplied": false
+      }
+    },
+    {
+      "id": "observed-indexed-shift",
+      "target": {
+        "schema": "explicit-structures-v1",
+        "title": "索引依赖step及显式位移的fold等式经过任意observe映射，不能把step当作无索引函数。",
+        "original": "索引依赖step及显式位移的fold等式经过任意observe映射，不能把step当作无索引函数。",
+        "carriers": [
+          {
+            "name": "a",
+            "original": "任意Type0载体"
+          }
+        ],
+        "operations": [
+          {
+            "name": "step",
+            "parameters": [
+              "Nat",
+              "a"
+            ],
+            "result_type": "a",
+            "original": "显式函数 step"
+          },
+          {
+            "name": "observe",
+            "parameters": [
+              "a"
+            ],
+            "result_type": "a",
+            "original": "显式任意运算 observe，不附加结构定律"
+          }
+        ],
+        "variables": [
+          {
+            "name": "m",
+            "type": "Nat"
+          },
+          {
+            "name": "n",
+            "type": "Nat"
+          },
+          {
+            "name": "x",
+            "type": "a"
+          }
+        ],
+        "definitions": [
+          {
+            "name": "run",
+            "original": "run(0,x)=x；run(k+1,x)=step(k,run(k,x))",
+            "parameters": [
+              {
+                "name": "n",
+                "type": "Nat"
+              },
+              {
+                "name": "x",
+                "type": "a"
+              }
+            ],
+            "result_type": "a",
+            "body": {
+              "nat_fold": {
+                "index": {
+                  "var": "n"
+                },
+                "zero": {
+                  "var": "x"
+                },
+                "step": {
+                  "index": "j",
+                  "value": "acc",
+                  "body": {
+                    "call": {
+                      "name": "step",
+                      "args": [
+                        {
+                          "var": "j"
+                        },
+                        {
+                          "var": "acc"
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          },
+          {
+            "name": "shifted",
+            "original": "shifted(m,0,x)=x；shifted(m,k+1,x)=step(m+k,shifted(m,k,x))",
+            "parameters": [
+              {
+                "name": "m",
+                "type": "Nat"
+              },
+              {
+                "name": "n",
+                "type": "Nat"
+              },
+              {
+                "name": "x",
+                "type": "a"
+              }
+            ],
+            "result_type": "a",
+            "body": {
+              "nat_fold": {
+                "index": {
+                  "var": "n"
+                },
+                "zero": {
+                  "var": "x"
+                },
+                "step": {
+                  "index": "j",
+                  "value": "acc",
+                  "body": {
+                    "call": {
+                      "name": "step",
+                      "args": [
+                        {
+                          "add": [
+                            {
+                              "var": "m"
+                            },
+                            {
+                              "var": "j"
+                            }
+                          ]
+                        },
+                        {
+                          "var": "acc"
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          }
+        ],
+        "assumptions": [],
+        "goal": {
+          "eq": [
+            {
+              "call": {
+                "name": "observe",
+                "args": [
+                  {
+                    "call": {
+                      "name": "run",
+                      "args": [
+                        {
+                          "add": [
+                            {
+                              "var": "m"
+                            },
+                            {
+                              "var": "n"
+                            }
+                          ]
+                        },
+                        {
+                          "var": "x"
+                        }
+                      ]
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "call": {
+                "name": "observe",
+                "args": [
+                  {
+                    "call": {
+                      "name": "shifted",
+                      "args": [
+                        {
+                          "var": "m"
+                        },
+                        {
+                          "var": "n"
+                        },
+                        {
+                          "call": {
+                            "name": "run",
+                            "args": [
+                              {
+                                "var": "m"
+                              },
+                              {
+                                "var": "x"
+                              }
+                            ]
+                          }
+                        }
+                      ]
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        "timeout_seconds": 20
+      },
+      "negative": false,
+      "provenance": {
+        "kind": "author-derived-indexed-mechanism",
+        "exposure": "author-visible-before-genuine-checks",
+        "reference_proof_supplied": false
+      }
+    },
+    {
+      "id": "missing-commutation",
+      "target": {
+        "schema": "explicit-structures-v1",
+        "title": "删除交换条件后仍要求完整观察复合等式；失败只记UNKNOWN。",
+        "original": "删除交换条件后仍要求完整观察复合等式；失败只记UNKNOWN。",
+        "carriers": [
+          {
+            "name": "a",
+            "original": "任意 a 类型，不附加未声明结构"
+          }
+        ],
+        "operations": [
+          {
+            "name": "f",
+            "parameters": [
+              "a"
+            ],
+            "result_type": "a",
+            "original": "显式函数参数 f"
+          },
+          {
+            "name": "g",
+            "parameters": [
+              "a"
+            ],
+            "result_type": "a",
+            "original": "显式函数参数 g"
+          },
+          {
+            "name": "h",
+            "parameters": [
+              "a"
+            ],
+            "result_type": "a",
+            "original": "显式函数 h"
+          }
+        ],
+        "definitions": [
+          {
+            "name": "iter_f",
+            "original": "iter_f(0,x)=x；iter_f(n+1,x)=f(iter_f(n,x))，以Nat.rec显式定义。",
+            "parameters": [
+              {
+                "name": "n",
+                "type": "Nat"
+              },
+              {
+                "name": "x",
+                "type": "a"
+              }
+            ],
+            "result_type": "a",
+            "body": {
+              "nat_fold": {
+                "index": {
+                  "var": "n"
+                },
+                "zero": {
+                  "var": "x"
+                },
+                "step": {
+                  "index": "k",
+                  "value": "acc",
+                  "body": {
+                    "call": {
+                      "name": "f",
+                      "args": [
+                        {
+                          "var": "acc"
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          },
+          {
+            "name": "iter_g",
+            "original": "iter_g(0,x)=x；iter_g(n+1,x)=g(iter_g(n,x))，以Nat.rec显式定义。",
+            "parameters": [
+              {
+                "name": "n",
+                "type": "Nat"
+              },
+              {
+                "name": "x",
+                "type": "a"
+              }
+            ],
+            "result_type": "a",
+            "body": {
+              "nat_fold": {
+                "index": {
+                  "var": "n"
+                },
+                "zero": {
+                  "var": "x"
+                },
+                "step": {
+                  "index": "k",
+                  "value": "acc",
+                  "body": {
+                    "call": {
+                      "name": "g",
+                      "args": [
+                        {
+                          "var": "acc"
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          },
+          {
+            "name": "iter_fg",
+            "original": "iter_fg(0,x)=x；iter_fg(n+1,x)=f(g(iter_fg(n,x)))，显式Nat.rec定义。",
+            "parameters": [
+              {
+                "name": "n",
+                "type": "Nat"
+              },
+              {
+                "name": "x",
+                "type": "a"
+              }
+            ],
+            "result_type": "a",
+            "body": {
+              "nat_fold": {
+                "index": {
+                  "var": "n"
+                },
+                "zero": {
+                  "var": "x"
+                },
+                "step": {
+                  "index": "k",
+                  "value": "acc",
+                  "body": {
+                    "call": {
+                      "name": "f",
+                      "args": [
+                        {
+                          "call": {
+                            "name": "g",
+                            "args": [
+                              {
+                                "var": "acc"
+                              }
+                            ]
+                          }
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          }
+        ],
+        "variables": [
+          {
+            "name": "n",
+            "type": "Nat"
+          },
+          {
+            "name": "x",
+            "type": "a"
+          }
+        ],
+        "assumptions": [],
+        "goal": {
+          "eq": [
+            {
+              "call": {
+                "name": "h",
+                "args": [
+                  {
+                    "call": {
+                      "name": "iter_fg",
+                      "args": [
+                        {
+                          "var": "n"
+                        },
+                        {
+                          "var": "x"
+                        }
+                      ]
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "call": {
+                "name": "h",
+                "args": [
+                  {
+                    "call": {
+                      "name": "iter_f",
+                      "args": [
+                        {
+                          "var": "n"
+                        },
+                        {
+                          "call": {
+                            "name": "iter_g",
+                            "args": [
+                              {
+                                "var": "n"
+                              },
+                              {
+                                "var": "x"
+                              }
+                            ]
+                          }
+                        }
+                      ]
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        "timeout_seconds": 20
+      },
+      "negative": true,
+      "provenance": {
+        "kind": "hypothesis-deletion-control",
+        "exposure": "author-visible-before-genuine-checks",
+        "reference_proof_supplied": false
+      }
+    },
+    {
+      "id": "different-observers",
+      "target": {
+        "schema": "explicit-structures-v1",
+        "title": "左右使用不同任意观察函数h与j，没有两者相等或其他关联条件。",
+        "original": "左右使用不同任意观察函数h与j，没有两者相等或其他关联条件。",
+        "carriers": [
+          {
+            "name": "a",
+            "original": "任意 a 类型，不附加未声明结构"
+          }
+        ],
+        "operations": [
+          {
+            "name": "f",
+            "parameters": [
+              "a"
+            ],
+            "result_type": "a",
+            "original": "显式函数参数 f"
+          },
+          {
+            "name": "g",
+            "parameters": [
+              "a"
+            ],
+            "result_type": "a",
+            "original": "显式函数参数 g"
+          },
+          {
+            "name": "h",
+            "parameters": [
+              "a"
+            ],
+            "result_type": "a",
+            "original": "显式函数 h"
+          },
+          {
+            "name": "j",
+            "parameters": [
+              "a"
+            ],
+            "result_type": "a",
+            "original": "显式任意运算 j，不附加结构定律"
+          }
+        ],
+        "definitions": [
+          {
+            "name": "iter_f",
+            "original": "iter_f(0,x)=x；iter_f(n+1,x)=f(iter_f(n,x))，以Nat.rec显式定义。",
+            "parameters": [
+              {
+                "name": "n",
+                "type": "Nat"
+              },
+              {
+                "name": "x",
+                "type": "a"
+              }
+            ],
+            "result_type": "a",
+            "body": {
+              "nat_fold": {
+                "index": {
+                  "var": "n"
+                },
+                "zero": {
+                  "var": "x"
+                },
+                "step": {
+                  "index": "k",
+                  "value": "acc",
+                  "body": {
+                    "call": {
+                      "name": "f",
+                      "args": [
+                        {
+                          "var": "acc"
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          },
+          {
+            "name": "iter_g",
+            "original": "iter_g(0,x)=x；iter_g(n+1,x)=g(iter_g(n,x))，以Nat.rec显式定义。",
+            "parameters": [
+              {
+                "name": "n",
+                "type": "Nat"
+              },
+              {
+                "name": "x",
+                "type": "a"
+              }
+            ],
+            "result_type": "a",
+            "body": {
+              "nat_fold": {
+                "index": {
+                  "var": "n"
+                },
+                "zero": {
+                  "var": "x"
+                },
+                "step": {
+                  "index": "k",
+                  "value": "acc",
+                  "body": {
+                    "call": {
+                      "name": "g",
+                      "args": [
+                        {
+                          "var": "acc"
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          },
+          {
+            "name": "iter_fg",
+            "original": "iter_fg(0,x)=x；iter_fg(n+1,x)=f(g(iter_fg(n,x)))，显式Nat.rec定义。",
+            "parameters": [
+              {
+                "name": "n",
+                "type": "Nat"
+              },
+              {
+                "name": "x",
+                "type": "a"
+              }
+            ],
+            "result_type": "a",
+            "body": {
+              "nat_fold": {
+                "index": {
+                  "var": "n"
+                },
+                "zero": {
+                  "var": "x"
+                },
+                "step": {
+                  "index": "k",
+                  "value": "acc",
+                  "body": {
+                    "call": {
+                      "name": "f",
+                      "args": [
+                        {
+                          "call": {
+                            "name": "g",
+                            "args": [
+                              {
+                                "var": "acc"
+                              }
+                            ]
+                          }
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          }
+        ],
+        "variables": [
+          {
+            "name": "n",
+            "type": "Nat"
+          },
+          {
+            "name": "x",
+            "type": "a"
+          }
+        ],
+        "assumptions": [
+          {
+            "name": "commutes",
+            "formula": {
+              "forall": {
+                "binders": [
+                  {
+                    "name": "u",
+                    "type": "a"
+                  }
+                ],
+                "body": {
+                  "eq": [
+                    {
+                      "call": {
+                        "name": "f",
+                        "args": [
+                          {
+                            "call": {
+                              "name": "g",
+                              "args": [
+                                {
+                                  "var": "u"
+                                }
+                              ]
+                            }
+                          }
+                        ]
+                      }
+                    },
+                    {
+                      "call": {
+                        "name": "g",
+                        "args": [
+                          {
+                            "call": {
+                              "name": "f",
+                              "args": [
+                                {
+                                  "var": "u"
+                                }
+                              ]
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        ],
+        "goal": {
+          "eq": [
+            {
+              "call": {
+                "name": "h",
+                "args": [
+                  {
+                    "call": {
+                      "name": "iter_fg",
+                      "args": [
+                        {
+                          "var": "n"
+                        },
+                        {
+                          "var": "x"
+                        }
+                      ]
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "call": {
+                "name": "j",
+                "args": [
+                  {
+                    "call": {
+                      "name": "iter_f",
+                      "args": [
+                        {
+                          "var": "n"
+                        },
+                        {
+                          "call": {
+                            "name": "iter_g",
+                            "args": [
+                              {
+                                "var": "n"
+                              },
+                              {
+                                "var": "x"
+                              }
+                            ]
+                          }
+                        }
+                      ]
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        "timeout_seconds": 20
+      },
+      "negative": true,
+      "provenance": {
+        "kind": "context-mismatch-control",
+        "exposure": "author-visible-before-genuine-checks",
+        "reference_proof_supplied": false
+      }
+    },
+    {
+      "id": "noninjective-direction",
+      "target": {
+        "schema": "explicit-structures-v1",
+        "title": "只给定h为常值观察函数，不可从h(u)=h(v)推出u=v或f(u)=f(v)。",
+        "original": "只给定h为常值观察函数，不可从h(u)=h(v)推出u=v或f(u)=f(v)。",
+        "carriers": [
+          {
+            "name": "a",
+            "original": "任意 a 类型，不附加未声明结构"
+          }
+        ],
+        "operations": [
+          {
+            "name": "f",
+            "parameters": [
+              "a"
+            ],
+            "result_type": "a",
+            "original": "显式任意运算 f，不附加结构定律"
+          },
+          {
+            "name": "h",
+            "parameters": [
+              "a"
+            ],
+            "result_type": "a",
+            "original": "显式任意运算 h，不附加结构定律"
+          }
+        ],
+        "definitions": [],
+        "variables": [
+          {
+            "name": "x",
+            "type": "a"
+          },
+          {
+            "name": "y",
+            "type": "a"
+          }
+        ],
+        "assumptions": [
+          {
+            "name": "constant_observer",
+            "formula": {
+              "forall": {
+                "binders": [
+                  {
+                    "name": "u",
+                    "type": "a"
+                  },
+                  {
+                    "name": "v",
+                    "type": "a"
+                  }
+                ],
+                "body": {
+                  "eq": [
+                    {
+                      "call": {
+                        "name": "h",
+                        "args": [
+                          {
+                            "var": "u"
+                          }
+                        ]
+                      }
+                    },
+                    {
+                      "call": {
+                        "name": "h",
+                        "args": [
+                          {
+                            "var": "v"
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        ],
+        "goal": {
+          "eq": [
+            {
+              "call": {
+                "name": "f",
+                "args": [
+                  {
+                    "var": "x"
+                  }
+                ]
+              }
+            },
+            {
+              "call": {
+                "name": "f",
+                "args": [
+                  {
+                    "var": "y"
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        "timeout_seconds": 20
+      },
+      "negative": true,
+      "provenance": {
+        "kind": "noninjectivity-control",
+        "exposure": "author-visible-before-genuine-checks",
+        "reference_proof_supplied": false
+      }
+    }
+  ]
+}

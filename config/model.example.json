@@ -1,0 +1,7 @@
+{
+  "endpoint": "https://api.openai.com/v1/chat/completions",
+  "model": "REPLACE_WITH_YOUR_MODEL_ID",
+  "revision": "REPLACE_WITH_PROVIDER_VERSION_OR_DEPLOYMENT_ID",
+  "api_key_env": "MRA_MODEL_API_KEY",
+  "token_field": "max_completion_tokens"
+}

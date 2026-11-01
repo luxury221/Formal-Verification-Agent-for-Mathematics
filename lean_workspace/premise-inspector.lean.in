@@ -1,0 +1,70 @@
+import __MRA_MODULE__
+import Lean
+
+set_option autoImplicit false
+set_option Elab.async false
+set_option maxHeartbeats 400000
+set_option pp.universes true
+set_option pp.fullNames true
+set_option pp.explicit true
+set_option pp.piBinderTypes true
+
+open Lean Elab Command in
+run_cmd do
+  let text ← liftIO <| IO.FS.readFile "/work/request.json"
+  let .ok request := Json.parse text | throwError "MRA_METADATA_INVALID_REQUEST"
+  let .ok written := request.getObjValAs? String "written_name"
+    | throwError "MRA_METADATA_INVALID_NAME"
+  let .ok moduleName := request.getObjValAs? String "module"
+    | throwError "MRA_METADATA_INVALID_MODULE"
+  let env ← getEnv
+  let mut found : Array Json := #[]
+  for (name, info) in env.constants do
+    let actual := name.toString
+    if actual == written || actual.endsWith ("." ++ written) then
+      if let some idx := env.getModuleIdxFor? name then
+        if env.header.moduleNames[idx.toNat]!.toString == moduleName then
+          if found.size >= 8 then
+            throwError "MRA_METADATA_TOO_MANY_MATCHES"
+          let (fullType, explicitType, binders, conclusion) ← liftTermElabM do
+            let explicitType := (← Lean.Meta.ppExpr info.type).pretty
+            let fullType ← withOptions (fun opts => opts.setBool `pp.explicit false) do
+              return (← Lean.Meta.ppExpr info.type).pretty
+            Lean.Meta.forallTelescope info.type fun args target => do
+              let mut binders : Array Json := #[]
+              for arg in args do
+                let decl ← arg.fvarId!.getDecl
+                let kind := match decl.binderInfo with
+                  | .default => "explicit"
+                  | .implicit => "implicit"
+                  | .strictImplicit => "strict_implicit"
+                  | .instImplicit => "instance"
+                binders := binders.push <| Json.mkObj [
+                  ("name", toJson (← Lean.Meta.ppExpr arg).pretty),
+                  ("kind", toJson kind),
+                  ("type", toJson (← Lean.Meta.ppExpr decl.type).pretty)]
+              return (fullType, explicitType, binders, (← Lean.Meta.ppExpr target).pretty)
+          let kind := match info with
+            | .thmInfo _ => "theorem"
+            | .axiomInfo _ => "axiom"
+            | .defnInfo _ => "definition"
+            | .opaqueInfo _ => "opaque"
+            | .inductInfo _ => "inductive"
+            | .ctorInfo _ => "constructor"
+            | .recInfo _ => "recursor"
+            | .quotInfo _ => "quotient"
+          found := found.push <| Json.mkObj [
+            ("name", toJson actual),
+            ("module", toJson moduleName),
+            ("kind", toJson kind),
+            ("universe_parameters", toJson (info.levelParams.map Name.toString)),
+            ("type", toJson fullType),
+            ("explicit_type", toJson explicitType),
+            ("binders", toJson binders),
+            ("conclusion", toJson conclusion)]
+  let report := Json.mkObj [
+    ("schema", toJson "lean-premise-metadata-v1"),
+    ("module", toJson moduleName),
+    ("written_name", toJson written),
+    ("matches", toJson found)]
+  logInfo m!"MRA_METADATA:{report.compress}"

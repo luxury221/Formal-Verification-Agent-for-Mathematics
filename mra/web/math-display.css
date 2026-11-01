@@ -1,0 +1,13 @@
+.mra-math{min-width:0;overflow-wrap:anywhere}
+.mra-math-view{white-space:pre-wrap}
+.mra-math .mra-formula{white-space:normal;overflow-wrap:normal;word-break:normal}
+.mra-math .mra-formula-display{display:block;max-width:100%;overflow-x:auto;overflow-y:hidden;padding:4px 0;overscroll-behavior-x:contain;scrollbar-width:thin}
+.mra-math .katex-display{margin:.8em 0;text-align:left}
+.mra-math .katex-display>.katex{text-align:left}
+.mra-math .katex{font-size:1.12em}
+.mra-math-toggle{display:block;border:0;border-bottom:1px dotted #9aa796;border-radius:0;background:transparent;padding:3px 0;margin:10px 0 0;color:#60735b;font:inherit;font-size:11px;line-height:1.6;cursor:pointer;text-align:left}
+.mra-math-toggle:focus-visible{outline:2px solid #527b65;outline-offset:4px}
+.mra-math-source{display:block;white-space:pre-wrap;overflow-wrap:anywhere;word-break:break-word;font:12px/1.9 ui-monospace,Consolas,monospace;color:#50604f;margin-top:10px}
+.mra-formula-fallback{white-space:pre-wrap;overflow-wrap:anywhere}
+.mra-math [hidden]{display:none!important}
+@media(max-width:480px){.mra-math .katex{font-size:1.04em}.mra-math .mra-formula:not(.mra-formula-display){display:inline-block;box-sizing:border-box;max-width:100%;vertical-align:middle;overflow-x:auto;overflow-y:hidden;padding:.2em .1em;scrollbar-width:none}.mra-math .mra-formula:not(.mra-formula-display)::-webkit-scrollbar{display:none}.mra-math-toggle{min-height:32px}}

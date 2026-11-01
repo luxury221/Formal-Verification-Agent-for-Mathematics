@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#f7f8f5"><title>MRA · PDE 研究工作台</title>
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="stylesheet" href="/workspace.css"><link rel="stylesheet" href="/pde-research.css">
+<script src="/shell.js" defer></script><script src="/typed-transport.js" defer></script>
+<script src="/pde-research.js" defer></script>
+</head>
+<body>
+<a class="skip-link" href="#page">跳至主要内容</a>
+<header class="pr-topbar" hidden><a href="/pde" class="pr-brand">MRA <span>数学研究工作台</span></a><span class="pr-preview">PDE 研究图</span></header><main class="app-main"><div class="page-container ar-page" id="page" tabindex="-1">
+<section class="ar-hero"><div><p class="ar-eyebrow">ANALYSIS &amp; PDE / RESEARCH NOTEBOOK</p><h1>从边界条件，<br>走向能量恒等式。</h1><p class="ar-lead">把分部积分、Green 恒等式和一维 Poisson 能量关系，组织成可追溯的研究任务。</p><div class="ar-tags"><span>完整边界条件</span><span>逐节点来源</span><span>原问题独立检查</span></div></div><div class="ar-symbol" aria-hidden="true">∫<small>|u′|² = f · u</small></div></section>
+<p class="pr-notice">逐节点确认后，后台执行真实 Lean 检查与独立重放。保存和排队保持未知，原问题须取得自己的完整证据。</p><div id="ar-message" class="ar-message" role="status" aria-live="polite" hidden></div>
+<section class="ar-context ar-card" aria-label="研究语境"><label>研究项目<select id="ar-project"><option value="">正在读取项目…</option></select></label><label>研究分支<select id="ar-branch"><option value="main">main</option></select></label><button class="ar-btn" id="ar-new-project" type="button">＋ 新建项目</button><span class="ar-context-note">每份证明绑定当前问题与分支</span></section>
+<form class="ar-card ar-create" id="ar-project-form" hidden><label>项目名称<input id="ar-project-title" maxlength="200" required placeholder="例如：一维演化问题的分析准备"></label><label>原始研究问题<textarea id="ar-project-question" rows="3" maxlength="8000" required placeholder="写明希望研究的问题、对象和边界。"></textarea></label><button class="ar-btn ar-primary" type="submit">创建研究项目</button></form>
+<div class="ar-layout">
+<aside class="ar-card ar-notebooks"><div class="ar-section-head"><h2>研究任务</h2><button class="ar-link" id="ar-refresh-list" type="button">刷新</button></div><p class="ar-muted">任务保存完整目标；检查逐项确认。</p><div id="ar-tasks" class="ar-task-list"></div><button class="ar-btn ar-wide" id="ar-new-task" type="button">＋ 新任务</button><p class="ar-back">先核对完整目标，再逐项确认。</p></aside>
+<div class="ar-main">
+<section class="ar-card" id="ar-editor"><div class="ar-section-head"><div><p class="ar-eyebrow">01 / DEFINE</p><h2>组织完整的数学目标</h2></div><span class="ar-pill">保存前：未知</span></div><p class="ar-muted">选择一个已知示例作为起点，或展开编辑完整请求。所有变量、前提和测度均会进入检查。</p><label>起始任务<select id="ar-example"></select></label><details class="ar-advanced"><summary>绑定外部分部积分来源</summary><p class="ar-muted">四步能量链需要一份已有的分部积分检查。核对实际来源后，将其编号和完整类型写入草稿；绑定本身不证明新目标。</p><label>来源运行编号<input id="pr-seed-id" maxlength="64" placeholder="pdewatched-…"></label><button class="ar-btn" id="pr-seed-bind" type="button">核对并绑定来源</button><div id="pr-seed-details"></div></details><div id="ar-draft-nodes" class="ar-draft-nodes"></div><details class="ar-advanced"><summary>编辑完整结构化请求</summary><p class="ar-muted">直接编辑当前项目内的节点。修改后须重新预览；不接受任意 Lean 源码。</p><label class="ar-sr" for="ar-json">完整任务节点 JSON</label><textarea id="ar-json" rows="20" spellcheck="false"></textarea></details><div class="ar-actions"><button class="ar-btn" id="ar-preview" type="button">预览全部目标</button><button class="ar-btn" id="pr-expand" type="button">合并推导后预览</button><button class="ar-btn ar-primary" id="ar-save" type="button" disabled>保存研究任务</button></div><div id="ar-plan"></div></section>
+<section class="ar-card" id="ar-work" hidden><div class="ar-section-head"><div><p class="ar-eyebrow">02 / VERIFY</p><h2 id="ar-work-title">研究记录</h2></div><div class="ar-actions"><button class="ar-btn" id="ar-refresh" type="button">重新核对</button><button class="ar-btn" id="ar-export" type="button" disabled>导出记录</button></div></div><div class="ar-result" id="ar-result"></div><p class="ar-muted">调度前置与证明引用分别列出。证明引用须绑定实际前置证据；原问题需要自己的完整验证。</p><div id="ar-nodes"></div><div id="ar-history"></div></section>
+<section class="ar-card" id="ar-check" hidden><p class="ar-eyebrow">03 / REVIEW &amp; RUN</p><h2>确认这一次完整检查</h2><div id="ar-check-details"></div><form id="ar-run-form"><label>语义核对人<input id="ar-reviewer" maxlength="200" required placeholder="填写姓名或负责核对的过程名称"></label><label class="ar-check-label"><input id="ar-confirm" type="checkbox" required><span>已核对原文、完整 Lean 目标、全部条件、测度及预算；确认执行本次检查。</span></label><button class="ar-btn ar-primary" id="ar-run" type="submit">确认并排队</button></form><p class="ar-muted">此具名确认是本地声明。执行耗时包含完整性与来源核对，排队不代表已经证明。</p></section>
+<section class="ar-footnote"><strong>当前范围</strong><p>一维经典 Poisson 关系、实数函数、闭区间导数与积分。可导、可积和边界条件均显式保留；一般弱解、存在唯一性与原创研究能力尚待实现和评估。</p></section>
+</div></div></div></main>
+<dialog id="ar-withdraw-dialog" class="ar-dialog"><form id="ar-withdraw-form"><h2>撤销节点证据</h2><p>依赖这份证据的后续结果将停用，恢复原文件不会使其复活。</p><label>核对人<input id="ar-withdraw-reviewer" maxlength="200" required></label><label>撤销原因<textarea id="ar-withdraw-reason" rows="3" maxlength="500" required></textarea></label><label class="ar-check-label"><input id="ar-withdraw-confirm" type="checkbox" required><span>确认撤销并传播到依赖节点</span></label><div class="ar-actions"><button type="button" class="ar-btn" id="ar-withdraw-close">返回</button><button class="ar-btn ar-danger" type="submit">确认撤销</button></div></form></dialog>
+<noscript>请启用 JavaScript，或使用项目中的 PDE 研究 CLI。</noscript>
+</body></html>

@@ -1,0 +1,83 @@
+import Mathlib.Data.Nat.Basic
+import LeanExport.Basic
+
+set_option autoImplicit false
+set_option Elab.async false
+set_option maxHeartbeats 200000
+
+open Lean
+
+private def mraLevel (n : Nat) : Level :=
+  n.rec .zero fun _ level => .succ level
+
+private def mraExpr (base : Environment) (data : Json) : Nat → Except String Expr
+  | 0 => .error "MRA_CERTIFICATE_POLICY_DEPTH"
+  | fuel + 1 => do
+    let op ← data.getObjValAs? String "op"
+    match op with
+    | "const" =>
+      let nameText ← data.getObjValAs? String "name"
+      let name := nameText.toName
+      let some info := base.find? name
+        | throw "MRA_CERTIFICATE_POLICY_UNKNOWN_CONSTANT"
+      if info.isUnsafe || info.isPartial then
+        throw "MRA_CERTIFICATE_POLICY_UNSAFE_CONSTANT"
+      let levels ← data.getObjValAs? (Array Nat) "levels"
+      unless levels.size ≤ 8 && levels.all (· ≤ 8) do
+        throw "MRA_CERTIFICATE_POLICY_LEVEL"
+      return .const name (levels.toList.map mraLevel)
+    | "app" =>
+      return .app (← mraExpr base (← data.getObjVal? "fn") fuel)
+        (← mraExpr base (← data.getObjVal? "arg") fuel)
+    | "lam" | "forall" =>
+      let type ← mraExpr base (← data.getObjVal? "type") fuel
+      let body ← mraExpr base (← data.getObjVal? "body") fuel
+      return if op == "lam" then .lam `x type body .default
+        else .forallE `x type body .default
+    | "bvar" => return .bvar (← data.getObjValAs? Nat "index")
+    | "nat" => return mkNatLit (← data.getObjValAs? Nat "value")
+    | "sort" =>
+      let level ← data.getObjValAs? Nat "level"
+      unless level ≤ 8 do throw "MRA_CERTIFICATE_POLICY_LEVEL"
+      return .sort (mraLevel level)
+    | _ => throw "MRA_CERTIFICATE_POLICY_CONSTRUCTOR"
+
+open Lean Elab Command in
+run_cmd do
+  -- The only elaborated expression is the host-owned, fixed target.
+  let expected ← liftTermElabM do
+    let e ← Lean.Elab.Term.elabType (← `(term| __MRA_EXPECTED_STATEMENT__))
+    Lean.Elab.Term.synthesizeSyntheticMVarsNoPostponing
+    instantiateMVars e
+  let base ← getEnv
+  let raw ← liftIO <| IO.FS.readFile "/work/certificate.json"
+  let .ok data := Json.parse raw | throwError "MRA_CERTIFICATE_POLICY_JSON"
+  let .ok proofData := data.getObjVal? "proof" | throwError "MRA_CERTIFICATE_POLICY_PROOF"
+  let proof ← match mraExpr base proofData 64 with
+    | .ok expr => pure expr
+    | .error error => throwError "{error}"
+  let declaration : Declaration := .thmDecl {
+    name := `MraCandidate.result
+    levelParams := []
+    type := expected
+    value := proof
+  }
+  let kernel ← match base.toKernelEnv.addDeclCore 0 0 declaration (cancelTk? := none) with
+    | .ok env => pure env
+    | .error error => throwError "MRA_CERTIFICATE_KERNEL_REJECTED: {← error.toMessageData {} |>.toString}"
+  setEnv (Environment.ofKernelEnv kernel)
+  let axioms ← Lean.collectAxioms `MraCandidate.result
+  let report := Json.mkObj [
+    ("target", toJson "MraCandidate.result"),
+    ("declaration_kind", toJson "theorem"),
+    ("type_matches", toJson true),
+    ("input_mode", toJson "kernel-expression-certificate-v1"),
+    ("candidate_source_executed", toJson false),
+    ("local_axioms", toJson (#[] : Array String)),
+    ("local_dependency_axioms", toJson (axioms.map Name.toString)),
+    ("axioms", toJson (axioms.map Name.toString))]
+  logInfo m!"MRA_AUDIT:{report.compress}"
+  liftIO do
+    IO.println "MRA_EXPORT_BEGIN"
+    LeanExport.dumpEnv (Environment.ofKernelEnv kernel) (some [`MraCandidate.result])
+    IO.println "MRA_EXPORT_END"

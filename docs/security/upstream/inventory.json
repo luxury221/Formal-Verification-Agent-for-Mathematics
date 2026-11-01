@@ -1,0 +1,242 @@
+[
+  {
+    "name": "Euler",
+    "repository": "canghaimeng/Euler",
+    "review_date": "2026-10-19",
+    "files": [
+      {
+        "name": "LICENSE",
+        "url": "https://raw.githubusercontent.com/canghaimeng/Euler/766346c0d3bef16c0c4be759aa589d8cc3b44511/LICENSE",
+        "sha256": "679c2480eedb2f9c76aff5812c7069acad97569c16cedf8c49780fdad468bd9f"
+      },
+      {
+        "name": "LICENSING.md",
+        "url": "https://raw.githubusercontent.com/canghaimeng/Euler/766346c0d3bef16c0c4be759aa589d8cc3b44511/LICENSING.md",
+        "sha256": "89c98543b150104e2379637c0436ca7668fc75b21198b6a52a8ebd11136fbb8c"
+      },
+      {
+        "name": "LICENSING.zh.md",
+        "url": "https://raw.githubusercontent.com/canghaimeng/Euler/766346c0d3bef16c0c4be759aa589d8cc3b44511/LICENSING.zh.md",
+        "sha256": "a2ef0345ea8f89eb115a028fdb66bdcc3d075ae6f87f3fcdb846319fcda36251"
+      },
+      {
+        "name": "NOTICE",
+        "url": "https://raw.githubusercontent.com/canghaimeng/Euler/766346c0d3bef16c0c4be759aa589d8cc3b44511/NOTICE",
+        "sha256": "3c5cb4c0cc9b774a17485761d4fe8d71e47ec6d04f157ab03b087534b4acb28e"
+      },
+      {
+        "name": "README.md",
+        "url": "https://raw.githubusercontent.com/canghaimeng/Euler/766346c0d3bef16c0c4be759aa589d8cc3b44511/README.md",
+        "sha256": "c146d01003c0b4532f5a5632ddb587a6e9c6242d3346003d809351335a6dcd53"
+      },
+      {
+        "name": "pyproject.toml",
+        "url": "https://raw.githubusercontent.com/canghaimeng/Euler/766346c0d3bef16c0c4be759aa589d8cc3b44511/pyproject.toml",
+        "sha256": "a9fa4a584059d86254f44e21bc405d8c648de00b290c919db3635d81d43ce0cf"
+      }
+    ],
+    "commit": "766346c0d3bef16c0c4be759aa589d8cc3b44511",
+    "commit_date": "2026-10-15T17:12:00Z",
+    "status": "fetched_requires_review"
+  },
+  {
+    "name": "Danus",
+    "repository": "frenzymath/Danus",
+    "review_date": "2026-10-19",
+    "files": [
+      {
+        "name": "LICENSE",
+        "url": "https://raw.githubusercontent.com/frenzymath/Danus/6d92e8d415933ca2ef52fd1a4da73fdfcd418f1c/LICENSE",
+        "sha256": "d51dbb6676bff13e23abd800608ec96bd6e637fd5b5194ef9ea8d848416d8ef3"
+      },
+      {
+        "name": "README.md",
+        "url": "https://raw.githubusercontent.com/frenzymath/Danus/6d92e8d415933ca2ef52fd1a4da73fdfcd418f1c/README.md",
+        "sha256": "24abd1150deb8b94db7d65c3c8fc80f82d033d6472ac8c89833ad9fd4367a046"
+      },
+      {
+        "name": "pyproject.toml",
+        "url": "https://raw.githubusercontent.com/frenzymath/Danus/6d92e8d415933ca2ef52fd1a4da73fdfcd418f1c/pyproject.toml",
+        "sha256": "3d884d87bf27af2ac6c5a5a8ebfb549801bd9267f2210286ea9f8ea7ce127e85"
+      }
+    ],
+    "commit": "6d92e8d415933ca2ef52fd1a4da73fdfcd418f1c",
+    "commit_date": "2026-08-27T03:34:27Z",
+    "status": "fetched_requires_review"
+  },
+  {
+    "name": "lean4",
+    "repository": "leanprover/lean4",
+    "review_date": "2026-10-19",
+    "files": [
+      {
+        "name": "LICENSE",
+        "url": "https://raw.githubusercontent.com/leanprover/lean4/eb6cafb7290e8bd5f2937522d8d804f58f02bafc/LICENSE",
+        "sha256": "8b28515ffffc5c0fe2807d8ae3735b00b324d9b7ce807dd63ff6ac8922fbce7e"
+      },
+      {
+        "name": "LICENSES",
+        "url": "https://raw.githubusercontent.com/leanprover/lean4/eb6cafb7290e8bd5f2937522d8d804f58f02bafc/LICENSES",
+        "sha256": "0af1535aa474a58f5d21b2f4b503bb91cad4ff34fec0f10dc776a0a041795fd8"
+      },
+      {
+        "name": "README.md",
+        "url": "https://raw.githubusercontent.com/leanprover/lean4/eb6cafb7290e8bd5f2937522d8d804f58f02bafc/README.md",
+        "sha256": "0e6af638fd5c19432395f8874498be337b378a5f1cc37d7732be7229cb140733"
+      },
+      {
+        "name": "lean-toolchain",
+        "url": "https://raw.githubusercontent.com/leanprover/lean4/eb6cafb7290e8bd5f2937522d8d804f58f02bafc/lean-toolchain",
+        "sha256": "f2b21527ab474ed073d8da57aa075e92dc809951251d67d527abd2957e7061c4"
+      }
+    ],
+    "commit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+    "commit_date": "2026-10-12T15:51:15Z",
+    "status": "fetched_requires_review"
+  },
+  {
+    "name": "mathlib4",
+    "repository": "leanprover-community/mathlib4",
+    "review_date": "2026-10-19",
+    "files": [
+      {
+        "name": "LICENSE",
+        "url": "https://raw.githubusercontent.com/leanprover-community/mathlib4/56a005855ea17e0b0958f73ec801ae140b0a1679/LICENSE",
+        "sha256": "b40930bbcf80744c86c46a12bc9da056641d722716c378f5659b9e555ef833e1"
+      },
+      {
+        "name": "README.md",
+        "url": "https://raw.githubusercontent.com/leanprover-community/mathlib4/56a005855ea17e0b0958f73ec801ae140b0a1679/README.md",
+        "sha256": "4ce9b32e1e3ec27547cef452ea6d91ee3c9d6fb764fd75118d222004bc36a012"
+      },
+      {
+        "name": "lakefile.lean",
+        "url": "https://raw.githubusercontent.com/leanprover-community/mathlib4/56a005855ea17e0b0958f73ec801ae140b0a1679/lakefile.lean",
+        "sha256": "6083173bc380adea0cfd26f9a7813637ae0fd2c38c6a0d4536626e82a9538ef6"
+      },
+      {
+        "name": "lean-toolchain",
+        "url": "https://raw.githubusercontent.com/leanprover-community/mathlib4/56a005855ea17e0b0958f73ec801ae140b0a1679/lean-toolchain",
+        "sha256": "ca5f1f601d34c49079e38d7e7041eb0f2a9c227fbc1df0f404820069a052330c"
+      }
+    ],
+    "commit": "56a005855ea17e0b0958f73ec801ae140b0a1679",
+    "commit_date": "2026-10-13T13:08:46Z",
+    "status": "fetched_requires_review"
+  },
+  {
+    "name": "LeanDojo-v2",
+    "repository": "lean-dojo/LeanDojo-v2",
+    "review_date": "2026-10-19",
+    "files": [
+      {
+        "name": "LICENSE",
+        "url": "https://raw.githubusercontent.com/lean-dojo/LeanDojo-v2/baed5eae6e87a65a446d9f54af07aab2154e7599/LICENSE",
+        "sha256": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4"
+      },
+      {
+        "name": "README.md",
+        "url": "https://raw.githubusercontent.com/lean-dojo/LeanDojo-v2/baed5eae6e87a65a446d9f54af07aab2154e7599/README.md",
+        "sha256": "2a25731b6da276068971808485ce82c5d03af35c502ad2ea6ed837e9445da618"
+      },
+      {
+        "name": "pyproject.toml",
+        "url": "https://raw.githubusercontent.com/lean-dojo/LeanDojo-v2/baed5eae6e87a65a446d9f54af07aab2154e7599/pyproject.toml",
+        "sha256": "e430186812b4d0945086890317727d42db2256167aeec515204291c70ddc7d46"
+      }
+    ],
+    "commit": "baed5eae6e87a65a446d9f54af07aab2154e7599",
+    "commit_date": "2026-08-10T19:14:54Z",
+    "status": "fetched_requires_review"
+  },
+  {
+    "name": "PyPantograph",
+    "repository": "stanford-centaur/PyPantograph",
+    "review_date": "2026-10-19",
+    "files": [
+      {
+        "name": "LICENSE",
+        "url": "https://raw.githubusercontent.com/stanford-centaur/PyPantograph/f8aee320ee5550ea2677e414534618a61e7e1497/LICENSE",
+        "sha256": "cf38caf66ec7d267d63ed046149ee73b7e6a8b40734fe8428f92ea04d68ba9da"
+      },
+      {
+        "name": "README.md",
+        "url": "https://raw.githubusercontent.com/stanford-centaur/PyPantograph/f8aee320ee5550ea2677e414534618a61e7e1497/README.md",
+        "sha256": "467661535abbb7270e69cecd52cf5cb6fdd5544ae65da0fb8e9db5fcba770a31"
+      },
+      {
+        "name": "pyproject.toml",
+        "url": "https://raw.githubusercontent.com/stanford-centaur/PyPantograph/f8aee320ee5550ea2677e414534618a61e7e1497/pyproject.toml",
+        "sha256": "a20c168a920b4e235b92249a32972b04480919be176a20273c22251f8014cece"
+      }
+    ],
+    "commit": "f8aee320ee5550ea2677e414534618a61e7e1497",
+    "commit_date": "2026-06-30T18:37:13Z",
+    "status": "fetched_requires_review"
+  },
+  {
+    "name": "ProofFlow",
+    "repository": "Huawei-AI4Math/ProofFlow",
+    "review_date": "2026-10-19",
+    "files": [
+      {
+        "name": "LICENSE",
+        "url": "https://raw.githubusercontent.com/Huawei-AI4Math/ProofFlow/97f1b7be82380733fb0380973c164e40645ae9da/LICENSE",
+        "sha256": "4c4ecb2961b39997b08640e455464040997d92224e59cd2715d8e9f10983e7f4"
+      },
+      {
+        "name": "README.md",
+        "url": "https://raw.githubusercontent.com/Huawei-AI4Math/ProofFlow/97f1b7be82380733fb0380973c164e40645ae9da/README.md",
+        "sha256": "fb1b6a4459cf54516504bb2ac9c434bb9d090dc3597e9b72f74f99f4df79102e"
+      },
+      {
+        "name": "pyproject.toml",
+        "url": "https://raw.githubusercontent.com/Huawei-AI4Math/ProofFlow/97f1b7be82380733fb0380973c164e40645ae9da/pyproject.toml",
+        "sha256": "4b850b150c7dacb21a01e48db8058967242b263010119511b4c2706a718f7c16"
+      },
+      {
+        "name": "requirements.txt",
+        "url": "https://raw.githubusercontent.com/Huawei-AI4Math/ProofFlow/97f1b7be82380733fb0380973c164e40645ae9da/requirements.txt",
+        "sha256": "a5ff449dfb5dee60a97f60eda2cb6267b9fae17f05b39d87bbc5ba1656ab8f02"
+      }
+    ],
+    "commit": "97f1b7be82380733fb0380973c164e40645ae9da",
+    "commit_date": "2026-06-28T09:37:03Z",
+    "status": "fetched_requires_review"
+  },
+  {
+    "name": "DeepSeek-Prover-V2",
+    "repository": "deepseek-ai/DeepSeek-Prover-V2",
+    "review_date": "2026-10-19",
+    "files": [
+      {
+        "name": "LICENSE-MODEL",
+        "url": "https://raw.githubusercontent.com/deepseek-ai/DeepSeek-Prover-V2/e598a57ea3284997d4a2a168a069fdd5064afbc8/LICENSE-MODEL",
+        "sha256": "ccfee4895df06bcab524151c278e8dde88bbe76165a24ecbcbcf9fafd71fd2b3"
+      },
+      {
+        "name": "README.md",
+        "url": "https://raw.githubusercontent.com/deepseek-ai/DeepSeek-Prover-V2/e598a57ea3284997d4a2a168a069fdd5064afbc8/README.md",
+        "sha256": "08d0b515c693c84d2aca9160efe72e15405f85d8990c547f7a779a555753fb54"
+      }
+    ],
+    "commit": "e598a57ea3284997d4a2a168a069fdd5064afbc8",
+    "commit_date": "2025-07-18T08:11:28Z",
+    "status": "fetched_requires_review"
+  },
+  {
+    "name": "Goedel-Prover-V2",
+    "repository": "Goedel-LM/Goedel-Prover-V2",
+    "review_date": "2026-10-19",
+    "files": [
+      {
+        "name": "README.md",
+        "url": "https://raw.githubusercontent.com/Goedel-LM/Goedel-Prover-V2/2e9036e118464aa96a8bebaf9f5b9d091aa3585c/README.md",
+        "sha256": "74d5803d0ea5c8d731b20f116a8052c0feaf99ecb55e16a70663ed19e7e68d15"
+      }
+    ],
+    "commit": "2e9036e118464aa96a8bebaf9f5b9d091aa3585c",
+    "commit_date": "2025-08-27T18:13:25Z",
+    "status": "fetched_requires_review"
+  }
+]

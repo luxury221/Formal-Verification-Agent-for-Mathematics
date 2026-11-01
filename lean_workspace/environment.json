@@ -1,0 +1,10 @@
+{
+  "schema_version": "1",
+  "lean_version": "4.35.0",
+  "lean_tag": "v4.35.0",
+  "lean_archive_sha256": "7289597a44543246c9227b8cae501767e095ce17f6d448b95fc4a8dc97268f6d",
+  "mathlib_commit": "56a005855ea17e0b0958f73ec801ae140b0a1679",
+  "mathlib_tag": "v4.35.0",
+  "import_scope": ["Mathlib.Data.Nat.Basic"],
+  "backend": "linux-unshare-native-lean"
+}

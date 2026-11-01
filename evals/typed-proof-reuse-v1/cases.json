@@ -1,0 +1,1130 @@
+{
+  "schema": "typed-proof-reuse-evaluation-v1",
+  "authorship": "Repository author, fully visible fixed programs. Not blind, not model-generated, not an originality or research result. Exact dataset and all failures remain in the denominator.",
+  "training_use": false,
+  "cases": [
+    {
+      "id": "rat-polynomial-repeat",
+      "source": {
+        "schema": "typed-definitions-v1",
+        "title": "有理数x=y时，poly(x)=poly(y)。",
+        "original": "有理数x=y时，poly(x)=poly(y)。",
+        "definitions": [
+          {
+            "name": "poly",
+            "original": "有理数多项式 poly(t)=t*t+t/2+1。",
+            "parameters": [
+              {
+                "name": "t",
+                "type": "Rat"
+              }
+            ],
+            "result_type": "Rat",
+            "body": {
+              "add": [
+                {
+                  "add": [
+                    {
+                      "mul": [
+                        {
+                          "var": "t"
+                        },
+                        {
+                          "var": "t"
+                        }
+                      ]
+                    },
+                    {
+                      "mul": [
+                        {
+                          "var": "t"
+                        },
+                        {
+                          "rat": [
+                            1,
+                            2
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "rat": [
+                    1,
+                    1
+                  ]
+                }
+              ]
+            }
+          }
+        ],
+        "variables": [
+          {
+            "name": "x",
+            "type": "Rat"
+          },
+          {
+            "name": "y",
+            "type": "Rat"
+          }
+        ],
+        "assumptions": [
+          {
+            "name": "hxy",
+            "formula": {
+              "eq": [
+                {
+                  "var": "x"
+                },
+                {
+                  "var": "y"
+                }
+              ]
+            }
+          }
+        ],
+        "goal": {
+          "eq": [
+            {
+              "call": {
+                "name": "poly",
+                "args": [
+                  {
+                    "var": "x"
+                  }
+                ]
+              }
+            },
+            {
+              "call": {
+                "name": "poly",
+                "args": [
+                  {
+                    "var": "y"
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        "strategy": "grind",
+        "timeout_seconds": 30
+      },
+      "source_available": true,
+      "target": {
+        "schema": "typed-definitions-v1",
+        "title": "有理数x=y时，同时复用poly等式的正向和反向。",
+        "original": "有理数x=y时，同时复用poly等式的正向和反向。",
+        "definitions": [
+          {
+            "name": "poly",
+            "original": "有理数多项式 poly(t)=t*t+t/2+1。",
+            "parameters": [
+              {
+                "name": "t",
+                "type": "Rat"
+              }
+            ],
+            "result_type": "Rat",
+            "body": {
+              "add": [
+                {
+                  "add": [
+                    {
+                      "mul": [
+                        {
+                          "var": "t"
+                        },
+                        {
+                          "var": "t"
+                        }
+                      ]
+                    },
+                    {
+                      "mul": [
+                        {
+                          "var": "t"
+                        },
+                        {
+                          "rat": [
+                            1,
+                            2
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "rat": [
+                    1,
+                    1
+                  ]
+                }
+              ]
+            }
+          }
+        ],
+        "variables": [
+          {
+            "name": "x",
+            "type": "Rat"
+          },
+          {
+            "name": "y",
+            "type": "Rat"
+          }
+        ],
+        "assumptions": [
+          {
+            "name": "hxy",
+            "formula": {
+              "eq": [
+                {
+                  "var": "x"
+                },
+                {
+                  "var": "y"
+                }
+              ]
+            }
+          }
+        ],
+        "goal": {
+          "and": [
+            {
+              "eq": [
+                {
+                  "call": {
+                    "name": "poly",
+                    "args": [
+                      {
+                        "var": "x"
+                      }
+                    ]
+                  }
+                },
+                {
+                  "call": {
+                    "name": "poly",
+                    "args": [
+                      {
+                        "var": "y"
+                      }
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "eq": [
+                {
+                  "call": {
+                    "name": "poly",
+                    "args": [
+                      {
+                        "var": "y"
+                      }
+                    ]
+                  }
+                },
+                {
+                  "call": {
+                    "name": "poly",
+                    "args": [
+                      {
+                        "var": "x"
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        "strategy": "grind",
+        "timeout_seconds": 30
+      },
+      "proof": {
+        "pair": [
+          {
+            "lemma": "prior",
+            "terms": [
+              {
+                "var": "x"
+              },
+              {
+                "var": "y"
+              }
+            ],
+            "proofs": [
+              {
+                "hyp": "hxy"
+              }
+            ]
+          },
+          {
+            "lemma": "prior",
+            "terms": [
+              {
+                "var": "y"
+              },
+              {
+                "var": "x"
+              }
+            ],
+            "proofs": [
+              {
+                "symm": {
+                  "hyp": "hxy"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "note": "Two explicit applications of the same closed polynomial program, with a reversed premise supplied explicitly."
+    },
+    {
+      "id": "mixed-lift",
+      "source": {
+        "schema": "typed-definitions-v1",
+        "title": "有理数x=y时，x+1=y+1。",
+        "original": "有理数x=y时，x+1=y+1。",
+        "definitions": [
+          {
+            "name": "embed",
+            "original": "自然数显式嵌入整数。",
+            "parameters": [
+              {
+                "name": "n",
+                "type": "Nat"
+              }
+            ],
+            "result_type": "Int",
+            "body": {
+              "cast": {
+                "to": "Int",
+                "value": {
+                  "var": "n"
+                }
+              }
+            }
+          },
+          {
+            "name": "lift",
+            "original": "先embed，再显式嵌入有理数。",
+            "parameters": [
+              {
+                "name": "n",
+                "type": "Nat"
+              }
+            ],
+            "result_type": "Rat",
+            "body": {
+              "cast": {
+                "to": "Rat",
+                "value": {
+                  "call": {
+                    "name": "embed",
+                    "args": [
+                      {
+                        "var": "n"
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        ],
+        "variables": [
+          {
+            "name": "x",
+            "type": "Rat"
+          },
+          {
+            "name": "y",
+            "type": "Rat"
+          }
+        ],
+        "assumptions": [
+          {
+            "name": "hxy",
+            "formula": {
+              "eq": [
+                {
+                  "var": "x"
+                },
+                {
+                  "var": "y"
+                }
+              ]
+            }
+          }
+        ],
+        "goal": {
+          "eq": [
+            {
+              "add": [
+                {
+                  "var": "x"
+                },
+                {
+                  "rat": [
+                    1,
+                    1
+                  ]
+                }
+              ]
+            },
+            {
+              "add": [
+                {
+                  "var": "y"
+                },
+                {
+                  "rat": [
+                    1,
+                    1
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        "strategy": "grind",
+        "timeout_seconds": 30
+      },
+      "source_available": true,
+      "target": {
+        "schema": "typed-definitions-v1",
+        "title": "n为自然数且有理数q=lift(n)时，q+1=lift(n)+1。",
+        "original": "n为自然数且有理数q=lift(n)时，q+1=lift(n)+1。",
+        "definitions": [
+          {
+            "name": "embed",
+            "original": "自然数显式嵌入整数。",
+            "parameters": [
+              {
+                "name": "n",
+                "type": "Nat"
+              }
+            ],
+            "result_type": "Int",
+            "body": {
+              "cast": {
+                "to": "Int",
+                "value": {
+                  "var": "n"
+                }
+              }
+            }
+          },
+          {
+            "name": "lift",
+            "original": "先embed，再显式嵌入有理数。",
+            "parameters": [
+              {
+                "name": "n",
+                "type": "Nat"
+              }
+            ],
+            "result_type": "Rat",
+            "body": {
+              "cast": {
+                "to": "Rat",
+                "value": {
+                  "call": {
+                    "name": "embed",
+                    "args": [
+                      {
+                        "var": "n"
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        ],
+        "variables": [
+          {
+            "name": "n",
+            "type": "Nat"
+          },
+          {
+            "name": "q",
+            "type": "Rat"
+          }
+        ],
+        "assumptions": [
+          {
+            "name": "hql",
+            "formula": {
+              "eq": [
+                {
+                  "var": "q"
+                },
+                {
+                  "call": {
+                    "name": "lift",
+                    "args": [
+                      {
+                        "var": "n"
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          }
+        ],
+        "goal": {
+          "eq": [
+            {
+              "add": [
+                {
+                  "var": "q"
+                },
+                {
+                  "rat": [
+                    1,
+                    1
+                  ]
+                }
+              ]
+            },
+            {
+              "add": [
+                {
+                  "call": {
+                    "name": "lift",
+                    "args": [
+                      {
+                        "var": "n"
+                      }
+                    ]
+                  }
+                },
+                {
+                  "rat": [
+                    1,
+                    1
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        "strategy": "grind",
+        "timeout_seconds": 30
+      },
+      "proof": {
+        "lemma": "prior",
+        "terms": [
+          {
+            "var": "q"
+          },
+          {
+            "call": {
+              "name": "lift",
+              "args": [
+                {
+                  "var": "n"
+                }
+              ]
+            }
+          }
+        ],
+        "proofs": [
+          {
+            "hyp": "hql"
+          }
+        ]
+      },
+      "note": "Nat to Int to Rat is explicit. The complete equality condition is retained."
+    },
+    {
+      "id": "rational-cancel",
+      "source": {
+        "schema": "typed-definitions-v1",
+        "title": "非零有理数q满足q/q=1。",
+        "original": "非零有理数q满足q/q=1。",
+        "definitions": [],
+        "variables": [
+          {
+            "name": "q",
+            "type": "Rat"
+          }
+        ],
+        "assumptions": [
+          {
+            "name": "hnz",
+            "formula": {
+              "not": {
+                "eq": [
+                  {
+                    "var": "q"
+                  },
+                  {
+                    "rat": [
+                      0,
+                      1
+                    ]
+                  }
+                ]
+              }
+            }
+          }
+        ],
+        "goal": {
+          "eq": [
+            {
+              "div": [
+                {
+                  "var": "q"
+                },
+                {
+                  "var": "q"
+                }
+              ]
+            },
+            {
+              "rat": [
+                1,
+                1
+              ]
+            }
+          ]
+        },
+        "strategy": "grind",
+        "timeout_seconds": 30
+      },
+      "source_available": true,
+      "target": {
+        "schema": "typed-definitions-v1",
+        "title": "非零有理数q满足q/q=1。",
+        "original": "非零有理数q满足q/q=1。",
+        "definitions": [],
+        "variables": [
+          {
+            "name": "q",
+            "type": "Rat"
+          }
+        ],
+        "assumptions": [
+          {
+            "name": "hnz",
+            "formula": {
+              "not": {
+                "eq": [
+                  {
+                    "var": "q"
+                  },
+                  {
+                    "rat": [
+                      0,
+                      1
+                    ]
+                  }
+                ]
+              }
+            }
+          }
+        ],
+        "goal": {
+          "eq": [
+            {
+              "div": [
+                {
+                  "var": "q"
+                },
+                {
+                  "var": "q"
+                }
+              ]
+            },
+            {
+              "rat": [
+                1,
+                1
+              ]
+            }
+          ]
+        },
+        "strategy": "grind",
+        "timeout_seconds": 30
+      },
+      "proof": {
+        "lemma": "prior",
+        "terms": [
+          {
+            "var": "q"
+          }
+        ],
+        "proofs": [
+          {
+            "hyp": "hnz"
+          }
+        ]
+      },
+      "note": "The nonzero hypothesis is explicit in source, complete target, and application."
+    },
+    {
+      "id": "missing-nonzero",
+      "source": {
+        "schema": "typed-definitions-v1",
+        "title": "非零有理数q满足q/q=1。",
+        "original": "非零有理数q满足q/q=1。",
+        "definitions": [],
+        "variables": [
+          {
+            "name": "q",
+            "type": "Rat"
+          }
+        ],
+        "assumptions": [
+          {
+            "name": "hnz",
+            "formula": {
+              "not": {
+                "eq": [
+                  {
+                    "var": "q"
+                  },
+                  {
+                    "rat": [
+                      0,
+                      1
+                    ]
+                  }
+                ]
+              }
+            }
+          }
+        ],
+        "goal": {
+          "eq": [
+            {
+              "div": [
+                {
+                  "var": "q"
+                },
+                {
+                  "var": "q"
+                }
+              ]
+            },
+            {
+              "rat": [
+                1,
+                1
+              ]
+            }
+          ]
+        },
+        "strategy": "grind",
+        "timeout_seconds": 30
+      },
+      "source_available": true,
+      "target": {
+        "schema": "typed-definitions-v1",
+        "title": "待检：没有非零条件时q/q=1。",
+        "original": "待检：对所有有理数q断言q/q=1，不保留非零前提。",
+        "definitions": [],
+        "variables": [
+          {
+            "name": "q",
+            "type": "Rat"
+          }
+        ],
+        "assumptions": [],
+        "goal": {
+          "eq": [
+            {
+              "div": [
+                {
+                  "var": "q"
+                },
+                {
+                  "var": "q"
+                }
+              ]
+            },
+            {
+              "rat": [
+                1,
+                1
+              ]
+            }
+          ]
+        },
+        "strategy": "grind",
+        "timeout_seconds": 30
+      },
+      "proof": {
+        "lemma": "prior",
+        "terms": [
+          {
+            "var": "q"
+          }
+        ],
+        "proofs": [
+          {
+            "refl": {
+              "var": "q"
+            }
+          }
+        ]
+      },
+      "note": "Intentional ill-typed premise. Both arms must actually check it; rejection is UNKNOWN, not REFUTED."
+    },
+    {
+      "id": "source-unavailable",
+      "source": {
+        "schema": "typed-definitions-v1",
+        "title": "有理数x=y时，poly(x)=poly(y)。",
+        "original": "有理数x=y时，poly(x)=poly(y)。",
+        "definitions": [
+          {
+            "name": "poly",
+            "original": "有理数多项式 poly(t)=t*t+t/2+1。",
+            "parameters": [
+              {
+                "name": "t",
+                "type": "Rat"
+              }
+            ],
+            "result_type": "Rat",
+            "body": {
+              "add": [
+                {
+                  "add": [
+                    {
+                      "mul": [
+                        {
+                          "var": "t"
+                        },
+                        {
+                          "var": "t"
+                        }
+                      ]
+                    },
+                    {
+                      "mul": [
+                        {
+                          "var": "t"
+                        },
+                        {
+                          "rat": [
+                            1,
+                            2
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "rat": [
+                    1,
+                    1
+                  ]
+                }
+              ]
+            }
+          }
+        ],
+        "variables": [
+          {
+            "name": "x",
+            "type": "Rat"
+          },
+          {
+            "name": "y",
+            "type": "Rat"
+          }
+        ],
+        "assumptions": [
+          {
+            "name": "hxy",
+            "formula": {
+              "eq": [
+                {
+                  "var": "x"
+                },
+                {
+                  "var": "y"
+                }
+              ]
+            }
+          }
+        ],
+        "goal": {
+          "eq": [
+            {
+              "call": {
+                "name": "poly",
+                "args": [
+                  {
+                    "var": "x"
+                  }
+                ]
+              }
+            },
+            {
+              "call": {
+                "name": "poly",
+                "args": [
+                  {
+                    "var": "y"
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        "strategy": "grind",
+        "timeout_seconds": 30
+      },
+      "source_available": false,
+      "target": {
+        "schema": "typed-definitions-v1",
+        "title": "有理数x=y时，poly(x)=poly(y)。",
+        "original": "有理数x=y时，poly(x)=poly(y)。",
+        "definitions": [
+          {
+            "name": "poly",
+            "original": "有理数多项式 poly(t)=t*t+t/2+1。",
+            "parameters": [
+              {
+                "name": "t",
+                "type": "Rat"
+              }
+            ],
+            "result_type": "Rat",
+            "body": {
+              "add": [
+                {
+                  "add": [
+                    {
+                      "mul": [
+                        {
+                          "var": "t"
+                        },
+                        {
+                          "var": "t"
+                        }
+                      ]
+                    },
+                    {
+                      "mul": [
+                        {
+                          "var": "t"
+                        },
+                        {
+                          "rat": [
+                            1,
+                            2
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "rat": [
+                    1,
+                    1
+                  ]
+                }
+              ]
+            }
+          }
+        ],
+        "variables": [
+          {
+            "name": "x",
+            "type": "Rat"
+          },
+          {
+            "name": "y",
+            "type": "Rat"
+          }
+        ],
+        "assumptions": [
+          {
+            "name": "hxy",
+            "formula": {
+              "eq": [
+                {
+                  "var": "x"
+                },
+                {
+                  "var": "y"
+                }
+              ]
+            }
+          }
+        ],
+        "goal": {
+          "eq": [
+            {
+              "call": {
+                "name": "poly",
+                "args": [
+                  {
+                    "var": "x"
+                  }
+                ]
+              }
+            },
+            {
+              "call": {
+                "name": "poly",
+                "args": [
+                  {
+                    "var": "y"
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        "strategy": "grind",
+        "timeout_seconds": 30
+      },
+      "proof": {
+        "lemma": "prior",
+        "terms": [
+          {
+            "var": "x"
+          },
+          {
+            "var": "y"
+          }
+        ],
+        "proofs": [
+          {
+            "hyp": "hxy"
+          }
+        ]
+      },
+      "note": "Source type and identical tactic are visible to both arms, but no checked archive is constructed. Measures archive availability only."
+    },
+    {
+      "id": "quantified-parameter",
+      "source": {
+        "schema": "typed-definitions-v1",
+        "title": "任意有理数x，对所有有理数y，x+y=y+x。",
+        "original": "任意有理数x，对所有有理数y，x+y=y+x。",
+        "definitions": [],
+        "variables": [
+          {
+            "name": "x",
+            "type": "Rat"
+          }
+        ],
+        "assumptions": [],
+        "goal": {
+          "forall": {
+            "binders": [
+              {
+                "name": "y",
+                "type": "Rat"
+              }
+            ],
+            "body": {
+              "eq": [
+                {
+                  "add": [
+                    {
+                      "var": "x"
+                    },
+                    {
+                      "var": "y"
+                    }
+                  ]
+                },
+                {
+                  "add": [
+                    {
+                      "var": "y"
+                    },
+                    {
+                      "var": "x"
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        },
+        "strategy": "grind",
+        "timeout_seconds": 30
+      },
+      "source_available": true,
+      "target": {
+        "schema": "typed-definitions-v1",
+        "title": "任意有理数y，对所有有理数z，y+z=z+y。",
+        "original": "任意有理数y，对所有有理数z，y+z=z+y。",
+        "definitions": [],
+        "variables": [
+          {
+            "name": "y",
+            "type": "Rat"
+          }
+        ],
+        "assumptions": [],
+        "goal": {
+          "forall": {
+            "binders": [
+              {
+                "name": "z",
+                "type": "Rat"
+              }
+            ],
+            "body": {
+              "eq": [
+                {
+                  "add": [
+                    {
+                      "var": "y"
+                    },
+                    {
+                      "var": "z"
+                    }
+                  ]
+                },
+                {
+                  "add": [
+                    {
+                      "var": "z"
+                    },
+                    {
+                      "var": "y"
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        },
+        "strategy": "grind",
+        "timeout_seconds": 30
+      },
+      "proof": {
+        "lemma": "prior",
+        "terms": [
+          {
+            "var": "y"
+          }
+        ],
+        "proofs": []
+      },
+      "note": "The actual parameter y overlaps a source quantified name. Full source closure prevents capture."
+    }
+  ]
+}

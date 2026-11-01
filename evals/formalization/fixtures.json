@@ -1,0 +1,43 @@
+{
+  "schema_version": "1",
+  "provenance": "Repository-authored protocol examples. Exact text lookup; no model generation or general language parsing.",
+  "examples": [
+    {
+      "statement": "对任意自然数 n，有 n + 0 = n。",
+      "context": [],
+      "status": "CANDIDATES_READY",
+      "candidates": [
+        {
+          "label": "自然数加零",
+          "lean_statement": "∀ n : Nat, n + 0 = n",
+          "variables": [{"name": "n", "domain": "Nat", "quantifier": "forall"}],
+          "assumptions": [],
+          "interpretation": "定义域为自然数，对每一个 n 断言 n + 0 = n；没有附加假设。"
+        }
+      ],
+      "questions": []
+    },
+    {
+      "statement": "所有自然数都等于零。",
+      "context": [],
+      "status": "CANDIDATES_READY",
+      "candidates": [
+        {
+          "label": "自然数全称命题",
+          "lean_statement": "∀ n : Nat, n = 0",
+          "variables": [{"name": "n", "domain": "Nat", "quantifier": "forall"}],
+          "assumptions": [],
+          "interpretation": "忠实记录原命题，不把它改成存在命题，也不预判其真假。"
+        }
+      ],
+      "questions": []
+    },
+    {
+      "statement": "对任意数 n，有 n + 0 = n。",
+      "context": [],
+      "status": "NEEDS_CLARIFICATION",
+      "candidates": [],
+      "questions": ["这里的“数”是自然数、整数、有理数还是实数？"]
+    }
+  ]
+}

@@ -1,0 +1,94 @@
+open Lean Elab Command in
+run_cmd do
+  -- Elaborate the host-compiled full source type before loading untrusted data.
+  let expected ← liftTermElabM do
+    let e ← Lean.Elab.Term.elabType (← `(term| __MRA_SOURCE_STATEMENT__))
+    Lean.Elab.Term.synthesizeSyntheticMVarsNoPostponing
+    instantiateMVars e
+  let base ← getEnv
+  let exported ← liftIO <| IO.FS.withFile "/work/source-__MRA_SLOT__.ndjson" .read fun h =>
+    LeanExport.parseStream (.ofHandle h)
+  let mut original : Std.HashMap Name ConstantInfo := {}
+  for (name, info) in exported.constMap do
+    if (base.find? name).isNone then
+      unless (`MraCandidate).isPrefixOf name do
+        throwError "MRA_IMPORT_UNAPPROVED_NAME {name}"
+      if info.isUnsafe || info.isPartial then
+        throwError "MRA_IMPORT_UNSAFE_DECLARATION {name}"
+      match info with
+      | .thmInfo _ | .defnInfo _ | .opaqueInfo _ => pure ()
+      | _ => throwError "MRA_IMPORT_UNAPPROVED_DECLARATION {name}"
+      original := original.insert name info
+  let some (.thmInfo result) := original[`MraCandidate.result]?
+    | throwError "MRA_IMPORT_MISSING_THEOREM"
+  unless result.levelParams.isEmpty do
+    throwError "MRA_IMPORT_UNEXPECTED_UNIVERSES"
+  let renameName := fun (name : Name) =>
+    if original.contains name then `MraCandidate.Reused.s__MRA_SLOT__ ++ name else name
+  let renameExpr := fun (e : Expr) => e.replace fun sub =>
+    match sub with
+    | .const name levels => some (.const (renameName name) levels)
+    | .proj name index value =>
+      if original.contains name then some (.proj (renameName name) index value) else none
+    | _ => none
+  let mut renamed : Std.HashMap Name ConstantInfo := {}
+  for (name, info) in original do
+    let name' := renameName name
+    if (base.find? name').isSome then
+      throwError "MRA_IMPORT_NAME_COLLISION {name'}"
+    let info' ← match info with
+      | .thmInfo v => pure <| ConstantInfo.thmInfo { v with
+          name := name', type := renameExpr v.type, value := renameExpr v.value,
+          all := v.all.map renameName }
+      | .defnInfo v => pure <| ConstantInfo.defnInfo { v with
+          name := name', type := renameExpr v.type, value := renameExpr v.value,
+          all := v.all.map renameName }
+      | .opaqueInfo v => pure <| ConstantInfo.opaqueInfo { v with
+          name := name', type := renameExpr v.type, value := renameExpr v.value,
+          all := v.all.map renameName }
+      | _ => throwError "MRA_IMPORT_UNAPPROVED_DECLARATION {name}"
+    renamed := renamed.insert name' info'
+  -- Preserve Lean's elaboration/realization state while adding every declaration
+  -- through the checking kernel API. ofKernelEnv alone loses that state.
+  let mut environment := base
+  let mut remaining := renamed.size
+  while remaining > 0 do
+    let before := remaining
+    for (name, info) in renamed do
+      if (environment.find? name).isNone &&
+          info.getUsedConstantsAsSet.all (fun n => (environment.find? n).isSome) then
+        let declaration ← match info with
+          | .thmInfo v => pure <| Declaration.thmDecl v
+          | .defnInfo v => pure <| Declaration.defnDecl v
+          | .opaqueInfo v => pure <| Declaration.opaqueDecl v
+          | _ => throwError "MRA_IMPORT_UNAPPROVED_DECLARATION {name}"
+        environment ← match environment.addDeclCore 0 0 declaration (cancelTk? := none) with
+          | .ok env => pure env
+          | .error err => throwError "MRA_IMPORT_KERNEL_REJECTED: {← err.toMessageData {} |>.toString}"
+        remaining := remaining - 1
+    if remaining == before then
+      throwError "MRA_IMPORT_UNRESOLVED_OR_CYCLIC_DEPENDENCY"
+  let bridge : Declaration := .thmDecl {
+    name := `MraCandidate.Reused.s__MRA_SLOT__.checked
+    levelParams := []
+    type := expected
+    value := mkConst (renameName `MraCandidate.result)
+  }
+  environment ← match environment.addDeclCore 0 0 bridge (cancelTk? := none) with
+    | .ok env => pure env
+    | .error err => throwError "MRA_IMPORT_TARGET_MISMATCH: {← err.toMessageData {} |>.toString}"
+  setEnv environment
+  let mut allAxioms : Array String := #[]
+  for (name, _) in renamed do
+    for ax in ← Lean.collectAxioms name do
+      unless #[`propext, `Classical.choice, `Quot.sound].contains ax do
+        throwError "MRA_IMPORT_FORBIDDEN_AXIOM {ax}"
+      unless allAxioms.contains ax.toString do
+        allAxioms := allAxioms.push ax.toString
+  let report := Json.mkObj [
+    ("slot", toJson (__MRA_SLOT__ : Nat)),
+    ("type_matches", toJson true),
+    ("candidate_module_imported", toJson false),
+    ("replayed_declarations", toJson renamed.size),
+    ("axioms", toJson allAxioms)]
+  logInfo m!"MRA_IMPORT:{report.compress}"

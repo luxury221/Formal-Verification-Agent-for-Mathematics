@@ -1,0 +1,1126 @@
+{
+  "schema": "structure-strategy-ast-diagnostics-v1",
+  "authorship": "Local author-visible correlated regression diagnostics. Not held out, independent tasks or evidence of research ability.",
+  "selection": "First non-rfl candidate in each arm, exactly one complete check per arm and case, 20 shared candidate/replay worker seconds; no retry. Known-order case reserved for browser rfl-to-v2 workflow.",
+  "source": "evals/structure-strategies-v1/cases.json",
+  "cases": [
+    {
+      "id": "known-declaration-order",
+      "target": {
+        "schema": "explicit-structures-v1",
+        "title": "任意显式幺半群中，power(x,m+n)=mul(power(x,m),power(x,n))；不需要交换律。",
+        "original": "任意显式幺半群中，power(x,m+n)=mul(power(x,m),power(x,n))；不需要交换律。",
+        "carriers": [
+          {
+            "name": "g",
+            "original": "任意载体g，处于Type宇宙。"
+          }
+        ],
+        "operations": [
+          {
+            "name": "mul",
+            "parameters": [
+              "g",
+              "g"
+            ],
+            "result_type": "g",
+            "original": "任意二元运算，不默认交换。"
+          },
+          {
+            "name": "one",
+            "parameters": [],
+            "result_type": "g",
+            "original": "显式单位元参数。"
+          }
+        ],
+        "definitions": [
+          {
+            "name": "power",
+            "original": "power(x,0)=one；power(x,k+1)=mul(power(x,k),x)。",
+            "parameters": [
+              {
+                "name": "x",
+                "type": "g"
+              },
+              {
+                "name": "n",
+                "type": "Nat"
+              }
+            ],
+            "result_type": "g",
+            "body": {
+              "nat_fold": {
+                "index": {
+                  "var": "n"
+                },
+                "zero": {
+                  "call": {
+                    "name": "one",
+                    "args": []
+                  }
+                },
+                "step": {
+                  "index": "k",
+                  "value": "acc",
+                  "body": {
+                    "call": {
+                      "name": "mul",
+                      "args": [
+                        {
+                          "var": "acc"
+                        },
+                        {
+                          "var": "x"
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          }
+        ],
+        "variables": [
+          {
+            "name": "x",
+            "type": "g"
+          },
+          {
+            "name": "n",
+            "type": "Nat"
+          },
+          {
+            "name": "m",
+            "type": "Nat"
+          }
+        ],
+        "assumptions": [
+          {
+            "name": "assoc",
+            "formula": {
+              "forall": {
+                "binders": [
+                  {
+                    "name": "a",
+                    "type": "g"
+                  },
+                  {
+                    "name": "b",
+                    "type": "g"
+                  },
+                  {
+                    "name": "c",
+                    "type": "g"
+                  }
+                ],
+                "body": {
+                  "eq": [
+                    {
+                      "call": {
+                        "name": "mul",
+                        "args": [
+                          {
+                            "call": {
+                              "name": "mul",
+                              "args": [
+                                {
+                                  "var": "a"
+                                },
+                                {
+                                  "var": "b"
+                                }
+                              ]
+                            }
+                          },
+                          {
+                            "var": "c"
+                          }
+                        ]
+                      }
+                    },
+                    {
+                      "call": {
+                        "name": "mul",
+                        "args": [
+                          {
+                            "var": "a"
+                          },
+                          {
+                            "call": {
+                              "name": "mul",
+                              "args": [
+                                {
+                                  "var": "b"
+                                },
+                                {
+                                  "var": "c"
+                                }
+                              ]
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          {
+            "name": "left_id",
+            "formula": {
+              "forall": {
+                "binders": [
+                  {
+                    "name": "a",
+                    "type": "g"
+                  }
+                ],
+                "body": {
+                  "eq": [
+                    {
+                      "call": {
+                        "name": "mul",
+                        "args": [
+                          {
+                            "call": {
+                              "name": "one",
+                              "args": []
+                            }
+                          },
+                          {
+                            "var": "a"
+                          }
+                        ]
+                      }
+                    },
+                    {
+                      "var": "a"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          {
+            "name": "right_id",
+            "formula": {
+              "forall": {
+                "binders": [
+                  {
+                    "name": "a",
+                    "type": "g"
+                  }
+                ],
+                "body": {
+                  "eq": [
+                    {
+                      "call": {
+                        "name": "mul",
+                        "args": [
+                          {
+                            "var": "a"
+                          },
+                          {
+                            "call": {
+                              "name": "one",
+                              "args": []
+                            }
+                          }
+                        ]
+                      }
+                    },
+                    {
+                      "var": "a"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        ],
+        "goal": {
+          "eq": [
+            {
+              "call": {
+                "name": "power",
+                "args": [
+                  {
+                    "var": "x"
+                  },
+                  {
+                    "add": [
+                      {
+                        "var": "m"
+                      },
+                      {
+                        "var": "n"
+                      }
+                    ]
+                  }
+                ]
+              }
+            },
+            {
+              "call": {
+                "name": "mul",
+                "args": [
+                  {
+                    "call": {
+                      "name": "power",
+                      "args": [
+                        {
+                          "var": "x"
+                        },
+                        {
+                          "var": "m"
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "call": {
+                      "name": "power",
+                      "args": [
+                        {
+                          "var": "x"
+                        },
+                        {
+                          "var": "n"
+                        }
+                      ]
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        "timeout_seconds": 20
+      },
+      "real": "browser",
+      "transformation": "unchanged previous failed declaration-order diagnostic",
+      "exposure": "author-visible",
+      "reference_proof_excluded": true
+    },
+    {
+      "id": "swapped-renamed-indices",
+      "target": {
+        "schema": "explicit-structures-v1",
+        "title": "不交换幺半群中的重命名幂加法变体：iterate(u,alpha+beta)=combine(iterate(u,alpha),iterate(u,beta))。",
+        "original": "不交换幺半群中的重命名幂加法变体：iterate(u,alpha+beta)=combine(iterate(u,alpha),iterate(u,beta))。",
+        "carriers": [
+          {
+            "name": "g",
+            "original": "任意载体g，处于Type宇宙。"
+          }
+        ],
+        "operations": [
+          {
+            "name": "combine",
+            "parameters": [
+              "g",
+              "g"
+            ],
+            "result_type": "g",
+            "original": "任意二元运算，不默认交换。"
+          },
+          {
+            "name": "unit",
+            "parameters": [],
+            "result_type": "g",
+            "original": "显式单位元参数。"
+          }
+        ],
+        "definitions": [
+          {
+            "name": "iterate",
+            "original": "power(x,0)=one；power(x,k+1)=mul(power(x,k),x)。",
+            "parameters": [
+              {
+                "name": "u",
+                "type": "g"
+              },
+              {
+                "name": "alpha",
+                "type": "Nat"
+              }
+            ],
+            "result_type": "g",
+            "body": {
+              "nat_fold": {
+                "index": {
+                  "var": "alpha"
+                },
+                "zero": {
+                  "call": {
+                    "name": "unit",
+                    "args": []
+                  }
+                },
+                "step": {
+                  "index": "k",
+                  "value": "acc",
+                  "body": {
+                    "call": {
+                      "name": "combine",
+                      "args": [
+                        {
+                          "var": "acc"
+                        },
+                        {
+                          "var": "u"
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          }
+        ],
+        "variables": [
+          {
+            "name": "u",
+            "type": "g"
+          },
+          {
+            "name": "beta",
+            "type": "Nat"
+          },
+          {
+            "name": "alpha",
+            "type": "Nat"
+          }
+        ],
+        "assumptions": [
+          {
+            "name": "law_a",
+            "formula": {
+              "forall": {
+                "binders": [
+                  {
+                    "name": "a",
+                    "type": "g"
+                  },
+                  {
+                    "name": "b",
+                    "type": "g"
+                  },
+                  {
+                    "name": "c",
+                    "type": "g"
+                  }
+                ],
+                "body": {
+                  "eq": [
+                    {
+                      "call": {
+                        "name": "combine",
+                        "args": [
+                          {
+                            "call": {
+                              "name": "combine",
+                              "args": [
+                                {
+                                  "var": "a"
+                                },
+                                {
+                                  "var": "b"
+                                }
+                              ]
+                            }
+                          },
+                          {
+                            "var": "c"
+                          }
+                        ]
+                      }
+                    },
+                    {
+                      "call": {
+                        "name": "combine",
+                        "args": [
+                          {
+                            "var": "a"
+                          },
+                          {
+                            "call": {
+                              "name": "combine",
+                              "args": [
+                                {
+                                  "var": "b"
+                                },
+                                {
+                                  "var": "c"
+                                }
+                              ]
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          {
+            "name": "law_b",
+            "formula": {
+              "forall": {
+                "binders": [
+                  {
+                    "name": "a",
+                    "type": "g"
+                  }
+                ],
+                "body": {
+                  "eq": [
+                    {
+                      "call": {
+                        "name": "combine",
+                        "args": [
+                          {
+                            "call": {
+                              "name": "unit",
+                              "args": []
+                            }
+                          },
+                          {
+                            "var": "a"
+                          }
+                        ]
+                      }
+                    },
+                    {
+                      "var": "a"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          {
+            "name": "law_c",
+            "formula": {
+              "forall": {
+                "binders": [
+                  {
+                    "name": "a",
+                    "type": "g"
+                  }
+                ],
+                "body": {
+                  "eq": [
+                    {
+                      "call": {
+                        "name": "combine",
+                        "args": [
+                          {
+                            "var": "a"
+                          },
+                          {
+                            "call": {
+                              "name": "unit",
+                              "args": []
+                            }
+                          }
+                        ]
+                      }
+                    },
+                    {
+                      "var": "a"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        ],
+        "goal": {
+          "eq": [
+            {
+              "call": {
+                "name": "iterate",
+                "args": [
+                  {
+                    "var": "u"
+                  },
+                  {
+                    "add": [
+                      {
+                        "var": "alpha"
+                      },
+                      {
+                        "var": "beta"
+                      }
+                    ]
+                  }
+                ]
+              }
+            },
+            {
+              "call": {
+                "name": "combine",
+                "args": [
+                  {
+                    "call": {
+                      "name": "iterate",
+                      "args": [
+                        {
+                          "var": "u"
+                        },
+                        {
+                          "var": "alpha"
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "call": {
+                      "name": "iterate",
+                      "args": [
+                        {
+                          "var": "u"
+                        },
+                        {
+                          "var": "beta"
+                        }
+                      ]
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        "timeout_seconds": 20
+      },
+      "real": "paired",
+      "transformation": "swap both Nat arguments in goal and RHS, rename symbols/laws/variables; declarations retained",
+      "exposure": "author-visible",
+      "reference_proof_excluded": true
+    },
+    {
+      "id": "unused-fold-definition",
+      "target": {
+        "schema": "explicit-structures-v1",
+        "title": "保留三条幺半群定律的单位元化简；附有未使用的幂定义和无关自然数参数。",
+        "original": "保留三条幺半群定律的单位元化简；附有未使用的幂定义和无关自然数参数。",
+        "carriers": [
+          {
+            "name": "g",
+            "original": "任意载体g，处于Type宇宙。"
+          }
+        ],
+        "operations": [
+          {
+            "name": "mul",
+            "parameters": [
+              "g",
+              "g"
+            ],
+            "result_type": "g",
+            "original": "任意二元运算，不默认交换。"
+          },
+          {
+            "name": "one",
+            "parameters": [],
+            "result_type": "g",
+            "original": "显式单位元参数。"
+          }
+        ],
+        "definitions": [
+          {
+            "name": "power",
+            "original": "power(x,0)=one；power(x,k+1)=mul(power(x,k),x)。",
+            "parameters": [
+              {
+                "name": "x",
+                "type": "g"
+              },
+              {
+                "name": "n",
+                "type": "Nat"
+              }
+            ],
+            "result_type": "g",
+            "body": {
+              "nat_fold": {
+                "index": {
+                  "var": "n"
+                },
+                "zero": {
+                  "call": {
+                    "name": "one",
+                    "args": []
+                  }
+                },
+                "step": {
+                  "index": "k",
+                  "value": "acc",
+                  "body": {
+                    "call": {
+                      "name": "mul",
+                      "args": [
+                        {
+                          "var": "acc"
+                        },
+                        {
+                          "var": "x"
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          }
+        ],
+        "variables": [
+          {
+            "name": "x",
+            "type": "g"
+          },
+          {
+            "name": "y",
+            "type": "g"
+          },
+          {
+            "name": "irrelevant",
+            "type": "Nat"
+          }
+        ],
+        "assumptions": [
+          {
+            "name": "assoc",
+            "formula": {
+              "forall": {
+                "binders": [
+                  {
+                    "name": "a",
+                    "type": "g"
+                  },
+                  {
+                    "name": "b",
+                    "type": "g"
+                  },
+                  {
+                    "name": "c",
+                    "type": "g"
+                  }
+                ],
+                "body": {
+                  "eq": [
+                    {
+                      "call": {
+                        "name": "mul",
+                        "args": [
+                          {
+                            "call": {
+                              "name": "mul",
+                              "args": [
+                                {
+                                  "var": "a"
+                                },
+                                {
+                                  "var": "b"
+                                }
+                              ]
+                            }
+                          },
+                          {
+                            "var": "c"
+                          }
+                        ]
+                      }
+                    },
+                    {
+                      "call": {
+                        "name": "mul",
+                        "args": [
+                          {
+                            "var": "a"
+                          },
+                          {
+                            "call": {
+                              "name": "mul",
+                              "args": [
+                                {
+                                  "var": "b"
+                                },
+                                {
+                                  "var": "c"
+                                }
+                              ]
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          {
+            "name": "left_id",
+            "formula": {
+              "forall": {
+                "binders": [
+                  {
+                    "name": "a",
+                    "type": "g"
+                  }
+                ],
+                "body": {
+                  "eq": [
+                    {
+                      "call": {
+                        "name": "mul",
+                        "args": [
+                          {
+                            "call": {
+                              "name": "one",
+                              "args": []
+                            }
+                          },
+                          {
+                            "var": "a"
+                          }
+                        ]
+                      }
+                    },
+                    {
+                      "var": "a"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          {
+            "name": "right_id",
+            "formula": {
+              "forall": {
+                "binders": [
+                  {
+                    "name": "a",
+                    "type": "g"
+                  }
+                ],
+                "body": {
+                  "eq": [
+                    {
+                      "call": {
+                        "name": "mul",
+                        "args": [
+                          {
+                            "var": "a"
+                          },
+                          {
+                            "call": {
+                              "name": "one",
+                              "args": []
+                            }
+                          }
+                        ]
+                      }
+                    },
+                    {
+                      "var": "a"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        ],
+        "goal": {
+          "eq": [
+            {
+              "call": {
+                "name": "mul",
+                "args": [
+                  {
+                    "call": {
+                      "name": "mul",
+                      "args": [
+                        {
+                          "call": {
+                            "name": "one",
+                            "args": []
+                          }
+                        },
+                        {
+                          "var": "x"
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "call": {
+                      "name": "mul",
+                      "args": [
+                        {
+                          "var": "y"
+                        },
+                        {
+                          "call": {
+                            "name": "one",
+                            "args": []
+                          }
+                        }
+                      ]
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "call": {
+                "name": "mul",
+                "args": [
+                  {
+                    "var": "x"
+                  },
+                  {
+                    "var": "y"
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        "timeout_seconds": 20
+      },
+      "real": "paired",
+      "transformation": "unit-law target with unused power definition and unrelated last Nat variable",
+      "exposure": "author-visible",
+      "reference_proof_excluded": true
+    },
+    {
+      "id": "missing-commutativity",
+      "target": {
+        "schema": "explicit-structures-v1",
+        "title": "待检：只有幺半群定律却尝试断言mul(x,y)=mul(y,x)。",
+        "original": "待检：只有幺半群定律却尝试断言mul(x,y)=mul(y,x)。",
+        "carriers": [
+          {
+            "name": "g",
+            "original": "任意载体g，处于Type宇宙。"
+          }
+        ],
+        "operations": [
+          {
+            "name": "mul",
+            "parameters": [
+              "g",
+              "g"
+            ],
+            "result_type": "g",
+            "original": "任意二元运算，不默认交换。"
+          },
+          {
+            "name": "one",
+            "parameters": [],
+            "result_type": "g",
+            "original": "显式单位元参数。"
+          }
+        ],
+        "definitions": [],
+        "variables": [
+          {
+            "name": "x",
+            "type": "g"
+          },
+          {
+            "name": "y",
+            "type": "g"
+          }
+        ],
+        "assumptions": [
+          {
+            "name": "assoc",
+            "formula": {
+              "forall": {
+                "binders": [
+                  {
+                    "name": "a",
+                    "type": "g"
+                  },
+                  {
+                    "name": "b",
+                    "type": "g"
+                  },
+                  {
+                    "name": "c",
+                    "type": "g"
+                  }
+                ],
+                "body": {
+                  "eq": [
+                    {
+                      "call": {
+                        "name": "mul",
+                        "args": [
+                          {
+                            "call": {
+                              "name": "mul",
+                              "args": [
+                                {
+                                  "var": "a"
+                                },
+                                {
+                                  "var": "b"
+                                }
+                              ]
+                            }
+                          },
+                          {
+                            "var": "c"
+                          }
+                        ]
+                      }
+                    },
+                    {
+                      "call": {
+                        "name": "mul",
+                        "args": [
+                          {
+                            "var": "a"
+                          },
+                          {
+                            "call": {
+                              "name": "mul",
+                              "args": [
+                                {
+                                  "var": "b"
+                                },
+                                {
+                                  "var": "c"
+                                }
+                              ]
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          {
+            "name": "left_id",
+            "formula": {
+              "forall": {
+                "binders": [
+                  {
+                    "name": "a",
+                    "type": "g"
+                  }
+                ],
+                "body": {
+                  "eq": [
+                    {
+                      "call": {
+                        "name": "mul",
+                        "args": [
+                          {
+                            "call": {
+                              "name": "one",
+                              "args": []
+                            }
+                          },
+                          {
+                            "var": "a"
+                          }
+                        ]
+                      }
+                    },
+                    {
+                      "var": "a"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          {
+            "name": "right_id",
+            "formula": {
+              "forall": {
+                "binders": [
+                  {
+                    "name": "a",
+                    "type": "g"
+                  }
+                ],
+                "body": {
+                  "eq": [
+                    {
+                      "call": {
+                        "name": "mul",
+                        "args": [
+                          {
+                            "var": "a"
+                          },
+                          {
+                            "call": {
+                              "name": "one",
+                              "args": []
+                            }
+                          }
+                        ]
+                      }
+                    },
+                    {
+                      "var": "a"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        ],
+        "goal": {
+          "eq": [
+            {
+              "call": {
+                "name": "mul",
+                "args": [
+                  {
+                    "var": "x"
+                  },
+                  {
+                    "var": "y"
+                  }
+                ]
+              }
+            },
+            {
+              "call": {
+                "name": "mul",
+                "args": [
+                  {
+                    "var": "y"
+                  },
+                  {
+                    "var": "x"
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        "timeout_seconds": 20
+      },
+      "real": "paired",
+      "transformation": "unchanged missing-commutativity negative control",
+      "exposure": "author-visible",
+      "reference_proof_excluded": true
+    }
+  ]
+}

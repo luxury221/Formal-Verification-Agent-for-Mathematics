@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#f6f7f4">
+  <title>MRA · 猜想探索</title>
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <link rel="stylesheet" href="/workspace.css">
+  <script src="/shell.js" defer></script><script src="/ideas.js" defer></script>
+</head>
+<body>
+<a class="skip-link" href="#page">跳至主要内容</a>
+<main class="app-main"><div class="page-container" id="page" tabindex="-1">
+  <section class="page-heading"><div><div class="eyebrow">IDEA EXPLORATION</div><h1>一个尚未确定的想法，也值得出发。</h1><p>写下猜想，澄清它的确切含义，再一起寻找证明或反例。</p></div><div class="heading-actions"><a class="button secondary" href="/ideas">＋ 新建一条</a></div></section>
+  <div class="idea-flow" aria-label="猜想研究流程"><div class="is-current" id="flow-0"><span>01</span> 描述研究问题</div><div id="flow-1"><span>02</span> 形成形式化候选</div><div id="flow-2"><span>03</span> 确认语义一致</div><div id="flow-3"><span>04</span> 探索与严格验证</div></div>
+  <div id="model-notice">正在读取模型服务状态…</div><div id="error" class="error" role="alert" hidden></div>
+  <div class="workspace">
+    <section class="card idea-form-card">
+      <div class="card-title"><span class="step">INPUT</span><h2>你的问题，是什么？</h2><span class="badge">自然数算术</span></div>
+      <form id="idea-form">
+        <label for="statement">原始猜想</label>
+        <textarea id="statement" rows="6" maxlength="8000" required placeholder="例如：对任意自然数 n，n + 1 都大于 n。
+
+尽量写清对象范围、必要前提，以及你希望验证的结论。"></textarea>
+        <div class="form-bottom-note"><span>清晰的定义与前提，是探索的起点。</span><span id="statement-count">0 / 8000</span></div>
+        <div class="example-chips"><span class="example-label">试试这些</span><button type="button" class="example-chip" data-example="对任意自然数 a、b，都有 a + b = b + a。">加法交换律 ↗</button><button type="button" class="example-chip" data-example="对任意自然数 a、b，如果 b ≤ a，则 (a - b) + b = a。减法是自然数截断减法。">截断减法 ↗</button><button type="button" class="example-chip" data-example="对任意自然数 a、b、c，如果 a × b = a × c，则 b = c。">消去律是否成立？ ↗</button></div>
+        <details><summary>补充定义与前提 <span>可选</span></summary><label for="context">每行一条补充说明</label><textarea id="context" rows="3" maxlength="4000" placeholder="补充说明将用于生成候选。请在候选中再次核对所有必要前提。"></textarea></details>
+        <button id="submit" class="primary" type="submit">保存并开始探索 <span>→</span></button><p class="hint">未配置模型时只保存猜想。配置后可继续生成候选，不会自动得出数学结论。</p>
+      </form>
+      <div class="domain-note"><p>支持自然数的加法、乘法、截断减法、比较与量词。最多 3 次证明计划；每次模型请求 30 秒，每次 Lean 两阶段共用 30 秒。</p></div>
+      <details><summary>模型服务与费用 <span>按需配置</span></summary><p class="hint">费用由所配置服务决定，当前不估算。配置后原文、背景和检查反馈会发送给该服务。</p><a class="text-button" href="/settings">查看模型配置指引 →</a></details>
+    </section>
+    <section class="card" aria-live="polite">
+      <div class="card-title"><span class="step">RESEARCH</span><h2>从候选，走向证据</h2><span id="state" class="badge">尚未开始</span></div>
+      <div id="empty" class="empty"><div class="empty-symbol">∀</div><h3>先明确，我们在问什么。</h3><p>模型提出候选，你确认它的含义。<br>真实 Lean 验证决定证明是否成立。</p><div class="empty-dot-grid"><span></span><span></span><span></span></div><p>证明、反例，或一个值得继续的未知。</p></div>
+      <div id="detail" hidden>
+        <p id="idea-id" class="task-id"></p><div class="statement"><span class="field-label">本版本原文</span><p id="original"></p><p id="source-context" class="hint"></p></div>
+        <p id="questions" class="explanation" hidden></p><div id="candidates"></div>
+        <form id="confirm-form" hidden><label for="reviewer">确认者姓名</label><input id="reviewer" maxlength="200" required placeholder="本地具名声明">
+          <label class="check-row"><input id="confirmed" type="checkbox" required><span>我已核对候选的定义域、量词、前提和结论，与本版本原意相符。</span></label>
+          <p class="hint">姓名未经身份认证。反驳时检查所选命题的完整否定；模型不能自行授予“已证明”。</p>
+          <button class="primary" type="submit">确认并探索证明 / 反例 <span>→</span></button>
+        </form>
+        <div class="verdict-row"><div><span class="field-label">数学判断</span><h3 id="verdict">UNKNOWN</h3></div><div><span class="field-label">证据等级</span><strong id="level">E0</strong></div></div>
+        <p id="reason" class="hint"></p><p id="metrics" class="hint"></p>
+        <div class="actions"><button id="generate" class="secondary" hidden>生成形式化候选</button><button id="revise" class="secondary">以左侧内容修订</button><button id="cancel" class="secondary" hidden>取消任务</button><button id="revoke" class="secondary" hidden>撤销语义确认</button><button id="evidence-button" class="secondary" hidden>查看证据</button></div>
+        <details><summary>实际阶段与搜索记录</summary><ol id="events" class="events"></ol><pre id="attempts"></pre></details>
+        <details id="evidence-panel" hidden><summary>检查证据 · 历史记录</summary><pre id="evidence"></pre></details>
+      </div>
+    </section>
+  </div>
+  <section class="panel recent-section"><div class="panel-heading"><h2>最近的猜想</h2><div><a class="text-button" href="/activity">所有记录 →</a><button id="refresh" class="icon-button" aria-label="刷新猜想记录">↻</button></div></div><div id="history" class="history"></div></section>
+  <footer class="page-footer"><span>候选与猜测保持未验证 · 证明失败不代表命题为假</span><span>MRA · IDEA EXPLORATION</span></footer>
+</div></main>
+</body>
+</html>

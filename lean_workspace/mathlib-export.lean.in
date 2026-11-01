@@ -1,0 +1,12 @@
+LeanExport.M.run env do
+      LeanExport.initState env
+      -- Imported constants are resolved from the sealed replay base. Export only
+      -- new declarations and their expressions, including explicit constant names.
+      let mut imported : NameHashSet := {}
+      for (name, _) in env.constants do
+        if !locals.contains name then
+          imported := imported.insert name
+      modify fun st => { st with visitedConstants := imported }
+      LeanExport.dumpMetadata
+      for name in locals do
+        LeanExport.dumpConstant name

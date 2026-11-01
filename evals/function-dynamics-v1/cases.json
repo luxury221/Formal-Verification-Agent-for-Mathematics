@@ -1,0 +1,1611 @@
+{
+  "schema": "function-dynamics-evaluation-v1",
+  "domain": "function-iteration-and-semiconjugacy",
+  "authorship": "MRA071: developer adapted publicly visible Mathlib statements after inspecting source statements and adjacent proof lines. No independent or blind split; all eight declared before any Lean outcome; first six-case draft preserved, two structural challenges added after code review and before real execution.",
+  "training_use": false,
+  "source": {
+    "repository": "https://github.com/leanprover-community/mathlib4",
+    "commit": "56a005855ea17e0b0958f73ec801ae140b0a1679",
+    "path": ".runtime/mathlib/Mathlib/Logic/Function/Iterate.lean",
+    "sha256": "b924373d6688ac3cde2e489a248c939650db59da633e0facccda01dd3882e5de",
+    "license": "Apache-2.0",
+    "license_path": ".runtime/mathlib/LICENSE",
+    "license_sha256": "b40930bbcf80744c86c46a12bc9da056641d722716c378f5659b9e555ef833e1",
+    "purpose": "Public statement provenance only; generators receive complete adapted targets and budgets, no source proof or theorem reference",
+    "limits": "Source archive identity checked against exact upstream commit bytes; Type0 and explicit left-action Nat.rec adaptations are not a checked definitional bridge to Mathlib Nat.iterate"
+  },
+  "cases": [
+    {
+      "id": "fixed-point",
+      "family": "fixed-point",
+      "target": {
+        "schema": "explicit-structures-v1",
+        "title": "固定点在迭代下保持",
+        "original": "对任意自然数n和状态x，若f(x)=x，则显式Nat.rec迭代iter_f(n,x)=x。原固定点条件保留。",
+        "carriers": [
+          {
+            "name": "a",
+            "original": "任意 a 类型，不附加未声明结构"
+          }
+        ],
+        "operations": [
+          {
+            "name": "f",
+            "parameters": [
+              "a"
+            ],
+            "result_type": "a",
+            "original": "显式函数参数 f"
+          }
+        ],
+        "definitions": [
+          {
+            "name": "iter_f",
+            "original": "iter_f(0,x)=x；iter_f(n+1,x)=f(iter_f(n,x))，以Nat.rec显式定义。",
+            "parameters": [
+              {
+                "name": "n",
+                "type": "Nat"
+              },
+              {
+                "name": "x",
+                "type": "a"
+              }
+            ],
+            "result_type": "a",
+            "body": {
+              "nat_fold": {
+                "index": {
+                  "var": "n"
+                },
+                "zero": {
+                  "var": "x"
+                },
+                "step": {
+                  "index": "k",
+                  "value": "acc",
+                  "body": {
+                    "call": {
+                      "name": "f",
+                      "args": [
+                        {
+                          "var": "acc"
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          }
+        ],
+        "variables": [
+          {
+            "name": "n",
+            "type": "Nat"
+          },
+          {
+            "name": "x",
+            "type": "a"
+          }
+        ],
+        "assumptions": [
+          {
+            "name": "fixed",
+            "formula": {
+              "eq": [
+                {
+                  "call": {
+                    "name": "f",
+                    "args": [
+                      {
+                        "var": "x"
+                      }
+                    ]
+                  }
+                },
+                {
+                  "var": "x"
+                }
+              ]
+            }
+          }
+        ],
+        "goal": {
+          "eq": [
+            {
+              "call": {
+                "name": "iter_f",
+                "args": [
+                  {
+                    "var": "n"
+                  },
+                  {
+                    "var": "x"
+                  }
+                ]
+              }
+            },
+            {
+              "var": "x"
+            }
+          ]
+        },
+        "timeout_seconds": 20
+      },
+      "provenance": {
+        "kind": "public-statement-adaptation",
+        "declaration": "Function.iterate_fixed",
+        "lines": [
+          91,
+          91
+        ],
+        "statement": "theorem iterate_fixed {x} (h : f x = x) (n : ℕ) : f^[n] x = x",
+        "adaptation": "Type0及点态陈述；用左作用Nat.rec定义代替库的函数迭代记号，保留固定点假设。",
+        "exposure": "developer-visible-public-source-and-adjacent-proofs",
+        "generator_reference_proof_supplied": false
+      }
+    },
+    {
+      "id": "invariant-observation",
+      "family": "invariant",
+      "target": {
+        "schema": "explicit-structures-v1",
+        "title": "观察量在迭代下保持",
+        "original": "若对每个状态u都有observe(f(u))=observe(u)，则任意n和x满足observe(iter_f(n,x))=observe(x)。全部原条件保留。",
+        "carriers": [
+          {
+            "name": "a",
+            "original": "任意 a 类型，不附加未声明结构"
+          },
+          {
+            "name": "b",
+            "original": "任意 b 类型，不附加未声明结构"
+          }
+        ],
+        "operations": [
+          {
+            "name": "f",
+            "parameters": [
+              "a"
+            ],
+            "result_type": "a",
+            "original": "显式函数参数 f"
+          },
+          {
+            "name": "observe",
+            "parameters": [
+              "a"
+            ],
+            "result_type": "b",
+            "original": "显式函数参数 observe"
+          }
+        ],
+        "definitions": [
+          {
+            "name": "iter_f",
+            "original": "iter_f(0,x)=x；iter_f(n+1,x)=f(iter_f(n,x))，以Nat.rec显式定义。",
+            "parameters": [
+              {
+                "name": "n",
+                "type": "Nat"
+              },
+              {
+                "name": "x",
+                "type": "a"
+              }
+            ],
+            "result_type": "a",
+            "body": {
+              "nat_fold": {
+                "index": {
+                  "var": "n"
+                },
+                "zero": {
+                  "var": "x"
+                },
+                "step": {
+                  "index": "k",
+                  "value": "acc",
+                  "body": {
+                    "call": {
+                      "name": "f",
+                      "args": [
+                        {
+                          "var": "acc"
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          }
+        ],
+        "variables": [
+          {
+            "name": "n",
+            "type": "Nat"
+          },
+          {
+            "name": "x",
+            "type": "a"
+          }
+        ],
+        "assumptions": [
+          {
+            "name": "invariant",
+            "formula": {
+              "forall": {
+                "binders": [
+                  {
+                    "name": "u",
+                    "type": "a"
+                  }
+                ],
+                "body": {
+                  "eq": [
+                    {
+                      "call": {
+                        "name": "observe",
+                        "args": [
+                          {
+                            "call": {
+                              "name": "f",
+                              "args": [
+                                {
+                                  "var": "u"
+                                }
+                              ]
+                            }
+                          }
+                        ]
+                      }
+                    },
+                    {
+                      "call": {
+                        "name": "observe",
+                        "args": [
+                          {
+                            "var": "u"
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        ],
+        "goal": {
+          "eq": [
+            {
+              "call": {
+                "name": "observe",
+                "args": [
+                  {
+                    "call": {
+                      "name": "iter_f",
+                      "args": [
+                        {
+                          "var": "n"
+                        },
+                        {
+                          "var": "x"
+                        }
+                      ]
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "call": {
+                "name": "observe",
+                "args": [
+                  {
+                    "var": "x"
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        "timeout_seconds": 20
+      },
+      "provenance": {
+        "kind": "public-statement-adaptation",
+        "declaration": "Function.iterate_invariant",
+        "lines": [
+          96,
+          96
+        ],
+        "statement": "theorem iterate_invariant {g : α → β} (h : g ∘ f = g) (n : ℕ) : g ∘ f^[n] = g",
+        "adaptation": "将函数复合等式点态展开；Type0；显式左作用Nat.rec迭代，全部不变量条件保留。",
+        "exposure": "developer-visible-public-source-and-adjacent-proofs",
+        "generator_reference_proof_supplied": false
+      }
+    },
+    {
+      "id": "semiconjugate-iteration",
+      "family": "intertwining",
+      "target": {
+        "schema": "explicit-structures-v1",
+        "title": "半共轭在相同迭代次数下保持",
+        "original": "对任意u，h(f(u))=g(h(u))；证明任意n和x都有h(iter_f(n,x))=iter_g(n,h(x))。两个任意载体与原半共轭条件全部保留。",
+        "carriers": [
+          {
+            "name": "a",
+            "original": "任意 a 类型，不附加未声明结构"
+          },
+          {
+            "name": "b",
+            "original": "任意 b 类型，不附加未声明结构"
+          }
+        ],
+        "operations": [
+          {
+            "name": "f",
+            "parameters": [
+              "a"
+            ],
+            "result_type": "a",
+            "original": "显式函数参数 f"
+          },
+          {
+            "name": "g",
+            "parameters": [
+              "b"
+            ],
+            "result_type": "b",
+            "original": "显式函数参数 g"
+          },
+          {
+            "name": "h",
+            "parameters": [
+              "a"
+            ],
+            "result_type": "b",
+            "original": "显式函数参数 h"
+          }
+        ],
+        "definitions": [
+          {
+            "name": "iter_f",
+            "original": "iter_f(0,x)=x；iter_f(n+1,x)=f(iter_f(n,x))，以Nat.rec显式定义。",
+            "parameters": [
+              {
+                "name": "n",
+                "type": "Nat"
+              },
+              {
+                "name": "x",
+                "type": "a"
+              }
+            ],
+            "result_type": "a",
+            "body": {
+              "nat_fold": {
+                "index": {
+                  "var": "n"
+                },
+                "zero": {
+                  "var": "x"
+                },
+                "step": {
+                  "index": "k",
+                  "value": "acc",
+                  "body": {
+                    "call": {
+                      "name": "f",
+                      "args": [
+                        {
+                          "var": "acc"
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          },
+          {
+            "name": "iter_g",
+            "original": "iter_g(0,x)=x；iter_g(n+1,x)=g(iter_g(n,x))，以Nat.rec显式定义。",
+            "parameters": [
+              {
+                "name": "n",
+                "type": "Nat"
+              },
+              {
+                "name": "x",
+                "type": "b"
+              }
+            ],
+            "result_type": "b",
+            "body": {
+              "nat_fold": {
+                "index": {
+                  "var": "n"
+                },
+                "zero": {
+                  "var": "x"
+                },
+                "step": {
+                  "index": "k",
+                  "value": "acc",
+                  "body": {
+                    "call": {
+                      "name": "g",
+                      "args": [
+                        {
+                          "var": "acc"
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          }
+        ],
+        "variables": [
+          {
+            "name": "n",
+            "type": "Nat"
+          },
+          {
+            "name": "x",
+            "type": "a"
+          }
+        ],
+        "assumptions": [
+          {
+            "name": "semiconjugacy",
+            "formula": {
+              "forall": {
+                "binders": [
+                  {
+                    "name": "u",
+                    "type": "a"
+                  }
+                ],
+                "body": {
+                  "eq": [
+                    {
+                      "call": {
+                        "name": "h",
+                        "args": [
+                          {
+                            "call": {
+                              "name": "f",
+                              "args": [
+                                {
+                                  "var": "u"
+                                }
+                              ]
+                            }
+                          }
+                        ]
+                      }
+                    },
+                    {
+                      "call": {
+                        "name": "g",
+                        "args": [
+                          {
+                            "call": {
+                              "name": "h",
+                              "args": [
+                                {
+                                  "var": "u"
+                                }
+                              ]
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        ],
+        "goal": {
+          "eq": [
+            {
+              "call": {
+                "name": "h",
+                "args": [
+                  {
+                    "call": {
+                      "name": "iter_f",
+                      "args": [
+                        {
+                          "var": "n"
+                        },
+                        {
+                          "var": "x"
+                        }
+                      ]
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "call": {
+                "name": "iter_g",
+                "args": [
+                  {
+                    "var": "n"
+                  },
+                  {
+                    "call": {
+                      "name": "h",
+                      "args": [
+                        {
+                          "var": "x"
+                        }
+                      ]
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        "timeout_seconds": 20
+      },
+      "provenance": {
+        "kind": "public-statement-adaptation",
+        "declaration": "Function.Semiconj.iterate_right",
+        "lines": [
+          111,
+          112
+        ],
+        "statement": "theorem iterate_right {f : α → β} {ga : α → α} {gb : β → β} (h : Semiconj f ga gb) (n : ℕ) :\n    Semiconj f ga^[n] gb^[n]",
+        "adaptation": "将Semiconj定义点态展开，限制Type0；两边迭代使用各自显式Nat.rec，保留同一个n及完整原条件。",
+        "exposure": "developer-visible-public-source-and-adjacent-proofs",
+        "generator_reference_proof_supplied": false
+      }
+    },
+    {
+      "id": "binary-operation-preservation",
+      "family": "binary-preservation",
+      "target": {
+        "schema": "explicit-structures-v1",
+        "title": "二元运算保持性在迭代下保持",
+        "original": "若任意u、w都有f(combine(u,w))=combine(f(u),f(w))，则任意n、x、y满足iter_f(n,combine(x,y))=combine(iter_f(n,x),iter_f(n,y))。",
+        "carriers": [
+          {
+            "name": "a",
+            "original": "任意 a 类型，不附加未声明结构"
+          }
+        ],
+        "operations": [
+          {
+            "name": "f",
+            "parameters": [
+              "a"
+            ],
+            "result_type": "a",
+            "original": "显式函数参数 f"
+          },
+          {
+            "name": "combine",
+            "parameters": [
+              "a",
+              "a"
+            ],
+            "result_type": "a",
+            "original": "显式函数参数 combine"
+          }
+        ],
+        "definitions": [
+          {
+            "name": "iter_f",
+            "original": "iter_f(0,x)=x；iter_f(n+1,x)=f(iter_f(n,x))，以Nat.rec显式定义。",
+            "parameters": [
+              {
+                "name": "n",
+                "type": "Nat"
+              },
+              {
+                "name": "x",
+                "type": "a"
+              }
+            ],
+            "result_type": "a",
+            "body": {
+              "nat_fold": {
+                "index": {
+                  "var": "n"
+                },
+                "zero": {
+                  "var": "x"
+                },
+                "step": {
+                  "index": "k",
+                  "value": "acc",
+                  "body": {
+                    "call": {
+                      "name": "f",
+                      "args": [
+                        {
+                          "var": "acc"
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          }
+        ],
+        "variables": [
+          {
+            "name": "n",
+            "type": "Nat"
+          },
+          {
+            "name": "x",
+            "type": "a"
+          },
+          {
+            "name": "y",
+            "type": "a"
+          }
+        ],
+        "assumptions": [
+          {
+            "name": "preserves",
+            "formula": {
+              "forall": {
+                "binders": [
+                  {
+                    "name": "u",
+                    "type": "a"
+                  },
+                  {
+                    "name": "w",
+                    "type": "a"
+                  }
+                ],
+                "body": {
+                  "eq": [
+                    {
+                      "call": {
+                        "name": "f",
+                        "args": [
+                          {
+                            "call": {
+                              "name": "combine",
+                              "args": [
+                                {
+                                  "var": "u"
+                                },
+                                {
+                                  "var": "w"
+                                }
+                              ]
+                            }
+                          }
+                        ]
+                      }
+                    },
+                    {
+                      "call": {
+                        "name": "combine",
+                        "args": [
+                          {
+                            "call": {
+                              "name": "f",
+                              "args": [
+                                {
+                                  "var": "u"
+                                }
+                              ]
+                            }
+                          },
+                          {
+                            "call": {
+                              "name": "f",
+                              "args": [
+                                {
+                                  "var": "w"
+                                }
+                              ]
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        ],
+        "goal": {
+          "eq": [
+            {
+              "call": {
+                "name": "iter_f",
+                "args": [
+                  {
+                    "var": "n"
+                  },
+                  {
+                    "call": {
+                      "name": "combine",
+                      "args": [
+                        {
+                          "var": "x"
+                        },
+                        {
+                          "var": "y"
+                        }
+                      ]
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "call": {
+                "name": "combine",
+                "args": [
+                  {
+                    "call": {
+                      "name": "iter_f",
+                      "args": [
+                        {
+                          "var": "n"
+                        },
+                        {
+                          "var": "x"
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "call": {
+                      "name": "iter_f",
+                      "args": [
+                        {
+                          "var": "n"
+                        },
+                        {
+                          "var": "y"
+                        }
+                      ]
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        "timeout_seconds": 20
+      },
+      "provenance": {
+        "kind": "public-statement-adaptation",
+        "declaration": "Function.Semiconj₂.iterate",
+        "lines": [
+          165,
+          166
+        ],
+        "statement": "theorem Semiconj₂.iterate {f : α → α} {op : α → α → α} (hf : Semiconj₂ f op op) (n : ℕ) :\n    Semiconj₂ f^[n] op op",
+        "adaptation": "将Semiconj₂点态展开为任意二元运算；不假设结合或交换；Type0及显式左作用Nat.rec迭代。",
+        "exposure": "developer-visible-public-source-and-adjacent-proofs",
+        "generator_reference_proof_supplied": false
+      }
+    },
+    {
+      "id": "commuting-iteration",
+      "family": "intertwining",
+      "target": {
+        "schema": "explicit-structures-v1",
+        "title": "交换函数与任意次迭代交换",
+        "original": "对任意u有f(g(u))=g(f(u))，证明任意n、x有f(iter_g(n,x))=iter_g(n,f(x))。没有增加其他结构定律。",
+        "carriers": [
+          {
+            "name": "a",
+            "original": "任意 a 类型，不附加未声明结构"
+          }
+        ],
+        "operations": [
+          {
+            "name": "f",
+            "parameters": [
+              "a"
+            ],
+            "result_type": "a",
+            "original": "显式函数参数 f"
+          },
+          {
+            "name": "g",
+            "parameters": [
+              "a"
+            ],
+            "result_type": "a",
+            "original": "显式函数参数 g"
+          }
+        ],
+        "definitions": [
+          {
+            "name": "iter_g",
+            "original": "iter_g(0,x)=x；iter_g(n+1,x)=g(iter_g(n,x))，以Nat.rec显式定义。",
+            "parameters": [
+              {
+                "name": "n",
+                "type": "Nat"
+              },
+              {
+                "name": "x",
+                "type": "a"
+              }
+            ],
+            "result_type": "a",
+            "body": {
+              "nat_fold": {
+                "index": {
+                  "var": "n"
+                },
+                "zero": {
+                  "var": "x"
+                },
+                "step": {
+                  "index": "k",
+                  "value": "acc",
+                  "body": {
+                    "call": {
+                      "name": "g",
+                      "args": [
+                        {
+                          "var": "acc"
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          }
+        ],
+        "variables": [
+          {
+            "name": "n",
+            "type": "Nat"
+          },
+          {
+            "name": "x",
+            "type": "a"
+          }
+        ],
+        "assumptions": [
+          {
+            "name": "commutes",
+            "formula": {
+              "forall": {
+                "binders": [
+                  {
+                    "name": "u",
+                    "type": "a"
+                  }
+                ],
+                "body": {
+                  "eq": [
+                    {
+                      "call": {
+                        "name": "f",
+                        "args": [
+                          {
+                            "call": {
+                              "name": "g",
+                              "args": [
+                                {
+                                  "var": "u"
+                                }
+                              ]
+                            }
+                          }
+                        ]
+                      }
+                    },
+                    {
+                      "call": {
+                        "name": "g",
+                        "args": [
+                          {
+                            "call": {
+                              "name": "f",
+                              "args": [
+                                {
+                                  "var": "u"
+                                }
+                              ]
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        ],
+        "goal": {
+          "eq": [
+            {
+              "call": {
+                "name": "f",
+                "args": [
+                  {
+                    "call": {
+                      "name": "iter_g",
+                      "args": [
+                        {
+                          "var": "n"
+                        },
+                        {
+                          "var": "x"
+                        }
+                      ]
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "call": {
+                "name": "iter_g",
+                "args": [
+                  {
+                    "var": "n"
+                  },
+                  {
+                    "call": {
+                      "name": "f",
+                      "args": [
+                        {
+                          "var": "x"
+                        }
+                      ]
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        "timeout_seconds": 20
+      },
+      "provenance": {
+        "kind": "public-statement-adaptation",
+        "declaration": "Function.Commute.iterate_right",
+        "lines": [
+          131,
+          131
+        ],
+        "statement": "theorem iterate_right (h : Commute f g) (n : ℕ) : Commute f g^[n]",
+        "adaptation": "将Commute点态展开；与半共轭案例相关而非独立任务族；Type0及显式Nat.rec迭代。",
+        "exposure": "developer-visible-public-source-and-adjacent-proofs",
+        "generator_reference_proof_supplied": false
+      }
+    },
+    {
+      "id": "missing-semiconjugacy",
+      "family": "intertwining",
+      "target": {
+        "schema": "explicit-structures-v1",
+        "title": "删除半共轭条件的对照",
+        "original": "保留相同载体、函数、定义及完整原目标，但不假设h(f(u))=g(h(u))。有界搜索失败保持UNKNOWN，不作为数学反证。",
+        "carriers": [
+          {
+            "name": "a",
+            "original": "任意 a 类型，不附加未声明结构"
+          },
+          {
+            "name": "b",
+            "original": "任意 b 类型，不附加未声明结构"
+          }
+        ],
+        "operations": [
+          {
+            "name": "f",
+            "parameters": [
+              "a"
+            ],
+            "result_type": "a",
+            "original": "显式函数参数 f"
+          },
+          {
+            "name": "g",
+            "parameters": [
+              "b"
+            ],
+            "result_type": "b",
+            "original": "显式函数参数 g"
+          },
+          {
+            "name": "h",
+            "parameters": [
+              "a"
+            ],
+            "result_type": "b",
+            "original": "显式函数参数 h"
+          }
+        ],
+        "definitions": [
+          {
+            "name": "iter_f",
+            "original": "iter_f(0,x)=x；iter_f(n+1,x)=f(iter_f(n,x))，以Nat.rec显式定义。",
+            "parameters": [
+              {
+                "name": "n",
+                "type": "Nat"
+              },
+              {
+                "name": "x",
+                "type": "a"
+              }
+            ],
+            "result_type": "a",
+            "body": {
+              "nat_fold": {
+                "index": {
+                  "var": "n"
+                },
+                "zero": {
+                  "var": "x"
+                },
+                "step": {
+                  "index": "k",
+                  "value": "acc",
+                  "body": {
+                    "call": {
+                      "name": "f",
+                      "args": [
+                        {
+                          "var": "acc"
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          },
+          {
+            "name": "iter_g",
+            "original": "iter_g(0,x)=x；iter_g(n+1,x)=g(iter_g(n,x))，以Nat.rec显式定义。",
+            "parameters": [
+              {
+                "name": "n",
+                "type": "Nat"
+              },
+              {
+                "name": "x",
+                "type": "b"
+              }
+            ],
+            "result_type": "b",
+            "body": {
+              "nat_fold": {
+                "index": {
+                  "var": "n"
+                },
+                "zero": {
+                  "var": "x"
+                },
+                "step": {
+                  "index": "k",
+                  "value": "acc",
+                  "body": {
+                    "call": {
+                      "name": "g",
+                      "args": [
+                        {
+                          "var": "acc"
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          }
+        ],
+        "variables": [
+          {
+            "name": "n",
+            "type": "Nat"
+          },
+          {
+            "name": "x",
+            "type": "a"
+          }
+        ],
+        "assumptions": [],
+        "goal": {
+          "eq": [
+            {
+              "call": {
+                "name": "h",
+                "args": [
+                  {
+                    "call": {
+                      "name": "iter_f",
+                      "args": [
+                        {
+                          "var": "n"
+                        },
+                        {
+                          "var": "x"
+                        }
+                      ]
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "call": {
+                "name": "iter_g",
+                "args": [
+                  {
+                    "var": "n"
+                  },
+                  {
+                    "call": {
+                      "name": "h",
+                      "args": [
+                        {
+                          "var": "x"
+                        }
+                      ]
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        "timeout_seconds": 20
+      },
+      "provenance": {
+        "kind": "hypothesis-deletion-control",
+        "declaration": "Function.Semiconj.iterate_right",
+        "lines": [
+          111,
+          112
+        ],
+        "statement": "theorem iterate_right {f : α → β} {ga : α → α} {gb : β → β} (h : Semiconj f ga gb) (n : ℕ) :\n    Semiconj f ga^[n] gb^[n]",
+        "adaptation": "有意删除半共轭假设的负对照；不再声称等同上游定理，不要求系统自动反驳。",
+        "exposure": "developer-visible-public-source-and-adjacent-proofs",
+        "generator_reference_proof_supplied": false
+      }
+    },
+    {
+      "id": "iterate-addition",
+      "family": "additive-iteration",
+      "target": {
+        "schema": "explicit-structures-v1",
+        "title": "迭代次数相加与分段迭代",
+        "original": "对任意自然数m、n和状态x，iter_f(m+n,x)=iter_f(m,iter_f(n,x))。f是任意自映射，两个索引和全部显式定义保留；不额外提供迭代交换引理。",
+        "carriers": [
+          {
+            "name": "a",
+            "original": "任意 a 类型，不附加未声明结构"
+          }
+        ],
+        "operations": [
+          {
+            "name": "f",
+            "parameters": [
+              "a"
+            ],
+            "result_type": "a",
+            "original": "显式函数参数 f"
+          }
+        ],
+        "definitions": [
+          {
+            "name": "iter_f",
+            "original": "iter_f(0,x)=x；iter_f(n+1,x)=f(iter_f(n,x))，以Nat.rec显式定义。",
+            "parameters": [
+              {
+                "name": "n",
+                "type": "Nat"
+              },
+              {
+                "name": "x",
+                "type": "a"
+              }
+            ],
+            "result_type": "a",
+            "body": {
+              "nat_fold": {
+                "index": {
+                  "var": "n"
+                },
+                "zero": {
+                  "var": "x"
+                },
+                "step": {
+                  "index": "k",
+                  "value": "acc",
+                  "body": {
+                    "call": {
+                      "name": "f",
+                      "args": [
+                        {
+                          "var": "acc"
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          }
+        ],
+        "variables": [
+          {
+            "name": "m",
+            "type": "Nat"
+          },
+          {
+            "name": "n",
+            "type": "Nat"
+          },
+          {
+            "name": "x",
+            "type": "a"
+          }
+        ],
+        "assumptions": [],
+        "goal": {
+          "eq": [
+            {
+              "call": {
+                "name": "iter_f",
+                "args": [
+                  {
+                    "add": [
+                      {
+                        "var": "m"
+                      },
+                      {
+                        "var": "n"
+                      }
+                    ]
+                  },
+                  {
+                    "var": "x"
+                  }
+                ]
+              }
+            },
+            {
+              "call": {
+                "name": "iter_f",
+                "args": [
+                  {
+                    "var": "m"
+                  },
+                  {
+                    "call": {
+                      "name": "iter_f",
+                      "args": [
+                        {
+                          "var": "n"
+                        },
+                        {
+                          "var": "x"
+                        }
+                      ]
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        "timeout_seconds": 20
+      },
+      "provenance": {
+        "kind": "public-statement-adaptation",
+        "declaration": "Function.iterate_add_apply",
+        "lines": [
+          76,
+          76
+        ],
+        "statement": "theorem iterate_add_apply (m n : ℕ) (x : α) : f^[m + n] x = f^[m] (f^[n] x)",
+        "adaptation": "原次数相加命题点态形式，Type0和显式左作用Nat.rec；不向生成器提供库证明或额外交换引理。",
+        "exposure": "developer-visible-public-source-and-adjacent-proofs",
+        "generator_reference_proof_supplied": false
+      }
+    },
+    {
+      "id": "iterate-commuting-composition",
+      "family": "composition-iteration",
+      "target": {
+        "schema": "explicit-structures-v1",
+        "title": "交换自映射复合的迭代",
+        "original": "若每个u都有f(g(u))=g(f(u))，则任意n、x有iter_fg(n,x)=iter_f(n,iter_g(n,x))。iter_fg每步先g后f；所有条件显式保留，不预先提供迭代交换引理。",
+        "carriers": [
+          {
+            "name": "a",
+            "original": "任意 a 类型，不附加未声明结构"
+          }
+        ],
+        "operations": [
+          {
+            "name": "f",
+            "parameters": [
+              "a"
+            ],
+            "result_type": "a",
+            "original": "显式函数参数 f"
+          },
+          {
+            "name": "g",
+            "parameters": [
+              "a"
+            ],
+            "result_type": "a",
+            "original": "显式函数参数 g"
+          }
+        ],
+        "definitions": [
+          {
+            "name": "iter_f",
+            "original": "iter_f(0,x)=x；iter_f(n+1,x)=f(iter_f(n,x))，以Nat.rec显式定义。",
+            "parameters": [
+              {
+                "name": "n",
+                "type": "Nat"
+              },
+              {
+                "name": "x",
+                "type": "a"
+              }
+            ],
+            "result_type": "a",
+            "body": {
+              "nat_fold": {
+                "index": {
+                  "var": "n"
+                },
+                "zero": {
+                  "var": "x"
+                },
+                "step": {
+                  "index": "k",
+                  "value": "acc",
+                  "body": {
+                    "call": {
+                      "name": "f",
+                      "args": [
+                        {
+                          "var": "acc"
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          },
+          {
+            "name": "iter_g",
+            "original": "iter_g(0,x)=x；iter_g(n+1,x)=g(iter_g(n,x))，以Nat.rec显式定义。",
+            "parameters": [
+              {
+                "name": "n",
+                "type": "Nat"
+              },
+              {
+                "name": "x",
+                "type": "a"
+              }
+            ],
+            "result_type": "a",
+            "body": {
+              "nat_fold": {
+                "index": {
+                  "var": "n"
+                },
+                "zero": {
+                  "var": "x"
+                },
+                "step": {
+                  "index": "k",
+                  "value": "acc",
+                  "body": {
+                    "call": {
+                      "name": "g",
+                      "args": [
+                        {
+                          "var": "acc"
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          },
+          {
+            "name": "iter_fg",
+            "original": "iter_fg(0,x)=x；iter_fg(n+1,x)=f(g(iter_fg(n,x)))，显式Nat.rec定义。",
+            "parameters": [
+              {
+                "name": "n",
+                "type": "Nat"
+              },
+              {
+                "name": "x",
+                "type": "a"
+              }
+            ],
+            "result_type": "a",
+            "body": {
+              "nat_fold": {
+                "index": {
+                  "var": "n"
+                },
+                "zero": {
+                  "var": "x"
+                },
+                "step": {
+                  "index": "k",
+                  "value": "acc",
+                  "body": {
+                    "call": {
+                      "name": "f",
+                      "args": [
+                        {
+                          "call": {
+                            "name": "g",
+                            "args": [
+                              {
+                                "var": "acc"
+                              }
+                            ]
+                          }
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          }
+        ],
+        "variables": [
+          {
+            "name": "n",
+            "type": "Nat"
+          },
+          {
+            "name": "x",
+            "type": "a"
+          }
+        ],
+        "assumptions": [
+          {
+            "name": "commutes",
+            "formula": {
+              "forall": {
+                "binders": [
+                  {
+                    "name": "u",
+                    "type": "a"
+                  }
+                ],
+                "body": {
+                  "eq": [
+                    {
+                      "call": {
+                        "name": "f",
+                        "args": [
+                          {
+                            "call": {
+                              "name": "g",
+                              "args": [
+                                {
+                                  "var": "u"
+                                }
+                              ]
+                            }
+                          }
+                        ]
+                      }
+                    },
+                    {
+                      "call": {
+                        "name": "g",
+                        "args": [
+                          {
+                            "call": {
+                              "name": "f",
+                              "args": [
+                                {
+                                  "var": "u"
+                                }
+                              ]
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        ],
+        "goal": {
+          "eq": [
+            {
+              "call": {
+                "name": "iter_fg",
+                "args": [
+                  {
+                    "var": "n"
+                  },
+                  {
+                    "var": "x"
+                  }
+                ]
+              }
+            },
+            {
+              "call": {
+                "name": "iter_f",
+                "args": [
+                  {
+                    "var": "n"
+                  },
+                  {
+                    "call": {
+                      "name": "iter_g",
+                      "args": [
+                        {
+                          "var": "n"
+                        },
+                        {
+                          "var": "x"
+                        }
+                      ]
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        "timeout_seconds": 20
+      },
+      "provenance": {
+        "kind": "public-statement-adaptation",
+        "declaration": "Function.Commute.comp_iterate",
+        "lines": [
+          145,
+          145
+        ],
+        "statement": "theorem comp_iterate (h : Commute f g) (n : ℕ) : (f ∘ g)^[n] = f^[n] ∘ g^[n]",
+        "adaptation": "将函数复合与函数等式点态展开；Type0、显式Nat.rec；先g后f的复合顺序完整保留，原交换条件保留。",
+        "exposure": "developer-visible-public-source-and-adjacent-proofs",
+        "generator_reference_proof_supplied": false
+      }
+    }
+  ]
+}

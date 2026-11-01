@@ -1,0 +1,18 @@
+.research-capacity-panel{margin-bottom:24px;padding:24px}
+.research-capacity-heading{display:flex;align-items:center;gap:24px;justify-content:space-between}
+.research-capacity-heading h2{font-size:22px;margin:8px 0}
+.research-capacity-counts{display:flex;flex-direction:column;gap:4px;margin-left:auto;text-align:right}
+.research-capacity-counts strong{font:30px Georgia,serif;color:var(--ink,#243a31)}
+.research-capacity-counts span{font-size:12px;color:var(--muted,#728075)}
+.research-capacity-panel summary{cursor:pointer;margin-top:16px;color:var(--green,#295f4b);font-size:14px}
+.research-capacity-tools{display:flex;align-items:end;gap:16px;margin:18px 0}
+.research-capacity-tools label:first-child{flex:1}
+.research-capacity-tools label{display:flex;flex-direction:column;gap:7px;font-size:12px;color:var(--muted,#728075)}
+.research-capacity-tools input,.research-capacity-tools select{max-width:100%;box-sizing:border-box;min-height:40px;border:1px solid var(--line,#dce3d9);border-radius:9px;padding:8px 12px;background:#fcfdf9;color:var(--ink,#243a31)}
+.research-capacity-projects{max-height:480px;overflow:auto;overscroll-behavior:contain}
+.research-capacity-project{display:flex;align-items:center;gap:24px;padding:20px 4px;border-top:1px solid var(--line,#dce3d9)}
+.research-capacity-project>div{flex:1;min-width:0}
+.research-capacity-project h3{margin:7px 0;font-size:16px;overflow-wrap:anywhere}
+.research-capacity-project p{font-size:13px;line-height:1.7;color:var(--muted,#728075);overflow-wrap:anywhere}
+.research-capacity-project>button{flex:none}
+@media(max-width:640px){.research-capacity-panel{padding:18px}.research-capacity-heading{flex-wrap:wrap;gap:14px}.research-capacity-heading>div:first-child{flex-basis:100%}.research-capacity-counts{text-align:left;margin:0 auto 0 0}.research-capacity-tools{align-items:stretch;flex-direction:column}.research-capacity-project{align-items:stretch;flex-direction:column;gap:12px}.research-capacity-project>button{align-self:flex-start}.research-capacity-counts strong{font-size:26px}}

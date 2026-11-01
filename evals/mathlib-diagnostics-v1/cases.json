@@ -1,0 +1,480 @@
+{
+  "schema": "mathlib-authored-evaluation-v1",
+  "authorship": "Project-authored functional diagnostics; no external papers or datasets.",
+  "visibility": "Repository visible; authored and inspected during development, not independent blind or held-out research evidence.",
+  "training_use": false,
+  "model_calls": 0,
+  "cases": [
+    {
+      "id": "reflexive",
+      "split": "development",
+      "family": "divisibility-reflexive",
+      "request": {
+        "schema": "mathlib-nat-divisibility-v1",
+        "title": "整除自反性",
+        "original": "任意自然数 a，a 整除自身。",
+        "variables": [
+          "a"
+        ],
+        "assumptions": [],
+        "goal": {
+          "dvd": [
+            {
+              "var": "a"
+            },
+            {
+              "var": "a"
+            }
+          ]
+        },
+        "proof": {
+          "ref": "Nat.dvd_refl",
+          "terms": [
+            {
+              "var": "a"
+            }
+          ],
+          "proofs": []
+        },
+        "timeout_seconds": 30
+      },
+      "expected_run_status": "COMPLETED"
+    },
+    {
+      "id": "composition",
+      "split": "development",
+      "family": "divisibility-composition",
+      "request": {
+        "schema": "mathlib-nat-divisibility-v1",
+        "timeout_seconds": 30,
+        "title": "整除链与加法的组合",
+        "original": "设 a、b、c 为自然数。若 a 整除 b 且 b 整除 c，则 a 整除 b+c。",
+        "variables": [
+          "a",
+          "b",
+          "c"
+        ],
+        "assumptions": [
+          {
+            "name": "hab",
+            "formula": {
+              "dvd": [
+                {
+                  "var": "a"
+                },
+                {
+                  "var": "b"
+                }
+              ]
+            }
+          },
+          {
+            "name": "hbc",
+            "formula": {
+              "dvd": [
+                {
+                  "var": "b"
+                },
+                {
+                  "var": "c"
+                }
+              ]
+            }
+          }
+        ],
+        "goal": {
+          "dvd": [
+            {
+              "var": "a"
+            },
+            {
+              "add": [
+                {
+                  "var": "b"
+                },
+                {
+                  "var": "c"
+                }
+              ]
+            }
+          ]
+        },
+        "proof": {
+          "ref": "Nat.dvd_add",
+          "terms": [
+            {
+              "var": "a"
+            },
+            {
+              "var": "b"
+            },
+            {
+              "var": "c"
+            }
+          ],
+          "proofs": [
+            {
+              "hyp": "hab"
+            },
+            {
+              "ref": "Nat.dvd_trans",
+              "terms": [
+                {
+                  "var": "a"
+                },
+                {
+                  "var": "b"
+                },
+                {
+                  "var": "c"
+                }
+              ],
+              "proofs": [
+                {
+                  "hyp": "hab"
+                },
+                {
+                  "hyp": "hbc"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "expected_run_status": "COMPLETED"
+    },
+    {
+      "id": "translated_subtraction",
+      "split": "regression",
+      "family": "truncated-subtraction",
+      "request": {
+        "schema": "mathlib-nat-divisibility-v1",
+        "timeout_seconds": 30.0,
+        "title": "平移后的截断减法边界",
+        "original": "任意自然数 n，n+1 整除 (n+1)-2，当且仅当 2=0 或 n+1≤2；减法在自然数上截断。",
+        "variables": [
+          "n"
+        ],
+        "assumptions": [],
+        "goal": {
+          "iff": [
+            {
+              "dvd": [
+                {
+                  "add": [
+                    {
+                      "var": "n"
+                    },
+                    {
+                      "nat": 1
+                    }
+                  ]
+                },
+                {
+                  "sub": [
+                    {
+                      "add": [
+                        {
+                          "var": "n"
+                        },
+                        {
+                          "nat": 1
+                        }
+                      ]
+                    },
+                    {
+                      "nat": 2
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "or": [
+                {
+                  "eq": [
+                    {
+                      "nat": 2
+                    },
+                    {
+                      "nat": 0
+                    }
+                  ]
+                },
+                {
+                  "le": [
+                    {
+                      "add": [
+                        {
+                          "var": "n"
+                        },
+                        {
+                          "nat": 1
+                        }
+                      ]
+                    },
+                    {
+                      "nat": 2
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        "proof": {
+          "ref": "Nat.dvd_sub_self_left",
+          "terms": [
+            {
+              "add": [
+                {
+                  "var": "n"
+                },
+                {
+                  "nat": 1
+                }
+              ]
+            },
+            {
+              "nat": 2
+            }
+          ],
+          "proofs": []
+        }
+      },
+      "expected_run_status": "COMPLETED"
+    },
+    {
+      "id": "wrong_proof",
+      "split": "regression",
+      "family": "true-target-wrong-proof",
+      "request": {
+        "schema": "mathlib-nat-divisibility-v1",
+        "title": "真命题与错误证明项",
+        "original": "任意自然数 a，a 整除自身。此处提供的倍数证明项类型不符，不能据此否定命题。",
+        "variables": [
+          "a"
+        ],
+        "assumptions": [],
+        "goal": {
+          "dvd": [
+            {
+              "var": "a"
+            },
+            {
+              "var": "a"
+            }
+          ]
+        },
+        "proof": {
+          "ref": "Nat.dvd_mul_right",
+          "terms": [
+            {
+              "var": "a"
+            },
+            {
+              "var": "a"
+            }
+          ],
+          "proofs": []
+        },
+        "timeout_seconds": 30
+      },
+      "expected_run_status": "REJECTED"
+    },
+    {
+      "id": "missing_premise",
+      "split": "regression",
+      "family": "missing-premise",
+      "request": {
+        "schema": "mathlib-nat-divisibility-v1",
+        "timeout_seconds": 30,
+        "title": "遗漏前提的失败对照",
+        "original": "任意自然数 a、b、c，若 a 整除 b，就有 a 整除 b+c。此陈述缺少条件，提交的证明应被拒绝。",
+        "variables": [
+          "a",
+          "b",
+          "c"
+        ],
+        "assumptions": [
+          {
+            "name": "hab",
+            "formula": {
+              "dvd": [
+                {
+                  "var": "a"
+                },
+                {
+                  "var": "b"
+                }
+              ]
+            }
+          }
+        ],
+        "goal": {
+          "dvd": [
+            {
+              "var": "a"
+            },
+            {
+              "add": [
+                {
+                  "var": "b"
+                },
+                {
+                  "var": "c"
+                }
+              ]
+            }
+          ]
+        },
+        "proof": {
+          "ref": "Nat.dvd_add",
+          "terms": [
+            {
+              "var": "a"
+            },
+            {
+              "var": "b"
+            },
+            {
+              "var": "c"
+            }
+          ],
+          "proofs": [
+            {
+              "hyp": "hab"
+            },
+            {
+              "hyp": "hab"
+            }
+          ]
+        }
+      },
+      "expected_run_status": "REJECTED"
+    },
+    {
+      "id": "reverse_direction",
+      "split": "regression",
+      "family": "invalid-converse",
+      "request": {
+        "schema": "mathlib-nat-divisibility-v1",
+        "title": "整除方向不可倒置",
+        "original": "任意自然数 a、b，若 a 整除 b，尝试推出 b 整除 a；系统应保留未知，不能把检查拒绝当作反证。",
+        "variables": [
+          "a",
+          "b"
+        ],
+        "assumptions": [
+          {
+            "name": "hab",
+            "formula": {
+              "dvd": [
+                {
+                  "var": "a"
+                },
+                {
+                  "var": "b"
+                }
+              ]
+            }
+          }
+        ],
+        "goal": {
+          "dvd": [
+            {
+              "var": "b"
+            },
+            {
+              "var": "a"
+            }
+          ]
+        },
+        "proof": {
+          "hyp": "hab"
+        },
+        "timeout_seconds": 30
+      },
+      "expected_run_status": "REJECTED"
+    },
+    {
+      "id": "unsupported_gcd",
+      "split": "regression",
+      "family": "unavailable-gcd-definition",
+      "request": {
+        "schema": "mathlib-nat-divisibility-v1",
+        "title": "最大公因数定义尚未开放",
+        "original": "任意自然数 a，gcd(a,a)=a。当前受控语言尚未提供gcd定义，应阻塞且保留未知。",
+        "variables": [
+          "a"
+        ],
+        "assumptions": [],
+        "goal": {
+          "eq": [
+            {
+              "gcd": [
+                {
+                  "var": "a"
+                },
+                {
+                  "var": "a"
+                }
+              ]
+            },
+            {
+              "var": "a"
+            }
+          ]
+        },
+        "proof": {
+          "ref": "Nat.dvd_refl",
+          "terms": [
+            {
+              "var": "a"
+            }
+          ],
+          "proofs": []
+        },
+        "timeout_seconds": 30
+      },
+      "expected_run_status": "PRECHECK_REJECTED"
+    },
+    {
+      "id": "unsupported_sets",
+      "split": "regression",
+      "family": "unavailable-set-definition",
+      "request": {
+        "schema": "mathlib-nat-divisibility-v1",
+        "title": "集合成员关系尚未开放",
+        "original": "任意自然数 a，a 属于由 a 构成的单元素集合。当前受控语言未提供集合，不能改写成其他命题。",
+        "variables": [
+          "a"
+        ],
+        "assumptions": [],
+        "goal": {
+          "member": [
+            {
+              "var": "a"
+            },
+            {
+              "singleton": {
+                "var": "a"
+              }
+            }
+          ]
+        },
+        "proof": {
+          "ref": "Nat.dvd_refl",
+          "terms": [
+            {
+              "var": "a"
+            }
+          ],
+          "proofs": []
+        },
+        "timeout_seconds": 30
+      },
+      "expected_run_status": "PRECHECK_REJECTED"
+    }
+  ]
+}

@@ -1,0 +1,11 @@
+{
+  "schema_version": "1",
+  "format": "kernel-expression-certificate-v1",
+  "claim_fingerprint": "cfcced8cc5b820c333e193d0830ee4c7aaccd9c57ce133d9f26e0417d4f4e388",
+  "formalization_fingerprint": "452776e382c140d18bb0e660bcb92349df782242051d8a81d7e2d5eaa269927c",
+  "proof": {
+    "op": "const",
+    "name": "Nat.add_zero",
+    "levels": []
+  }
+}

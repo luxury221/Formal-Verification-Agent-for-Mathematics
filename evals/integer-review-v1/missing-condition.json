@@ -1,0 +1,63 @@
+{
+  "schema": "int-paper-review-v1",
+  "document": {
+    "id": "integer-negative-counterexample",
+    "version": 1,
+    "title": "整数不一定非负：负数反例",
+    "text": "猜想：对任意整数 n，0 ≤ n。\n证明尝试：整数均非负。"
+  },
+  "variables": [
+    "n"
+  ],
+  "assumptions": [],
+  "conclusion": {
+    "op": "le",
+    "left": {
+      "op": "num",
+      "value": 0
+    },
+    "right": {
+      "op": "var",
+      "name": "n"
+    }
+  },
+  "claim_span": [
+    1,
+    1
+  ],
+  "claim_plan": {
+    "direction": "refute",
+    "strategy": "counterexample",
+    "witnesses": [
+      -1
+    ]
+  },
+  "steps": [
+    {
+      "id": "s1",
+      "span": [
+        2,
+        2
+      ],
+      "formula": {
+        "op": "le",
+        "left": {
+          "op": "num",
+          "value": 0
+        },
+        "right": {
+          "op": "var",
+          "name": "n"
+        }
+      },
+      "depends_on": [],
+      "plan": {
+        "direction": "refute",
+        "strategy": "counterexample",
+        "witnesses": [
+          -1
+        ]
+      }
+    }
+  ]
+}

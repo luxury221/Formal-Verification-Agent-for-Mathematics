@@ -1,0 +1,12 @@
+{
+  "schema_version": "1",
+  "dataset_id": "mra-golden-v1",
+  "path": "evals/golden_cases.json",
+  "license": "project-owned-internal",
+  "consent": "project-development-and-regression-only",
+  "provenance": "Synthetic elementary mathematical fixtures authored for this project; Lean feedback recorded separately",
+  "split": "regression",
+  "training_use": false,
+  "public_benchmark_imported": false,
+  "limitations": "Small hand-constructed regression suite; does not measure general theorem-proving or paper-review success rates"
+}

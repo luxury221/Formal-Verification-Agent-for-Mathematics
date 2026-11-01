@@ -1,0 +1,111 @@
+{
+  "schema": "pde-energy-known-probes-v1",
+  "probes": [
+    {
+      "id": "integration-by-parts",
+      "original": "Lebesgue测度下的有向分部积分。保留两函数的完整导数条件、导函数可积性与两个端点项；不要求a≤b。",
+      "statement": "∀ (u v du dv : ℝ → ℝ) (a b : ℝ), (∀ x ∈ Set.uIcc a b, HasDerivAt u (du x) x) → (∀ x ∈ Set.uIcc a b, HasDerivAt v (dv x) x) → IntervalIntegrable du volume a b → IntervalIntegrable dv volume a b → (∫ x in a..b, u x * dv x) = u b * v b - u a * v a - (∫ x in a..b, du x * v x)",
+      "proof": "by\n  intro u v du dv a b hu hv hdu hdv\n  exact intervalIntegral.integral_mul_deriv_eq_deriv_mul hu hv hdu hdv",
+      "expected": "VERIFIED",
+      "source": "Mathlib.MeasureTheory.Integral.IntervalIntegral.IntegrationByParts:141"
+    },
+    {
+      "id": "zero-boundary-green",
+      "original": "u在两个端点均为零时的分部积分恒等式；保留全部导数和可积性条件，端点可反向。实际导入上一条已核验证明数据。",
+      "statement": "∀ (u v du dv : ℝ → ℝ) (a b : ℝ), (∀ x ∈ Set.uIcc a b, HasDerivAt u (du x) x) → (∀ x ∈ Set.uIcc a b, HasDerivAt v (dv x) x) → IntervalIntegrable du volume a b → IntervalIntegrable dv volume a b → u a = 0 → u b = 0 → (∫ x in a..b, u x * dv x) = -(∫ x in a..b, du x * v x)",
+      "proof": "by\n  intro u v du dv a b hu hv hdu hdv ha hb\n  have h := MraCandidate.Reused.s0.checked u v du dv a b hu hv hdu hdv\n  simpa only [ha, hb, zero_mul, sub_self, zero_sub] using h",
+      "source_probe": "integration-by-parts",
+      "expected": "VERIFIED",
+      "source": "checked integration-by-parts proof data"
+    },
+    {
+      "id": "poisson-smooth-test",
+      "original": "一维光滑Poisson方程−u″=f对光滑零边界测试函数φ的积分恒等式。φ、u、u′的导数关系及所需区间可积性全部显式。这不是一般Sobolev弱解理论，也不证明存在性。",
+      "statement": "∀ (u du ddu f φ dφ : ℝ → ℝ) (a b : ℝ), (∀ x ∈ Set.uIcc a b, HasDerivAt u (du x) x) → (∀ x ∈ Set.uIcc a b, HasDerivAt du (ddu x) x) → (∀ x ∈ Set.uIcc a b, HasDerivAt φ (dφ x) x) → IntervalIntegrable du volume a b → IntervalIntegrable ddu volume a b → IntervalIntegrable dφ volume a b → (∀ x ∈ Set.uIcc a b, -ddu x = f x) → φ a = 0 → φ b = 0 → (∫ x in a..b, du x * dφ x) = (∫ x in a..b, f x * φ x)",
+      "proof": "by\n  intro u du ddu f φ dφ a b hu hdu hφ hi hi2 hiφ he ha hb\n  have h := MraCandidate.Reused.s0.checked φ du dφ ddu a b hφ hdu hiφ hi2 ha hb\n  have heq : (∫ x in a..b, f x * φ x) = -(∫ x in a..b, φ x * ddu x) := by\n    calc\n      _ = (∫ x in a..b, -(φ x * ddu x)) := intervalIntegral.integral_congr (fun x hx => by rw [← he x hx, neg_mul, mul_comm (ddu x) (φ x)])\n      _ = _ := intervalIntegral.integral_neg\n  calc\n    _ = (∫ x in a..b, dφ x * du x) := intervalIntegral.integral_congr (fun x _ => mul_comm _ _)\n    _ = - (∫ x in a..b, φ x * ddu x) := by rw [h, neg_neg]\n    _ = _ := heq.symm",
+      "source_probe": "zero-boundary-green",
+      "expected": "VERIFIED",
+      "source": "checked zero-boundary-green proof data and intervalIntegral.integral_congr"
+    },
+    {
+      "id": "poisson-energy",
+      "original": "一维光滑零Dirichlet Poisson解满足∫(u′u′)=∫fu；用已验证光滑测试恒等式取φ=u。不是存在性、唯一性或一般多维PDE结论。",
+      "statement": "∀ (u du ddu f : ℝ → ℝ) (a b : ℝ), (∀ x ∈ Set.uIcc a b, HasDerivAt u (du x) x) → (∀ x ∈ Set.uIcc a b, HasDerivAt du (ddu x) x) → IntervalIntegrable du volume a b → IntervalIntegrable ddu volume a b → (∀ x ∈ Set.uIcc a b, -ddu x = f x) → u a = 0 → u b = 0 → (∫ x in a..b, du x * du x) = (∫ x in a..b, f x * u x)",
+      "proof": "by\n  intro u du ddu f a b hu hdu hi hi2 he ha hb\n  exact MraCandidate.Reused.s0.checked u du ddu f u du a b hu hdu hu hi hi2 hi he ha hb",
+      "source_probe": "poisson-smooth-test",
+      "expected": "VERIFIED",
+      "source": "checked smooth test identity instantiated at φ=u"
+    },
+    {
+      "id": "poisson-work-nonnegative",
+      "original": "额外要求a≤b，一维光滑零边界Poisson解的∫fu非负，依据已验证能量恒等式和逐点平方非负。完整导数、可积性、方程和边界条件保留。",
+      "statement": "∀ (u du ddu f : ℝ → ℝ) (a b : ℝ), (∀ x ∈ Set.uIcc a b, HasDerivAt u (du x) x) → (∀ x ∈ Set.uIcc a b, HasDerivAt du (ddu x) x) → IntervalIntegrable du volume a b → IntervalIntegrable ddu volume a b → (∀ x ∈ Set.uIcc a b, -ddu x = f x) → u a = 0 → u b = 0 → a ≤ b → 0 ≤ (∫ x in a..b, f x * u x)",
+      "proof": "by\n  intro u du ddu f a b hu hdu hi hi2 he ha hb hab\n  rw [← MraCandidate.Reused.s0.checked u du ddu f a b hu hdu hi hi2 he ha hb]\n  exact intervalIntegral.integral_nonneg_of_forall hab (fun x => mul_self_nonneg (du x))",
+      "source_probe": "poisson-energy",
+      "expected": "VERIFIED",
+      "source": "checked Poisson energy proof data; intervalIntegral.integral_nonneg_of_forall"
+    },
+    {
+      "id": "missing-boundary",
+      "original": "负对照：遗漏两个零边界条件，错误省去端点项。失败保持UNKNOWN，不能当作原命题的反证。",
+      "statement": "∀ (u v du dv : ℝ → ℝ) (a b : ℝ), (∀ x ∈ Set.uIcc a b, HasDerivAt u (du x) x) → (∀ x ∈ Set.uIcc a b, HasDerivAt v (dv x) x) → IntervalIntegrable du volume a b → IntervalIntegrable dv volume a b → (∫ x in a..b, u x * dv x) = -(∫ x in a..b, du x * v x)",
+      "proof": "by\n  intro u v du dv a b hu hv hdu hdv\n  simpa only [zero_mul, sub_self, zero_sub] using (MraCandidate.Reused.s0.checked u v du dv a b hu hv hdu hdv)",
+      "source_probe": "integration-by-parts",
+      "expected": "REJECTED",
+      "source": "missing boundary mutation"
+    },
+    {
+      "id": "wrong-poisson-sign",
+      "original": "负对照：在相同完整条件下把能量恒等式右侧错误取负。",
+      "statement": "∀ (u du ddu f : ℝ → ℝ) (a b : ℝ), (∀ x ∈ Set.uIcc a b, HasDerivAt u (du x) x) → (∀ x ∈ Set.uIcc a b, HasDerivAt du (ddu x) x) → IntervalIntegrable du volume a b → IntervalIntegrable ddu volume a b → (∀ x ∈ Set.uIcc a b, -ddu x = f x) → u a = 0 → u b = 0 → (∫ x in a..b, du x * du x) = -(∫ x in a..b, f x * u x)",
+      "proof": "by\n  intro u du ddu f a b hu hdu hi hi2 he ha hb\n  exact MraCandidate.Reused.s0.checked u du ddu f a b hu hdu hi hi2 he ha hb",
+      "source_probe": "poisson-energy",
+      "expected": "REJECTED",
+      "source": "Poisson sign mutation"
+    },
+    {
+      "id": "wrong-measure",
+      "original": "负对照：把只针对volume的分部积分定理直接用于任意测度μ；即使额外保留volume可积性也没有得到这个桥接。",
+      "statement": "∀ (μ : Measure ℝ) (u v du dv : ℝ → ℝ) (a b : ℝ), (∀ x ∈ Set.uIcc a b, HasDerivAt u (du x) x) → (∀ x ∈ Set.uIcc a b, HasDerivAt v (dv x) x) → IntervalIntegrable du volume a b → IntervalIntegrable dv volume a b → (∫ x in a..b, u x * dv x ∂μ) = u b * v b - u a * v a - (∫ x in a..b, du x * v x ∂μ)",
+      "proof": "by\n  intro μ u v du dv a b hu hv hi hi2\n  exact MraCandidate.Reused.s0.checked u v du dv a b hu hv hi hi2",
+      "source_probe": "integration-by-parts",
+      "expected": "REJECTED",
+      "source": "measure mutation"
+    },
+    {
+      "id": "missing-regularity",
+      "original": "负对照：遗漏v的HasDerivAt条件后仍尝试应用分部积分。",
+      "statement": "∀ (u v du dv : ℝ → ℝ) (a b : ℝ), (∀ x ∈ Set.uIcc a b, HasDerivAt u (du x) x) → IntervalIntegrable du volume a b → IntervalIntegrable dv volume a b → (∫ x in a..b, u x * dv x) = u b * v b - u a * v a - (∫ x in a..b, du x * v x)",
+      "proof": "by\n  intro u v du dv a b hu hi hi2\n  apply MraCandidate.Reused.s0.checked u v du dv a b hu\n  all_goals assumption",
+      "source_probe": "integration-by-parts",
+      "expected": "REJECTED",
+      "source": "regularity mutation"
+    },
+    {
+      "id": "missing-orientation",
+      "original": "负对照：遗漏a≤b，仍尝试由有向平方积分推出∫fu非负。",
+      "statement": "∀ (u du ddu f : ℝ → ℝ) (a b : ℝ), (∀ x ∈ Set.uIcc a b, HasDerivAt u (du x) x) → (∀ x ∈ Set.uIcc a b, HasDerivAt du (ddu x) x) → IntervalIntegrable du volume a b → IntervalIntegrable ddu volume a b → (∀ x ∈ Set.uIcc a b, -ddu x = f x) → u a = 0 → u b = 0 → 0 ≤ (∫ x in a..b, f x * u x)",
+      "proof": "by\n  intro u du ddu f a b hu hdu hi hi2 he ha hb\n  rw [← MraCandidate.Reused.s0.checked u du ddu f a b hu hdu hi hi2 he ha hb]\n  apply intervalIntegral.integral_nonneg_of_forall\n  all_goals first | assumption | exact fun x => mul_self_nonneg (du x)",
+      "source_probe": "poisson-energy",
+      "expected": "REJECTED",
+      "source": "orientation mutation"
+    },
+    {
+      "id": "placeholder",
+      "original": "安全控制：分部积分证明中的sorry占位不得晋升。",
+      "statement": "∀ (u v du dv : ℝ → ℝ) (a b : ℝ), (∀ x ∈ Set.uIcc a b, HasDerivAt u (du x) x) → (∀ x ∈ Set.uIcc a b, HasDerivAt v (dv x) x) → IntervalIntegrable du volume a b → IntervalIntegrable dv volume a b → (∫ x in a..b, u x * dv x) = u b * v b - u a * v a - (∫ x in a..b, du x * v x)",
+      "proof": "by sorry",
+      "expected": "POLICY_BLOCKED",
+      "source": "sorryAx control"
+    },
+    {
+      "id": "unused-axiom",
+      "original": "安全控制：即使分部积分目标正确，也拒绝未使用的局部公理。",
+      "statement": "∀ (u v du dv : ℝ → ℝ) (a b : ℝ), (∀ x ∈ Set.uIcc a b, HasDerivAt u (du x) x) → (∀ x ∈ Set.uIcc a b, HasDerivAt v (dv x) x) → IntervalIntegrable du volume a b → IntervalIntegrable dv volume a b → (∫ x in a..b, u x * dv x) = u b * v b - u a * v a - (∫ x in a..b, du x * v x)",
+      "proof": "by\n  intro u v du dv a b hu hv hdu hdv\n  exact intervalIntegral.integral_mul_deriv_eq_deriv_mul hu hv hdu hdv",
+      "extra": "axiom unapproved : False",
+      "expected": "POLICY_BLOCKED",
+      "source": "local axiom control"
+    }
+  ]
+}

@@ -1,0 +1,92 @@
+import __MRA_MODULE__
+import Lean
+
+set_option autoImplicit false
+set_option Elab.async false
+set_option maxHeartbeats 400000
+set_option pp.fullNames true
+set_option pp.universes true
+
+open Lean Elab Command Meta in
+elab "mra_application " type:term : command => do
+  let text ← liftIO <| IO.FS.readFile "/work/request.json"
+  let .ok request := Json.parse text | throwError "MRA_APPLICATION_INVALID_REQUEST"
+  let .ok declaration := request.getObjValAs? String "declaration"
+    | throwError "MRA_APPLICATION_INVALID_DECLARATION"
+  let name := (declaration.splitOn ".").foldl Name.str Name.anonymous
+  let info ← getConstInfo name
+  unless info matches .thmInfo _ do
+    throwError "MRA_APPLICATION_REQUIRES_THEOREM"
+  let report ← liftTermElabM do
+    let expected ← Term.elabType type
+    Term.synthesizeSyntheticMVarsNoPostponing
+    unless ← isProp expected do throwError "MRA_APPLICATION_REQUIRES_PROPOSITION"
+    let fullType := (← ppExpr expected).pretty
+    forallTelescope expected fun args target => do
+      let mut context : Array Json := #[]
+      for arg in args do
+        let decl ← arg.fvarId!.getDecl
+        context := context.push <| Json.mkObj [
+          ("name", toJson (← ppExpr arg).pretty),
+          ("type", toJson (← ppExpr decl.type).pretty)]
+      let targetText := (← ppExpr target).pretty
+      let base := [
+        ("schema", toJson "lean-premise-application-v1"),
+        ("declaration", toJson declaration),
+        ("full_type", toJson fullType),
+        ("context", toJson context),
+        ("target", toJson targetText)]
+      try
+        let candidate ← mkConstWithFreshMVarLevels name
+        let goal ← mkFreshExprSyntheticOpaqueMVar target
+        let pending ← goal.mvarId!.apply candidate { allowSynthFailures := true }
+        let mut obligations : Array Json := #[]
+        let mut discharged : Array String := #[]
+        for subgoal in pending do
+          unless ← subgoal.isAssigned do
+            try
+              subgoal.assumption
+              discharged := discharged.push (← ppExpr (← instantiateMVars (.mvar subgoal))).pretty
+            catch _ => pure ()
+        for subgoal in pending do
+          unless ← subgoal.isAssigned do
+            obligations := obligations.push <| Json.mkObj [
+              ("type", toJson (← ppExpr (← instantiateMVars (← subgoal.getType))).pretty),
+              ("context", toJson (← subgoal.withContext <| ppGoal subgoal).pretty)]
+        let applied ← instantiateMVars goal
+        let mut bindings : Array Json := #[]
+        let mut declarationType ← inferType candidate
+        for argument in applied.getAppArgs do
+          declarationType ← whnf declarationType
+          if let .forallE binder domain body kind := declarationType then
+            let binderKind := match kind with
+              | .default => "explicit"
+              | .implicit => "implicit"
+              | .strictImplicit => "strict_implicit"
+              | .instImplicit => "instance"
+            bindings := bindings.push <| Json.mkObj [
+              ("parameter", toJson binder.toString),
+              ("kind", toJson binderKind),
+              ("type", toJson (← ppExpr (← instantiateMVars domain)).pretty),
+              ("value", toJson (← ppExpr argument).pretty)]
+            declarationType := body.instantiate1 argument
+        let unresolved := applied.hasMVar
+        return Json.mkObj <| base ++ [
+          ("state", toJson (if obligations.isEmpty && !unresolved then "NO_OPEN_GOALS" else "OPEN_OBLIGATIONS")),
+          ("application", toJson (← ppExpr applied).pretty),
+          ("bindings", toJson bindings),
+          ("discharged", toJson discharged),
+          ("obligations", toJson obligations),
+          ("unresolved_metavariables", toJson unresolved),
+          ("error", Json.null)]
+      catch error =>
+        return Json.mkObj <| base ++ [
+          ("state", toJson "NO_MATCH"), ("application", Json.null),
+          ("bindings", toJson (#[] : Array Json)),
+          ("discharged", toJson (#[] : Array String)),
+          ("obligations", toJson (#[] : Array Json)),
+          ("unresolved_metavariables", toJson false),
+          ("error", toJson (← error.toMessageData.toString))]
+  logInfo m!"MRA_APPLICATION:{report.compress}"
+
+mra_application (__MRA_STATEMENT__)

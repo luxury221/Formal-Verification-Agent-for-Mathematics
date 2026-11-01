@@ -1,0 +1,101 @@
+{
+  "schema": "int-paper-review-v1",
+  "document": {
+    "id": "integer-bad-proof",
+    "version": 1,
+    "title": "整数真命题，原证明错误",
+    "text": "定理：对任意整数 n，n - 1 < n。\n第一步：断言 n = 0。\n第二步：由第一步得到 n - 1 < n。"
+  },
+  "variables": [
+    "n"
+  ],
+  "assumptions": [],
+  "conclusion": {
+    "op": "lt",
+    "left": {
+      "op": "sub",
+      "left": {
+        "op": "var",
+        "name": "n"
+      },
+      "right": {
+        "op": "num",
+        "value": 1
+      }
+    },
+    "right": {
+      "op": "var",
+      "name": "n"
+    }
+  },
+  "claim_span": [
+    1,
+    1
+  ],
+  "claim_plan": {
+    "direction": "prove",
+    "strategy": "omega",
+    "witnesses": []
+  },
+  "steps": [
+    {
+      "id": "s1",
+      "span": [
+        2,
+        2
+      ],
+      "formula": {
+        "op": "eq",
+        "left": {
+          "op": "var",
+          "name": "n"
+        },
+        "right": {
+          "op": "num",
+          "value": 0
+        }
+      },
+      "depends_on": [],
+      "plan": {
+        "direction": "refute",
+        "strategy": "counterexample",
+        "witnesses": [
+          -1
+        ]
+      }
+    },
+    {
+      "id": "s2",
+      "span": [
+        3,
+        3
+      ],
+      "formula": {
+        "op": "lt",
+        "left": {
+          "op": "sub",
+          "left": {
+            "op": "var",
+            "name": "n"
+          },
+          "right": {
+            "op": "num",
+            "value": 1
+          }
+        },
+        "right": {
+          "op": "var",
+          "name": "n"
+        }
+      },
+      "depends_on": [
+        "s1"
+      ],
+      "plan": {
+        "direction": "prove",
+        "strategy": "omega",
+        "witnesses": []
+      }
+    }
+  ]
+}

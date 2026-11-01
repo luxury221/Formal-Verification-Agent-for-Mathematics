@@ -1,0 +1,72 @@
+{
+  "schema_version": "1",
+  "dataset_id": "nat-arithmetic-v1",
+  "path": "evals/nat-arithmetic-v1/cases.json",
+  "sha256": "bf32357f7c6d59c6556cfb4960b465f34b921978fd91fa0130185e67d06eb898",
+  "domain": "elementary-natural-arithmetic",
+  "license": "project-owned-internal",
+  "consent": "project-development-and-evaluation-only",
+  "provenance": "Repository-authored elementary arithmetic references and Chinese statements; no external benchmark, private paper or model generation. Lean library lemmas are cited by name under the pinned Mathlib/Lean licenses.",
+  "training_use": false,
+  "public_benchmark_imported": false,
+  "splits": {
+    "train": [],
+    "development": [
+      "natv1_add_comm",
+      "natv1_add_absorbs",
+      "natv1_succ_injective",
+      "natv1_succ_fixed",
+      "natv1_le_reflexive",
+      "natv1_lt_reflexive"
+    ],
+    "regression": [
+      "natv1_sub_restore_guarded",
+      "natv1_sub_restore_unconditional",
+      "natv1_add_cancel",
+      "natv1_mul_cancel_unconditional",
+      "natv1_mul_add",
+      "natv1_square_add"
+    ],
+    "reserved": [
+      "natv1_mul_zero_factor_or",
+      "natv1_mul_zero_factor_and",
+      "natv1_add_monotone",
+      "natv1_add_strict_from_le",
+      "natv1_mul_one",
+      "natv1_mul_zero_identity"
+    ]
+  },
+  "families": {
+    "natv1_add_comm": "addition-algebra",
+    "natv1_add_absorbs": "addition-algebra",
+    "natv1_succ_injective": "successor",
+    "natv1_succ_fixed": "successor",
+    "natv1_le_reflexive": "order-reflexivity",
+    "natv1_lt_reflexive": "order-reflexivity",
+    "natv1_sub_restore_guarded": "truncated-subtraction",
+    "natv1_sub_restore_unconditional": "truncated-subtraction",
+    "natv1_add_cancel": "cancellation",
+    "natv1_mul_cancel_unconditional": "cancellation",
+    "natv1_mul_add": "distributivity",
+    "natv1_square_add": "distributivity",
+    "natv1_mul_zero_factor_or": "zero-product",
+    "natv1_mul_zero_factor_and": "zero-product",
+    "natv1_add_monotone": "addition-monotonicity",
+    "natv1_add_strict_from_le": "addition-monotonicity",
+    "natv1_mul_one": "multiplication-identities",
+    "natv1_mul_zero_identity": "multiplication-identities"
+  },
+  "budget": {
+    "model": {
+      "timeout_seconds": 30.0,
+      "max_input_chars": 16000,
+      "max_output_tokens": 2048,
+      "max_output_bytes": 65536
+    },
+    "lean_timeout_seconds": 30.0,
+    "max_generation_attempts": 1,
+    "max_lean_checks_per_case": 1
+  },
+  "reserved_status": "Reserved for future model evaluation; repository-visible and inspected during construction/reference validation. Not an independently blind or historically uncontaminated holdout.",
+  "limitations": "18 hand-authored references in 9 manually assigned families; family-disjoint development/regression/reserved splits with empty training split. Exact normalized text deduplication does not certify semantic independence. Reference checks measure fixture correctness, not generated solution rates, alignment accuracy or model improvement. No training authorization or public redistribution license."
+}

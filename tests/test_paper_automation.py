@@ -12,7 +12,7 @@ from mra.domain import digest
 from mra.paper_automation import PaperAutomationStore
 from mra.paper_pipeline import PaperPump
 from mra.paper_protocol import DEFAULT_BUDGET
-from mra.paper_protocol import chunks, scan_input
+from mra import paper_budget, paper_structure
 from mra.research_flow import atomic
 from mra.tasks import WorkerBusy
 from document_fixtures import source_request
@@ -231,10 +231,17 @@ class AutomaticPaperTests(unittest.TestCase):
         key = row["job_id"]
         with self.store.edit(key) as current:
             current.update(
-                state="RUNNING", active={"kind": "MODEL", "step": "read-0-1", "chunk": 0}
+                state="RUNNING",
+                active={
+                    "kind": "MODEL",
+                    "step": "read-0-1",
+                    "chunk": 0,
+                    "reservation": "model:read-0-1",
+                },
             )
             current["chunks"][0].update(status="WORKING", attempts=1)
-            current["used"].update(model_calls=1, output_tokens_reserved=8192)
+            paper_budget.reserve(current, "model:read-0-1", "output_tokens", 8192)
+            current["used"]["model_calls"] = 1
             current["calls"]["read-0-1"] = {
                 "status": "STARTED",
                 "request_fingerprint": digest("uncertain"),
@@ -282,7 +289,11 @@ class AutomaticPaperTests(unittest.TestCase):
         source = self.store.source(self.store.read(key))
         packet = {
             "source_fingerprint": row["source_fingerprint"],
-            **scan_input(source, chunks(source)[0]),
+            **paper_structure.scan_packet(
+                source,
+                self.store.artifact(self.store.read(key), "structure.json"),
+                self.store.focus(self.store.read(key), self.store.read(key)["chunks"][0], source),
+            ),
             "feedback": None,
         }
         with self.pump.owner() as fd:

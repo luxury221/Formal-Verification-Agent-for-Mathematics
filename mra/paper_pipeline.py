@@ -12,18 +12,17 @@ from .chat_model import ModelConfig
 from .domain import canonical, digest
 from .formalizer import strict_json
 from .model_service import ModelBudget
-from .paper_automation import ACTIVE
+from .paper_automation import ACTIVE, SCHEMA
 from .paper_models import PaperModelRequest, PaperModelService
 from .paper_protocol import (
     MAX_INPUT,
-    audit_result,
     block_context,
-    chunks,
     formal_result,
-    scan_input,
     scan_result,
 )
-from . import paper_kernel
+from . import paper_alignment, paper_budget, paper_kernel, paper_structure
+from .formalizer import exact_object
+from .model_service import text_field
 from .tasks import WorkerBusy, _now
 
 
@@ -71,7 +70,7 @@ class PaperPump:
         # cannot overlap an orphan model or checker supervisor.
         for path in self.store.paths():
             with self.store.edit(path.name) as row:
-                if row["state"] != "RUNNING":
+                if row["schema"] != SCHEMA or row["state"] != "RUNNING":
                     continue
                 if row.get("active_started_at"):
                     elapsed = (
@@ -81,6 +80,7 @@ class PaperPump:
                     row["elapsed_seconds"] += max(0, elapsed)
                 active = row["active"]
                 if active:
+                    paper_budget.uncertain(row, active.get("reservation"))
                     if active["kind"] == "MODEL":
                         row["calls"][active["step"]]["status"] = "INTERRUPTED_COST_UNKNOWN"
                     target = (
@@ -112,6 +112,11 @@ class PaperPump:
             raise InterruptedError("Automatic paper job stopped")
         if self.deadline is not None and time.monotonic() >= self.deadline:
             raise BudgetExhausted("Whole-paper active wall-time budget exhausted")
+        if any(
+            paper_budget.totals(row)[r]["occupied"] > row["budget"][r]
+            for r in paper_budget.RESOURCES
+        ):
+            raise BudgetExhausted("Confirmed resource consumption exceeded the shared allowance")
         self.store.current(row)
         config = ModelConfig.load(self.store.root)
         if config is None:
@@ -123,9 +128,9 @@ class PaperPump:
     def call(self, key, step, task, packet, owner_fd, target):
         config = self.guard(key)
         budget = ModelBudget(
-            timeout_seconds=30,
+            timeout_seconds=90 if task == "paper_formalize" else 60,
             max_input_chars=MAX_INPUT,
-            max_output_tokens=2048 if task == "paper_audit" else 8192,
+            max_output_tokens=16384 if task == "paper_audit" else 8192,
             max_output_bytes=262144,
         )
         request = PaperModelRequest(key + ":" + step, task, canonical(packet).decode(), budget)
@@ -145,19 +150,23 @@ class PaperPump:
             used, limit = row["used"], row["budget"]
             if (
                 used["model_calls"] >= limit["model_calls"]
-                or used["output_tokens_reserved"] + budget.max_output_tokens
-                > limit["output_tokens"]
+                or paper_budget.available(row, "output_tokens") < budget.max_output_tokens
             ):
                 raise BudgetExhausted("Shared model-call or output-token allowance exhausted")
             used["model_calls"] += 1
-            used["output_tokens_reserved"] += budget.max_output_tokens
+            paper_budget.reserve(row, "model:" + step, "output_tokens", budget.max_output_tokens)
             row["calls"][step] = {
                 "status": "STARTED",
                 "request": request_name,
                 "request_fingerprint": request.fingerprint,
                 "response": None,
             }
-            row["active"] = {"kind": "MODEL", "step": step, **target}
+            row["active"] = {
+                "kind": "MODEL",
+                "step": step,
+                "reservation": "model:" + step,
+                **target,
+            }
         service = self.service_factory(
             self.store.root,
             config,
@@ -175,9 +184,10 @@ class PaperPump:
             or response.usage.output_tokens > budget.max_output_tokens
             or len(response.output_json.encode()) > budget.max_output_bytes
         ):
-            raise ValueError("Model response does not match the reserved request")
+            raise OSError("Model response does not match the reserved request; consumption unknown")
         response_name = self.store.put(key, "calls/" + step + "-response.json", asdict(response))
         with self.store.edit(key) as row:
+            paper_budget.settle(row, "model:" + step, response.usage.output_tokens, response_name)
             row["calls"][step].update(status="RESPONDED", response=response_name)
             row["used"]["input_tokens_reported"] += response.usage.input_tokens
             row["used"]["output_tokens_reported"] += response.usage.output_tokens
@@ -206,16 +216,20 @@ class PaperPump:
     def reading(self, key, index, owner_fd):
         row = self.store.read(key)
         source, fp = self.store.source(row), row["source_fingerprint"]
-        focus, target = chunks(source)[index], {"chunk": index}
+        focus, target = self.store.focus(row, row["chunks"][index], source), {"chunk": index}
+        structure = self.store.artifact(row, row["structure"])
         while True:
             self.guard(key)
             chunk = self.store.read(key)["chunks"][index]
-            if chunk["status"] == "GAP":
+            if chunk["status"] in ("GAP", "SPLIT", "ACCEPTED"):
                 return
             attempt = chunk["attempts"] + (chunk["status"] != "WORKING")
             if attempt > row["budget"]["repair_attempts"] + 1:
-                with self.store.edit(key) as current:
-                    current["chunks"][index]["status"] = "GAP"
+                if len(focus) > 1 or sum(len(u["text"]) for u in focus) > 4000:
+                    self.store.split(key, index, "阅读或核对尝试已用尽：" + str(chunk["feedback"]))
+                else:
+                    with self.store.edit(key) as current:
+                        current["chunks"][index]["status"] = "GAP"
                 return
             with self.store.edit(key) as current:
                 current["chunks"][index].update(status="WORKING", attempts=attempt)
@@ -223,10 +237,26 @@ class PaperPump:
             try:
                 packet = {
                     "source_fingerprint": fp,
-                    **scan_input(source, focus, chunk["extra_context"]),
+                    **paper_structure.scan_packet(source, structure, focus, chunk["extra_context"]),
                     "feedback": chunk["feedback"],
                 }
                 raw = self.call(key, prefix, "paper_scan", packet, owner_fd, target)
+                if isinstance(raw, dict) and raw.get("action") == "SPLIT":
+                    exact_object(
+                        raw, {"action", "source_fingerprint", "reason"}, "Adaptive reading split"
+                    )
+                    if raw["source_fingerprint"] != fp:
+                        raise ValueError("Split request does not match fixed source")
+                    text_field(raw["reason"], "Specific split reason", 2000)
+                    self.store.split(key, index, raw["reason"])
+                    return
+                if (
+                    isinstance(raw, dict)
+                    and isinstance(raw.get("obligations"), list)
+                    and len(raw["obligations"]) > 8
+                ):
+                    self.store.split(key, index, "单区数学义务超过 8 项，需要减小阅读粒度")
+                    return
                 reading = scan_result(raw, source, focus, fp)
                 if reading["required_context"]:
                     self.retry(
@@ -237,18 +267,24 @@ class PaperPump:
                     )
                     continue
                 name = self.store.put(key, "readings/" + prefix + ".json", reading)
+                requirements = paper_alignment.reading_requirements(source, focus, reading)
+                if len(requirements) > 128:
+                    self.store.split(key, index, "逐项语义对应超过单次核对上限")
+                    return
                 audit_packet = {
                     **packet,
                     "proposal_fingerprint": digest(reading),
                     "reading": reading,
+                    "alignment_requirements": requirements,
                 }
-                review = audit_result(
+                review = paper_alignment.validate_audit(
                     self.call(
                         key, prefix + "-audit", "paper_audit", audit_packet, owner_fd, target
                     ),
                     source,
                     fp,
                     digest(reading),
+                    requirements,
                 )
                 review_name = self.store.put(key, "readings/" + prefix + "-audit.json", review)
                 if review["decision"] != "ACCEPT":
@@ -282,6 +318,8 @@ class PaperPump:
                             "candidate": None,
                             "receipt": None,
                             "kernel_directory": None,
+                            "target_contract": None,
+                            "attempt_contract": None,
                         }
                     )
                 with self.store.edit(key) as current:
@@ -310,8 +348,10 @@ class PaperPump:
                     by_block.setdefault(quote["block_id"], set()).add(i)
         unresolved_blocks = set()
         for chunk in row["chunks"]:
-            if chunk["status"] != "ACCEPTED":
-                unresolved_blocks.update(u["block_id"] for u in chunks(source)[chunk["index"]])
+            if not chunk.get("children") and chunk["status"] != "ACCEPTED":
+                unresolved_blocks.update(
+                    u["block_id"] for u in self.store.focus(row, chunk, source)
+                )
         with self.store.edit(key) as current:
             for i, proposal in proposals.items():
                 current["items"][i]["dependencies"] = sorted(
@@ -344,7 +384,10 @@ class PaperPump:
                     current["items"][item_id]["status"] = "GAP"
                 return
             with self.store.edit(key) as current:
+                if item["status"] != "WORKING":
+                    current["items"][item_id]["attempt_contract"] = item.get("target_contract")
                 current["items"][item_id].update(status="WORKING", attempts=attempt)
+            item = self.store.read(key)["items"][item_id]
             prefix = f"formal-{item_id}-{attempt}"
             try:
                 ids = list(
@@ -363,6 +406,11 @@ class PaperPump:
                     "context": block_context(source, ids),
                     "languages": paper_kernel.languages(),
                     "feedback": item["feedback"],
+                    "locked_target": self.store.artifact(
+                        self.store.read(key), item["attempt_contract"]
+                    )
+                    if item.get("attempt_contract")
+                    else None,
                 }
                 proposal = formal_result(
                     self.call(key, prefix, "paper_formalize", packet, owner_fd, target),
@@ -382,20 +430,37 @@ class PaperPump:
                             status="UNSUPPORTED", feedback="; ".join(proposal["questions"])
                         )
                     return
-                remaining = (
-                    self.store.read(key)["budget"]["kernel_seconds"]
-                    - self.store.read(key)["used"]["kernel_seconds_reserved"]
-                )
-                if remaining < 1:
-                    raise BudgetExhausted("Shared kernel-worker time allowance exhausted")
-                candidate = paper_kernel.compile_candidate(
-                    proposal["profile"],
-                    proposal["request"],
-                    obligation["content"],
-                    min(30, remaining),
-                )
-                candidate_name = self.store.put(key, "candidates/" + prefix + ".json", candidate)
-                review = audit_result(
+                current = self.store.read(key)
+                candidate_name = "candidates/" + prefix + ".json"
+                if candidate_name in current["artifacts"]:
+                    candidate = self.store.artifact(current, candidate_name)
+                else:
+                    remaining = paper_budget.available(current, "kernel_seconds")
+                    if remaining < 1:
+                        raise BudgetExhausted("Shared kernel-worker time allowance exhausted")
+                    candidate = paper_kernel.compile_candidate(
+                        proposal["profile"],
+                        proposal["request"],
+                        obligation["content"],
+                        min(30, int(remaining)),
+                    )
+                    self.store.put(key, candidate_name, candidate)
+                if item.get("target_contract"):
+                    locked = self.store.artifact(self.store.read(key), item["target_contract"])
+                    if locked["target_fingerprint"] != paper_alignment.target_fingerprint(
+                        candidate
+                    ):
+                        raise ValueError(
+                            "Locked semantic target changed; repair may only change proof or strategy"
+                        )
+                requirements = paper_alignment.formal_requirements(source, obligation, candidate)
+                if len(requirements) > 128:
+                    with self.store.edit(key) as current:
+                        current["items"][item_id].update(
+                            status="GAP", feedback="形式化逐项对应超过核对上限，需要拆解原始义务"
+                        )
+                    return
+                review = paper_alignment.validate_audit(
                     self.call(
                         key,
                         prefix + "-audit",
@@ -404,6 +469,7 @@ class PaperPump:
                             **packet,
                             "candidate": candidate,
                             "proposal_fingerprint": digest(candidate),
+                            "alignment_requirements": requirements,
                         },
                         owner_fd,
                         target,
@@ -411,6 +477,8 @@ class PaperPump:
                     source,
                     fp,
                     digest(candidate),
+                    requirements,
+                    candidate,
                 )
                 review_name = self.store.put(key, "candidates/" + prefix + "-audit.json", review)
                 if review["decision"] != "ACCEPT":
@@ -423,11 +491,48 @@ class PaperPump:
                     continue
                 self.guard(key)
                 kernel_name = "kernel/" + prefix
+                contract_name = item.get("target_contract") or self.store.put(
+                    key,
+                    "candidates/" + prefix + "-target.json",
+                    {
+                        "target_fingerprint": paper_alignment.target_fingerprint(candidate),
+                        "semantic_target": paper_alignment.semantic_target(candidate),
+                        "source_fingerprint": fp,
+                        "obligation_fingerprint": digest(obligation),
+                        "audit": review_name,
+                    },
+                )
                 with self.store.edit(key) as current:
-                    current["used"]["kernel_seconds_reserved"] += candidate["request"][
-                        "timeout_seconds"
-                    ]
-                    current["active"] = {"kind": "KERNEL", "item": item_id}
+                    current["items"][item_id]["target_contract"] = contract_name
+                receipt_name = "candidates/" + prefix + "-receipt.json"
+                current = self.store.read(key)
+                if (
+                    receipt_name in current["artifacts"]
+                    and current["items"][item_id].get("receipt") == receipt_name
+                ):
+                    receipt = self.store.artifact(current, receipt_name)
+                    try:
+                        paper_kernel.validate_receipt(
+                            self.store.directory(key) / kernel_name, candidate, receipt
+                        )
+                    except (OSError, ValueError, KeyError, TypeError) as error:
+                        raise RuntimeError(
+                            "Committed kernel checkpoint evidence changed"
+                        ) from error
+                    self.finish_kernel(key, item_id, target, receipt)
+                    if receipt["kernel_status"] == "KERNEL_CHECKED":
+                        return
+                    continue
+                with self.store.edit(key) as current:
+                    allowance = candidate["request"]["timeout_seconds"]
+                    if allowance > paper_budget.available(current, "kernel_seconds"):
+                        raise BudgetExhausted("Shared kernel-worker time allowance exhausted")
+                    paper_budget.reserve(current, "kernel:" + prefix, "kernel_seconds", allowance)
+                    current["active"] = {
+                        "kind": "KERNEL",
+                        "item": item_id,
+                        "reservation": "kernel:" + prefix,
+                    }
                     current["items"][item_id].update(
                         candidate=candidate_name,
                         receipt=None,
@@ -453,32 +558,57 @@ class PaperPump:
                     raise RuntimeError(
                         "Kernel artifact or receipt integrity check failed"
                     ) from error
+                if receipt.get("kernel_status") not in ("KERNEL_CHECKED", "UNKNOWN", "UNAVAILABLE"):
+                    raise RuntimeError("Invalid kernel receipt status; reservation retained")
+                try:
+                    paper_kernel.validate_receipt(
+                        self.store.directory(key) / kernel_name, candidate, receipt
+                    )
+                except (OSError, ValueError, KeyError, TypeError) as error:
+                    raise RuntimeError(
+                        "Kernel receipt could not confirm resource consumption"
+                    ) from error
                 receipt_name = self.store.put(
                     key, "candidates/" + prefix + "-receipt.json", receipt
                 )
                 with self.store.edit(key) as current:
+                    if receipt["kernel_status"] == "UNAVAILABLE":
+                        paper_budget.uncertain(current, "kernel:" + prefix)
+                    else:
+                        paper_budget.settle(
+                            current, "kernel:" + prefix, receipt["worker_seconds"], receipt_name
+                        )
                     current["used"]["kernel_seconds_reported"] += receipt["worker_seconds"]
                     current["items"][item_id]["receipt"] = receipt_name
                     current["active"] = None
                 self.guard(key)
-                if receipt["kernel_status"] == "UNAVAILABLE":
-                    self.retry(key, target, "验证环境不可用：" + str(receipt.get("diagnostic")))
-                    raise KernelInterrupted(
-                        "Kernel setup or integrity validation unavailable; no automatic model repair"
-                    )
+                self.finish_kernel(key, item_id, target, receipt)
                 if receipt["kernel_status"] == "KERNEL_CHECKED":
-                    with self.store.edit(key) as current:
-                        current["items"][item_id].update(status="KERNEL_CHECKED", feedback=None)
                     return
-                self.retry(
-                    key, target, "真实检查未通过（不代表反驳）：" + str(receipt.get("diagnostic"))
-                )
             except (ValueError, KeyError, TypeError, RecursionError) as error:
                 self.retry(key, target, "形式化响应未满足协议：" + str(error))
 
+    def finish_kernel(self, key, item_id, target, receipt):
+        if receipt["kernel_status"] == "UNAVAILABLE":
+            self.retry(key, target, "验证环境不可用：" + str(receipt.get("diagnostic")))
+            raise KernelInterrupted(
+                "Kernel setup or integrity validation unavailable; no automatic model repair"
+            )
+        if receipt["kernel_status"] == "KERNEL_CHECKED":
+            with self.store.edit(key) as current:
+                current["items"][item_id].update(status="KERNEL_CHECKED", feedback=None)
+        else:
+            self.retry(
+                key, target, "真实检查未通过（不代表反驳）：" + str(receipt.get("diagnostic"))
+            )
+
     def execute(self, key, owner_fd):
         row = self.store.read(key)
-        if row["state"] not in ("QUEUED", "WAITING_FOR_SOURCE") or row["cancel_requested"]:
+        if (
+            row["schema"] != SCHEMA
+            or row["state"] not in ("QUEUED", "WAITING_FOR_SOURCE")
+            or row["cancel_requested"]
+        ):
             return
         doc = self.store.current(row)
         if not row["source_fingerprint"]:
@@ -492,11 +622,13 @@ class PaperPump:
                 return
             source = self.store.documents.draft(row["document_id"])
             self.store.put(key, "source.json", source)
+            self.store.put(key, "structure.json", paper_structure.build_index(source))
             with self.store.edit(key) as current:
                 current.update(
                     source_fingerprint=digest(source),
                     chunks=self.store.chunk_records(source),
                     state="QUEUED",
+                    structure="structure.json",
                 )
         config = ModelConfig.load(self.store.root)
         if config is None:
@@ -521,9 +653,19 @@ class PaperPump:
             self.guard(key)
             row = self.store.read(key)
             if row["stage"] == "READING":
-                for chunk in row["chunks"]:
-                    if chunk["status"] not in ("ACCEPTED", "GAP"):
-                        self.reading(key, chunk["index"], owner_fd)
+                while True:
+                    row = self.store.read(key)
+                    pending_chunk = next(
+                        (
+                            c
+                            for c in row["chunks"]
+                            if c["status"] not in ("ACCEPTED", "GAP", "SPLIT")
+                        ),
+                        None,
+                    )
+                    if pending_chunk is None:
+                        break
+                    self.reading(key, pending_chunk["index"], owner_fd)
                 self.dependencies(key)
             while True:
                 self.guard(key)
@@ -552,9 +694,11 @@ class PaperPump:
                     break
                 self.formalize(key, available, owner_fd)
             row = self.store.read(key)
-            gaps = any(c["status"] != "ACCEPTED" or c["feedback"] for c in row["chunks"]) or any(
-                i["status"] != "KERNEL_CHECKED" for i in row["items"].values()
-            )
+            gaps = any(
+                (c["status"] != "ACCEPTED" or c["feedback"])
+                for c in row["chunks"]
+                if not c.get("children")
+            ) or any(i["status"] != "KERNEL_CHECKED" for i in row["items"].values())
             state = "COMPLETED_WITH_GAPS" if gaps else "COMPLETED"
         except InterruptedError as caught:
             state = (
@@ -587,6 +731,7 @@ class PaperPump:
                 # advances its attempt; no duplicate unknown-charge request.
                 if current["active"]:
                     active = current["active"]
+                    paper_budget.uncertain(current, active.get("reservation"))
                     if active["kind"] == "MODEL":
                         current["calls"][active["step"]]["status"] = "INTERRUPTED_COST_UNKNOWN"
                     target = (
@@ -618,7 +763,11 @@ class PaperPump:
                 while not self.stopped.is_set():
                     for path in self.store.paths():
                         row = self.store.read(path.name)
-                        if row["state"] not in ACTIVE or row["state"] == "RUNNING":
+                        if (
+                            row["schema"] != SCHEMA
+                            or row["state"] not in ACTIVE
+                            or row["state"] == "RUNNING"
+                        ):
                             continue
                         self.current_id, self.state = path.name, "RUNNING"
                         try:

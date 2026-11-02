@@ -13,13 +13,15 @@ from .document_intake import DocumentStore, read_json, request_id
 from .domain import digest
 from .formalizer import exact_object
 from .integrity import file_hash
-from .paper_protocol import SCHEMA, DEFAULT_BUDGET, MAX_BUDGET, budget, chunks
+from .paper_protocol import SCHEMA as LEGACY_SCHEMA, DEFAULT_BUDGET, MAX_BUDGET, budget, chunks
+from . import paper_budget, paper_structure
 from .research_flow import atomic, identifier, lease
 from .tasks import WorkerBusy, _now
 
 ACTIVE = ("QUEUED", "WAITING_FOR_SOURCE", "RUNNING")
 RESUMABLE = ("WAITING_FOR_MODEL", "INTERRUPTED", "MODEL_ERROR", "EXECUTION_ERROR")
 CODE_ROOT = Path(__file__).resolve().parents[1]
+SCHEMA = "whole-paper-automation-v2"
 
 
 @contextmanager
@@ -77,7 +79,7 @@ class PaperAutomationStore:
 
     def read(self, key):
         row = read_json(self.directory(key) / "record.json")
-        if row["job_id"] != key or row["schema"] != SCHEMA:
+        if row["job_id"] != key or row["schema"] not in (SCHEMA, LEGACY_SCHEMA):
             raise ValueError("Paper job identity changed")
         return row
 
@@ -140,6 +142,8 @@ class PaperAutomationStore:
                     self.documents.draft(raw["document_id"]) if doc["state"] == "READY" else None
                 )
             key = "paperauto-" + uuid.uuid4().hex
+            plan = self.chunk_records(source) if source else []
+            index = paper_structure.build_index(source) if source else None
             staging = self.base / (".staging-" + uuid.uuid4().hex)
             staging.mkdir(mode=0o700)
             row = {
@@ -159,10 +163,13 @@ class PaperAutomationStore:
                 "source_fingerprint": digest(source) if source else None,
                 "implementation": implementation(),
                 "model": None,
+                "structure": "structure.json" if source else None,
+                "accounting_schema": paper_budget.SCHEMA,
+                "reservations": {},
                 "budget": limits,
                 "cancel_requested": False,
                 "error": None,
-                "chunks": self.chunk_records(source) if source else [],
+                "chunks": plan,
                 "items": {},
                 "artifacts": {},
                 "calls": {},
@@ -181,6 +188,8 @@ class PaperAutomationStore:
             if source:
                 atomic(staging / "source.json", source)
                 row["artifacts"]["source.json"] = file_hash(staging / "source.json")
+                atomic(staging / "structure.json", index)
+                row["artifacts"]["structure.json"] = file_hash(staging / "structure.json")
             atomic(staging / "record.json", row)
             staging.rename(self.directory(key))
             fd = os.open(self.base, os.O_RDONLY | os.O_DIRECTORY)
@@ -201,9 +210,55 @@ class PaperAutomationStore:
                 "feedback": None,
                 "reading": None,
                 "audit": None,
+                "parent": None,
+                "children": [],
+                "depth": 0,
+                "focus": refs,
             }
-            for i, _ in enumerate(chunks(source))
+            for i, refs in enumerate(paper_structure.partition(source))
         ]
+
+    def focus(self, row, chunk, source=None):
+        source = source or self.source(row)
+        if row["schema"] == LEGACY_SCHEMA:
+            return chunks(source)[chunk["index"]]
+        return paper_structure.materialize(source, chunk["focus"])
+
+    def split(self, key, index, reason):
+        row = self.read(key)
+        children = paper_structure.split_focus(self.source(row), row["chunks"][index]["focus"])
+        with self.edit(key) as current:
+            parent = current["chunks"][index]
+            if parent["children"]:
+                return
+            if (
+                children is None
+                or parent["depth"] >= paper_structure.MAX_DEPTH
+                or len(current["chunks"]) + 2 > paper_structure.MAX_CHUNKS
+            ):
+                parent.update(
+                    status="GAP",
+                    feedback="无法继续拆分（粒度、深度或任务数量上限）：" + reason[:4000],
+                )
+                return
+            indices = []
+            for refs in children:
+                child = {
+                    "index": len(current["chunks"]),
+                    "parent": index,
+                    "children": [],
+                    "depth": parent["depth"] + 1,
+                    "focus": refs,
+                    "status": "PENDING",
+                    "attempts": 0,
+                    "extra_context": list(parent["extra_context"]),
+                    "feedback": None,
+                    "reading": None,
+                    "audit": None,
+                }
+                indices.append(child["index"])
+                current["chunks"].append(child)
+            parent.update(status="SPLIT", children=indices, feedback=reason[:4000])
 
     def put(self, key, name, value):
         p = self.directory(key) / name
@@ -278,6 +333,10 @@ class PaperAutomationStore:
                         if row["state"] != "RUNNING":
                             row["state"] = "CANCELLED"
                 else:
+                    if row["schema"] != SCHEMA:
+                        raise ValueError(
+                            "Historical v1 jobs cannot resume under v2; create a new job"
+                        )
                     if row["state"] not in RESUMABLE:
                         raise ValueError("Only a paused or interrupted job can resume")
                     self.current(row)
@@ -304,6 +363,8 @@ class PaperAutomationStore:
         result["coverage_scope"] = "EXTRACTED_TEXT_ONLY"
         result["extraction_fidelity_certified"] = False
         result["original_semantic_alignment_certified"] = False
+        result["legacy_job"] = row["schema"] == LEGACY_SCHEMA
+        result["accounting"] = paper_budget.totals(row) if not result["legacy_job"] else None
         try:
             self.current(row)
             for name in row["artifacts"]:
@@ -318,14 +379,23 @@ class PaperAutomationStore:
             result.update(stale=True, availability_error=str(error)[:1000])
         source = self.source(row) if row["source_fingerprint"] and not result["stale"] else None
         result["source"] = source
+        result["structure_index"] = (
+            self.artifact(row, row["structure"]) if source and row.get("structure") else None
+        )
         coverage, items = [], []
+        result["reading_audits"] = []
         if source:
-            partition = chunks(source)
             for chunk in row["chunks"]:
+                if chunk.get("children"):
+                    continue
                 readings = self.artifact(row, chunk["reading"]) if chunk["reading"] else None
                 accepted = chunk["status"] == "ACCEPTED"
                 by_id = {x["unit_id"]: x for x in readings["coverage"]} if accepted else {}
-                for unit in partition[chunk["index"]]:
+                if chunk.get("audit"):
+                    result["reading_audits"].append(
+                        {"chunk": chunk["index"], "audit": self.artifact(row, chunk["audit"])}
+                    )
+                for unit in self.focus(row, chunk, source):
                     coverage.append(
                         {
                             "unit_id": unit["id"],
@@ -333,6 +403,7 @@ class PaperAutomationStore:
                             "span": unit["span"],
                             "reading_status": chunk["status"],
                             "reading_accepted": accepted,
+                            "chunk": chunk["index"],
                             **by_id.get(
                                 unit["id"],
                                 {
@@ -349,6 +420,10 @@ class PaperAutomationStore:
                 view["obligation"] = self.artifact(row, item["obligation"])
                 if item.get("candidate"):
                     view["candidate"] = self.artifact(row, item["candidate"])
+                if item.get("semantic_audit"):
+                    view["component_audit"] = self.artifact(row, item["semantic_audit"])
+                if item.get("target_contract"):
+                    view["locked_target"] = self.artifact(row, item["target_contract"])
                 if item.get("receipt"):
                     receipt = self.artifact(row, item["receipt"])
                     try:
@@ -368,7 +443,9 @@ class PaperAutomationStore:
         result["summary"] = {
             "source_blocks": len(source["blocks"]) if source else None,
             "source_characters": sum(len(b["text"]) for b in source["blocks"]) if source else None,
-            "reading_units": sum(len(c) for c in chunks(source)) if source else None,
+            "reading_units": len(coverage) if source else None,
+            "reading_leaves": sum(not c.get("children") for c in row["chunks"]),
+            "split_chunks": sum(bool(c.get("children")) for c in row["chunks"]),
             "reading_units_accepted": sum(c["reading_accepted"] for c in coverage),
             "obligations": len(items),
             "kernel_candidates_checked": sum(i["status"] == "KERNEL_CHECKED" for i in items),
@@ -398,4 +475,7 @@ class PaperAutomationStore:
             "profiles": ["typed", "calculus", "proof2"],
             "whole_article_verified": False,
             "human_review_generated": False,
+            "maximum_reading_chunks": paper_structure.MAX_CHUNKS,
+            "maximum_split_depth": paper_structure.MAX_DEPTH,
+            "accounting_schema": paper_budget.SCHEMA,
         }

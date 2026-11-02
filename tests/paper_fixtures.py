@@ -86,7 +86,7 @@ def reading(packet):
 
 
 def audit(packet):
-    return {
+    result = {
         "source_fingerprint": packet["source_fingerprint"],
         "proposal_fingerprint": packet["proposal_fingerprint"],
         "decision": "ACCEPT",
@@ -94,6 +94,25 @@ def audit(packet):
         "issues": [],
         "required_context": [],
     }
+    if "alignment_requirements" in packet:
+        result["alignments"] = []
+        counts = {}
+        for row in packet["alignment_requirements"]:
+            paths = row["formal_paths"]
+            if row["kind"] in ("assumptions", "conclusion"):
+                index = counts.get(row["kind"], 0)
+                counts[row["kind"]] = index + 1
+                paths = paths[index : index + 1]
+            result["alignments"].append(
+                {
+                    "id": row["id"],
+                    "source_refs": deepcopy(row["origins"][:1]),
+                    "formal_paths": deepcopy(paths),
+                    "relation": "MATCH",
+                    "explanation": "Scripted correspondence fixture; not evidence of mathematical interpretation quality",
+                }
+            )
+    return result
 
 
 class FixtureService:

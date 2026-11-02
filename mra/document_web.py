@@ -2,6 +2,8 @@
 
 from urllib.parse import urlsplit
 
+from .document_intake import capabilities
+
 
 def dispatch(handler, write):
     parsed = urlsplit(handler.path)
@@ -12,19 +14,7 @@ def dispatch(handler, write):
         raise ValueError("Document routes do not accept query parameters")
     store = handler.server.documents
     if len(parts) == 4 and parts[3] == "capabilities" and not write:
-        runtime = store.runtime_root / ".runtime/document-ingestion-v1"
-        handler.reply(
-            200,
-            {
-                "pdf": (runtime / "python/bin/python").is_file(),
-                "ocr": (runtime / "ocr/usr/bin/tesseract").is_file()
-                and (
-                    runtime / "ocr/usr/share/tesseract-ocr/4.00/tessdata/eng.traineddata"
-                ).is_file(),
-                "ocr_language": "English",
-                "remote_uploads": False,
-            },
-        )
+        handler.reply(200, capabilities(store.runtime_root))
         return True
     if len(parts) == 3:
         if write:

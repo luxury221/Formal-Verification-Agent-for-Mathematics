@@ -24,6 +24,22 @@ CODE_ROOT = Path(__file__).resolve().parents[1]
 SCHEMA = "whole-paper-automation-v2"
 
 
+def capabilities(root):
+    """Describe the existing pipeline without opening ledgers or executing work."""
+    return {
+        "schema": SCHEMA,
+        "model": model_status(root),
+        "default_budget": deepcopy(DEFAULT_BUDGET),
+        "maximum_budget": deepcopy(MAX_BUDGET),
+        "profiles": ["typed", "calculus", "proof2"],
+        "whole_article_verified": False,
+        "human_review_generated": False,
+        "maximum_reading_chunks": paper_structure.MAX_CHUNKS,
+        "maximum_split_depth": paper_structure.MAX_DEPTH,
+        "accounting_schema": paper_budget.SCHEMA,
+    }
+
+
 @contextmanager
 def metadata_lease(directory):
     """Wait briefly for a concurrent extractor's short metadata commit."""
@@ -467,15 +483,4 @@ class PaperAutomationStore:
         ]
 
     def capabilities(self):
-        return {
-            "schema": SCHEMA,
-            "model": model_status(self.root),
-            "default_budget": DEFAULT_BUDGET,
-            "maximum_budget": MAX_BUDGET,
-            "profiles": ["typed", "calculus", "proof2"],
-            "whole_article_verified": False,
-            "human_review_generated": False,
-            "maximum_reading_chunks": paper_structure.MAX_CHUNKS,
-            "maximum_split_depth": paper_structure.MAX_DEPTH,
-            "accounting_schema": paper_budget.SCHEMA,
-        }
+        return capabilities(self.root)

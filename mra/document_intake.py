@@ -31,6 +31,22 @@ MAX_SOURCES = 1024 * 1024
 MAX_DOCUMENTS = 30
 
 
+def capabilities(root):
+    """Presence hints only; no environment validation, worker start or storage writes."""
+    runtime = Path(root).resolve() / ".runtime/document-ingestion-v1"
+    return {
+        "pdf": (runtime / "python/bin/python").is_file(),
+        "ocr": (runtime / "ocr/usr/bin/tesseract").is_file()
+        and (runtime / "ocr/usr/share/tesseract-ocr/4.00/tessdata/eng.traineddata").is_file(),
+        "ocr_language": "English",
+        "remote_uploads": False,
+        "source_formats": ["html", "tex"],
+        "maximum_pdf_bytes": MAX_PDF,
+        "maximum_source_bytes": MAX_SOURCES,
+        "runtime_assurance": "FILE_PRESENCE_ONLY",
+    }
+
+
 def request_id(value):
     if not isinstance(value, str) or not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9._-]{0,99}", value):
         raise ValueError("Invalid document request identifier")

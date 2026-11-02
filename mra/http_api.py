@@ -741,6 +741,18 @@ class WorkbenchHandler(BaseHTTPRequestHandler):
             if not write and self.path in self.server.assets:
                 raw, mime = self.server.assets[self.path]
                 return self.reply(200, raw, mime)
+            if self.path.split("?", 1)[0] == "/v1/capabilities":
+                if write or self.path != "/v1/capabilities":
+                    raise ValueError("Capabilities use GET without query parameters")
+                from .workflows import capabilities
+
+                value = capabilities(self.server.root)
+                for name in ("document", "paper"):
+                    pump = getattr(self.server, name + "_pump")
+                    value["workers"][name] = (
+                        pump.snapshot() if pump else {"state": "EXTERNAL", "error": None}
+                    )
+                return self.reply(200, value)
             if not write and self.path == "/v1/session":
                 return self.reply(
                     200,

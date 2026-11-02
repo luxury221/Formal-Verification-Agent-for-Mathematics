@@ -18,9 +18,26 @@ MAX_DEPTH = 96
 MAX_NODES = 24000
 ERRORS = (OSError, ValueError, TypeError, KeyError, RuntimeError, sqlite3.Error)
 
-# No worker, recovery, model generation, arbitrary Lean, filesystem or shell tool.
+# Tools enqueue existing work; no worker execution, inline model generation or shell.
 TOOLS = {
     "catalog": (set(), False),
+    "workflow.capabilities": (set(), False),
+    "document.capabilities": (set(), False),
+    "document.import": ({"request"}, True),
+    "document.list": (set(), False),
+    "document.status": ({"document_id"}, False),
+    "document.draft": ({"document_id"}, False),
+    "document.cancel": ({"document_id"}, True),
+    "paper.capabilities": (set(), False),
+    "paper.create": ({"request"}, True),
+    "paper.list": (set(), False),
+    "paper.status": ({"job_id"}, False),
+    "paper.artifact": ({"job_id", "name"}, False),
+    "paper.cancel": ({"job_id", "request"}, True),
+    "paper.resume": ({"job_id", "request"}, True),
+    "study.create": ({"request"}, True),
+    "study.list": (set(), False),
+    "study.scaffold": ({"study_id", "request"}, True),
     "mathlib.search": ({"query", "limit"}, False),
     "study.report": ({"study_id"}, False),
     "formalization.preview": ({"study_id", "node_id", "backend", "formalization"}, False),
@@ -134,6 +151,9 @@ class CoreToolAPI:
             "audit_reads_may_persist_invalidation": True,
             "executes_lean": False,
             "generates_model_output": False,
+            "may_enqueue_model_work": True,
+            "starts_worker": False,
+            "worker_execution": "EXTERNAL",
             "automatic_retry": False,
             "scope": "Local business tools; authoritative stores retain review, budgets and evidence",
         }
@@ -141,16 +161,24 @@ class CoreToolAPI:
     @staticmethod
     def _receipt(tool, args, result=None):
         value = {"tool": tool}
-        for name in ("study_id", "graph_id"):
+        for name in ("study_id", "graph_id", "document_id", "job_id"):
             if name in args:
                 value[name] = args[name]
         request = args.get("request", {})
         if isinstance(request, dict):
-            for name in ("request_id", "attempt_id", "round_id"):
+            for name in ("request_id", "attempt_id", "round_id", "document_id"):
                 if name in request:
                     value[name] = request[name]
         if isinstance(result, dict):
-            for name in ("study_id", "graph_id", "attempt_id", "child_id", "revision"):
+            for name in (
+                "study_id",
+                "graph_id",
+                "attempt_id",
+                "child_id",
+                "revision",
+                "document_id",
+                "job_id",
+            ):
                 if name in result:
                     value[name] = result[name]
             if tool == "study.transfer":
@@ -240,6 +268,43 @@ class CoreToolAPI:
     def _dispatch(self, tool, args):
         if tool == "catalog":
             return self.catalog()
+        if tool == "workflow.capabilities":
+            from .workflows import capabilities
+
+            return capabilities(self.root)
+        if tool.startswith("document."):
+            from .document_intake import DocumentStore, capabilities
+
+            if tool == "document.capabilities":
+                return capabilities(self.root)
+            store = DocumentStore(self.root)
+            if tool == "document.import":
+                return store.create(args["request"])
+            if tool == "document.list":
+                return {"documents": store.listing()}
+            method = {
+                "document.status": "report",
+                "document.draft": "draft",
+                "document.cancel": "cancel",
+            }[tool]
+            return getattr(store, method)(args["document_id"])
+        if tool.startswith("paper."):
+            from .paper_automation import PaperAutomationStore, capabilities
+
+            if tool == "paper.capabilities":
+                return capabilities(self.root)
+            store = PaperAutomationStore(self.root)
+            if tool == "paper.create":
+                return store.create(args["request"])
+            if tool == "paper.list":
+                return {"jobs": store.listing()}
+            key = args["job_id"]
+            if tool == "paper.status":
+                return store.report(key)
+            if tool == "paper.artifact":
+                # Read only manifest-registered, hash-matched JSON under this job.
+                return store.artifact(store.read(key), args["name"])
+            return store.action(key, tool.removeprefix("paper."), args["request"])
         if tool == "mathlib.search":
             from .premise_search import PremiseIndex
 
@@ -251,7 +316,13 @@ class CoreToolAPI:
         from .research_studio import StudioStore, backend_store
 
         studio = StudioStore(self.root)
+        if tool == "study.create":
+            return studio.create(args["request"])
+        if tool == "study.list":
+            return {"studies": studio.listing()}
         key = args["study_id"]
+        if tool == "study.scaffold":
+            return studio.scaffold(key, args["request"])
         if tool == "study.report":
             return studio.report(key)
         if tool == "formalization.preview":

@@ -138,6 +138,29 @@ class CoreToolTests(unittest.TestCase):
         )
         self.assertNotIn("math_verdict", result)
 
+    def test_create_list_and_scaffold_use_original_study_identity_and_revision(self):
+        data = {"request_id": "created-through-tool", "source": source("分析")}
+        first = self.invoke("study.create", writer=True, request=data)
+        key = first["receipt"]["study_id"]
+        replay = self.invoke("study.create", writer=True, request=data)
+        self.assertEqual(replay["receipt"]["study_id"], key)
+        self.assertEqual(len(self.invoke("study.list")["result"]["studies"]), 2)
+        change = {"request_id": "initial-plan", "expected_revision": first["result"]["revision"]}
+        reply = self.invoke("study.scaffold", writer=True, study_id=key, request=change)
+        self.assertEqual(reply["call_status"], "RETURNED", reply)
+        self.assertEqual(reply["receipt"]["request_id"], "initial-plan")
+        plan = reply["result"]["plans"][-1]
+        self.assertEqual(plan["producer"]["kind"], "original-question-scaffold")
+        self.assertEqual(plan["plan"]["steps"][-1]["statement"], data["source"]["question"])
+        again = self.invoke("study.scaffold", writer=True, study_id=key, request=change)
+        self.assertEqual(again["result"], reply["result"])
+        stale = {"request_id": "stale-plan", "expected_revision": first["result"]["revision"]}
+        self.assertEqual(
+            self.invoke("study.scaffold", writer=True, study_id=key, request=stale)["call_status"],
+            "FAILED",
+        )
+        self.assertEqual(reply["result"]["math_verdict"], "UNKNOWN")
+
     def test_duplicate_keys_nonstandard_numbers_utf8_and_depth_fail_before_dispatch(self):
         valid = core_tools.encode(self.request("catalog"))
         too_deep = b'{"tree":' + b"[" * 100 + b"0" + b"]" * 100 + b"}"

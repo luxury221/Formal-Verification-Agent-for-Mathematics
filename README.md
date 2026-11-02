@@ -120,6 +120,10 @@ python3 ops/scripts/seal_runtime.py
 
 ## 开发与文档
 
+整体模块、当前边界与接下来的三个交付见[框架总览](docs/product/framework-overview.md)。
+统一能力入口为 `GET /v1/capabilities` 或本地工具 `workflow.capabilities`；现有工具已覆盖文档导入、
+全文任务生命周期与研究任务入口，仍由原领域模块管理预算、审核和数学证据。
+
 ```bash
 python3 ops/scripts/check_source.py
 python3 ops/scripts/run_tests.py --suite source

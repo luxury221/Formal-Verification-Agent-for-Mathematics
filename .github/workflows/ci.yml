@@ -1,9 +1,14 @@
-name: P0 quality gates
+name: Source contracts and real Lean smoke
 
 on:
   push:
   pull_request:
   workflow_dispatch:
+    inputs:
+      real_lean:
+        description: Prepare the pinned base runtime and run four actual Lean/replay smoke checks
+        type: boolean
+        default: false
 
 permissions:
   contents: read
@@ -11,12 +16,26 @@ permissions:
 jobs:
   contracts:
     runs-on: ubuntu-22.04
+    timeout-minutes: 15
+    env:
+      MRA_REAL_LEAN: "0"
+      MRA_DOCUMENT_RUNTIME: "0"
+      MRA_REAL_EVIDENCE_READ: "0"
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
       - run: python3 ops/scripts/check_source.py
-      - run: python3 -m unittest discover -s tests -v
+      - run: python3 ops/scripts/run_tests.py --suite source --report artifacts/ci/source.json -v
+      - name: Preserve the exact selected, deferred and skipped test inventory
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2, MIT
+        with:
+          name: source-test-report
+          path: artifacts/ci/source.json
+          if-no-files-found: error
+          retention-days: 14
   real-lean:
-    if: github.event_name == 'workflow_dispatch'
+    needs: contracts
+    if: github.event_name == 'workflow_dispatch' && inputs.real_lean
     runs-on: ubuntu-22.04
     timeout-minutes: 30
     steps:
@@ -26,5 +45,12 @@ jobs:
       - run: python3 ops/scripts/bootstrap_mathlib.py
       - run: python3 ops/scripts/prepare_mathlib_cache.py
       - run: python3 ops/scripts/seal_runtime.py
-      - run: MRA_REAL_LEAN=1 python3 -m unittest discover -s tests -v
-      - run: python3 -m mra benchmark
+      - run: MRA_REAL_LEAN=1 python3 ops/scripts/run_tests.py --suite lean-smoke --report artifacts/ci/lean-smoke.json -v
+      - name: Preserve real Lean smoke outcomes
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2, MIT
+        with:
+          name: lean-smoke-test-report
+          path: artifacts/ci/lean-smoke.json
+          if-no-files-found: error
+          retention-days: 14

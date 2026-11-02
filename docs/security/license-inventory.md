@@ -1,5 +1,9 @@
 # 许可与依赖清单
 
+2026-11-02：CI 测试报告留存采用固定 `actions/upload-artifact` v4.6.2（MIT），
+仅用于 GitHub 临时运行器上传指定 JSON 报告，保留 14 天。版本、许可、用途与限制见
+[ci-checks-v1](../dependencies/ci-checks-v1.md)。产品运行环境与 Lean/Mathlib 采用记录不变。
+
 2026-11-01：论文导入新增独立、可选的本地 PDF/OCR 工具环境。固定版本、
 用途、许可及保留的 wheel/Debian 通知见
 [document-ingestion-v1](../dependencies/document-ingestion-v1.md)。不用于数学

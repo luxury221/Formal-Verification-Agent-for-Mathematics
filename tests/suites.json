@@ -1,0 +1,77 @@
+{
+  "schema": "mra-test-suites-v1",
+  "requirements": {
+    "base-runtime": {
+      "files": [".runtime/runtime-snapshot.json", "lean_workspace/runtime-lock.json"],
+      "description": "Pinned base Lean/Mathlib provenance; prepare using the README bootstrap sequence. Tests still verify integrity."
+    },
+    "analysis-runtime": {
+      "files": [".runtime/analysis-foundation-v1/adoption.json", ".runtime/analysis-foundation-v1/acquisition.json", ".runtime/analysis-foundation-v1/snapshot.json", ".runtime/analysis-foundation-v1/lock.json"],
+      "description": "Locally adopted analysis profile; no public one-command preparation is claimed."
+    },
+    "calculus-runtime": {
+      "files": [".runtime/calculus-foundation-v2/adoption.json", ".runtime/calculus-foundation-v2/acquisition.json", ".runtime/calculus-foundation-v2/snapshot.json", ".runtime/calculus-foundation-v2/lock.json", ".runtime/calculus-language-v1/adoption.json"],
+      "description": "Locally adopted calculus profile and language bridge."
+    },
+    "proof-v1": {
+      "files": [".runtime/proof-language-v1/adoption.json"],
+      "description": "Versioned proof composition adoption."
+    },
+    "proof-v2": {
+      "files": [".runtime/proof-language-v2/adoption.json"],
+      "description": "Versioned proof logic adoption."
+    },
+    "proof-v3": {
+      "files": [".runtime/proof-language-v3/adoption.json"],
+      "description": "Versioned optimization language adoption."
+    },
+    "proof-v4": {
+      "files": [".runtime/proof-language-v4/adoption.json"],
+      "description": "Versioned finite linear programming language adoption."
+    },
+    "function-source": {
+      "files": [".runtime/mathlib/Mathlib/Logic/Function/Iterate.lean", ".runtime/mathlib/LICENSE"],
+      "description": "Actual pinned upstream source and license used by the function dynamics context."
+    },
+    "pde-watched-runtime": {
+      "files": [".runtime/pde-energy-v1/adoption.json", ".runtime/pde-energy-v1/acquisition.json", ".runtime/pde-energy-v1/snapshot.json", ".runtime/pde-energy-v1/lock.json", ".runtime/pde-energy-watched-v2/adoption.json", ".runtime/pde-energy-watched-v2/acquisition.json", ".runtime/pde-energy-watched-v2/snapshot.json", ".runtime/pde-energy-watched-v2/lock.json"],
+      "description": "Prepared PDE profiles; the test checks actual native dependencies and kernel identity."
+    }
+  },
+  "runtime_contracts": [
+    {"test": "test_analysis_language.ContractTests", "requires": ["analysis-runtime"], "reason": "setUp copies the original adopted profile's complete TRUST_FILES, even for compiler assertions."},
+    {"test": "test_analysis_streaming.ContractTests", "requires": ["analysis-runtime"], "reason": "setUp copies adopted analysis provenance for ledger and streaming manifest checks."},
+    {"test": "test_calculus_language.ContractTests", "requires": ["base-runtime", "calculus-runtime"], "reason": "setUp copies calculus and base ledger TRUST_FILES."},
+    {"test": "test_calculus_research.ContractTests", "requires": ["base-runtime", "calculus-runtime"], "reason": "Graph fixture copies adopted calculus provenance and binds actual provider manifests."},
+    {"test": "test_proof_research.ContractTests", "requires": ["base-runtime", "calculus-runtime", "proof-v1"], "reason": "Graph fixture copies adopted versioned proof and calculus TRUST_FILES."},
+    {"test": "test_proof_logic_research.ContractTests", "requires": ["base-runtime", "calculus-runtime", "proof-v1", "proof-v2"], "reason": "Graph fixture copies adopted versioned proof logic provenance."},
+    {"test": "test_proof_router.VersionRouterTests", "requires": ["base-runtime", "calculus-runtime", "proof-v1", "proof-v2"], "reason": "Router fixture instantiates original adopted v1 and v2 providers."},
+    {"test": "test_optimization_language.OptimizationRoutingTests", "requires": ["base-runtime", "calculus-runtime", "proof-v1", "proof-v2", "proof-v3"], "reason": "Routing fixture copies the complete provider trust chain; compiler-only tests remain in source."},
+    {"test": "test_optimization_research.ContractTests", "requires": ["base-runtime", "calculus-runtime", "proof-v1", "proof-v2", "proof-v3"], "reason": "Graph fixture copies adopted optimization profile provenance."},
+    {"test": "test_finite_lp_research.ContractTests", "requires": ["base-runtime", "calculus-runtime", "proof-v1", "proof-v2", "proof-v3", "proof-v4"], "reason": "Graph fixture copies adopted finite LP provider provenance."},
+    {"test": "test_finite_lp_router.FiniteLpRouterTests", "requires": ["base-runtime", "calculus-runtime", "proof-v1", "proof-v2", "proof-v3", "proof-v4"], "reason": "Cross-version fixture copies all four original provider trust chains."},
+    {"test": "test_function_dynamics_evaluation.ContractTests", "requires": ["base-runtime", "function-source"], "reason": "Context freezes the actual upstream Iterate source, license and provider manifest."},
+    {"test": "test_mathlib_lab.LedgerTests", "requires": ["base-runtime"], "reason": "Store previews bind the real base source manifest and runtime snapshot."},
+    {"test": "test_mathlib_lab.HttpTests.test_routes_guard_full_preview_history_and_cancel", "requires": ["base-runtime"], "reason": "HTTP preview uses an isolated ledger backed by the actual base provenance."},
+    {"test": "test_number_theory.LedgerTests", "requires": ["base-runtime"], "reason": "Store previews bind the real base source manifest and runtime snapshot."},
+    {"test": "test_number_theory.HttpTests.test_http_preview_confirm_cancel_and_revoke_use_independent_ledger", "requires": ["base-runtime"], "reason": "HTTP submission binds actual number theory provider provenance."},
+    {"test": "test_number_theory_search.ContractTests", "requires": ["base-runtime"], "reason": "Proposal search hashes the prepared runtime snapshot; no checker is called by these tests."},
+    {"test": "test_number_theory_search.HttpTests", "requires": ["base-runtime"], "reason": "Search route hashes actual base provenance before returning an unverified candidate."},
+    {"test": "test_mathlib_evaluation.PlanTests.test_all_inputs_budget_and_visible_authorship_are_explicit", "requires": ["base-runtime"], "reason": "Evaluation plans bind original runtime provenance."},
+    {"test": "test_mathlib_evaluation.PlanTests.test_splits_do_not_overlap_families_and_keep_failure_cases", "requires": ["base-runtime"], "reason": "Evaluation plans bind original runtime provenance."},
+    {"test": "test_mathlib_evaluation.PlanTests.test_nonuniform_budgets_duplicate_families_and_unknown_fields_are_rejected", "requires": ["base-runtime"], "reason": "Valid evaluation plan setup first binds runtime provenance."},
+    {"test": "test_mathlib_evaluation.PlanTests.test_stale_unnamed_or_unconfirmed_execution_never_creates_a_run", "requires": ["base-runtime"], "reason": "Plan setup first binds runtime provenance before testing execution rejection."},
+    {"test": "test_mathlib_evaluation.PlanTests.test_global_worker_lease_blocks_evaluation_before_directory_creation", "requires": ["base-runtime"], "reason": "The test constructs evaluation_plan with actual runtime provenance before acquiring the worker lease."},
+    {"test": "test_mathlib_evaluation.PlanTests.test_cli_plan_keeps_existing_arithmetic_dataset_command_working", "requires": ["base-runtime"], "reason": "The plan CLI binds runtime provenance."},
+    {"test": "test_mathlib_evaluation.PlanTests.test_http_plan_assets_read_only_routes_and_strict_queries", "requires": ["base-runtime"], "reason": "The plan HTTP endpoint binds runtime provenance."},
+    {"test": "test_research_mathlib.ProtocolTests.test_real_queued_and_cancelled_sources_cannot_be_bound", "requires": ["base-runtime"], "reason": "Creates a queued source through the original Mathlib provider."},
+    {"test": "test_mathlib_knowledge.ProtocolTests.test_queued_cancelled_unknown_and_unconfirmed_sources_rejected", "requires": ["base-runtime"], "reason": "Creates a queued source through the original Mathlib provider."},
+    {"test": "test_pde_energy_watched.ContractTests.test_context_requires_actual_native_dependencies_and_kernel", "requires": ["pde-watched-runtime"], "reason": "Explicitly reads actual sealed profile, native dependencies and host kernel; it is not a source fixture."}
+  ],
+  "lean_smoke": [
+    "test_ideas.NaturalIdeaRealLeanTests.test_new_universal_inequality_is_really_proved_in_two_processes",
+    "test_ideas.NaturalIdeaRealLeanTests.test_false_universal_claim_is_refuted_using_verified_witness",
+    "test_ideas.NaturalIdeaRealLeanTests.test_proof_failure_cannot_be_reported_as_refutation",
+    "test_replay.ReplayRealLeanTests.test_second_process_is_required_and_bound_into_real_receipt"
+  ]
+}

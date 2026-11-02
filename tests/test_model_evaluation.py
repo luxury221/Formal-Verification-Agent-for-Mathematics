@@ -2,6 +2,7 @@
 
 from dataclasses import asdict, replace
 import json
+import os
 from pathlib import Path
 import subprocess
 import sys
@@ -207,6 +208,9 @@ class EvaluationFixture:
         return response_for(request)
 
 
+@unittest.skipUnless(
+    os.environ.get("MRA_REAL_LEAN") == "1", "Explicit Lean evaluation with simulated proposals"
+)
 class ModelEvaluationRealLeanTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):

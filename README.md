@@ -108,13 +108,18 @@ python3 ops/scripts/seal_runtime.py
 
 ```bash
 python3 ops/scripts/check_source.py
-PYTHONPATH=.:tests python3 -m unittest test_document_intake test_document_http test_document_obligations -v
+python3 ops/scripts/run_tests.py --suite source
+# 只查看测试范围、所需环境和延后项目，不执行测试：
+python3 ops/scripts/run_tests.py --suite prepared --list
 # 准备本地 PDF/OCR 后，可增加真实提取测试：
 MRA_DOCUMENT_RUNTIME=1 PYTHONPATH=.:tests python3 -m unittest test_document_intake test_document_http -v
 ```
 
-完整测试集包含需要封存环境的用例，首次克隆直接运行全量测试或默认 CI
-可能因缺少环境而失败。测试记录需区分软件合同、真实 Lean 检查与真实模型效果，不能相互替代。
+默认 CI 运行源码合同；需要封存环境的合同会逐条列为延后，显式启用的集成测试列为跳过，
+都不计作通过。准备好基础 Lean 后可运行 `MRA_REAL_LEAN=1 python3 ops/scripts/run_tests.py --suite lean-smoke`；
+该入口检查四项真实 Lean/重放用例，任一跳过也不算验收成功。高级合同仍需各自采用记录，
+完整历史实验还可能依赖本地账本和资源限制。JSON 报告保存在 `artifacts/`，
+具体范围见[测试分层说明](docs/protocols/test-suites-v1.md)。软件测试、真实 Lean 检查与模型效果分别报告。
 
 - [产品蓝图](Math_Research_Agent_Development_Blueprint.md)与[开发约定](CONTRIBUTING.md)
 - [模型配置](docs/protocols/ideas-v1.md)与[框架独立工具](docs/protocols/core-tools-v1.md)

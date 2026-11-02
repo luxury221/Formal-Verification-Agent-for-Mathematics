@@ -388,6 +388,9 @@ class ChatTransportTests(unittest.TestCase):
                 ModelConfig(endpoint, "m", "v1", "MRA_TEST_KEY", "max_tokens")
 
 
+@unittest.skipUnless(
+    os.environ.get("MRA_REAL_LEAN") == "1", "Explicit actual Nat Lean and replay"
+)
 class NaturalIdeaRealLeanTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):

@@ -4,23 +4,36 @@ Use Linux or WSL Ubuntu 22.04 with Python 3.10 or later. The core uses the Pytho
 standard library; preparing real verification also requires the pinned Lean and
 Mathlib toolchain described in the README.
 
-Run the source gate before proposing a change. The full suite below currently
-includes tests that require a prepared, sealed runtime even without the real-Lean
-opt-in flag. A source-only clone does not provide those snapshots or advanced
-profile adoption files, so full discovery and the default CI can fail on missing
-environment prerequisites. Retain and report those failures; do not describe this
-command as an environment-independent contract gate:
+Run the source gate and the explicit source test suite before proposing a change.
+The suite inventories every discovered test. Contracts requiring adopted local
+profiles are individually deferred with their requirements and reasons, and
+integration opt-ins stay skipped. Neither category is counted as passed:
 
 ```bash
 python3 ops/scripts/check_source.py
-python3 -m unittest discover -s tests -v
+python3 ops/scripts/run_tests.py --suite source
 ```
 
-Real Lean tests are a separate opt-in after runtime preparation:
+Inventory the environment-dependent contracts without running fixtures:
 
 ```bash
-MRA_REAL_LEAN=1 python3 -m unittest discover -s tests -v
+python3 ops/scripts/run_tests.py --suite prepared --list
 ```
+
+After preparing and sealing the pinned base runtime, run the four real Lean and
+independent replay smoke checks with
+`MRA_REAL_LEAN=1 python3 ops/scripts/run_tests.py --suite lean-smoke`.
+Every selected smoke test must pass; a skip fails that scope. GitHub Actions offers
+the same scope through manual dispatch with `real_lean=true`.
+
+`--suite prepared` runs all contracts after checking the listed environment
+prerequisites; real integrations still require their original opt-in flags.
+Advanced experiments may also require private historical ledgers, profile-specific
+adoption and host resource limits. Direct `unittest discover` is retained as a
+diagnostic and does not provide a source-only gate. Do not use
+`MRA_REAL_LEAN=1` with full discovery on a fresh clone and describe that as a basic
+smoke test. Reports preserve selected, deferred, skipped and failed cases under
+`artifacts/`. See [test scopes](docs/protocols/test-suites-v1.md).
 
 Review code changes yourself, especially cancellation, recovery, upgrades and
 rollback. Retain failed-run evidence and describe the exact validation scope.

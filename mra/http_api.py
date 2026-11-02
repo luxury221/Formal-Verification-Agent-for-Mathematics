@@ -72,9 +72,15 @@ from .document_intake import DocumentStore, DocumentPump
 from . import document_web
 from .document_obligations import ObligationStore
 from . import obligation_web
+from .paper_automation import PaperAutomationStore
+from .paper_pipeline import PaperPump
+from . import paper_web
 
 MAX_BODY = 196608
 ASSETS = {
+    "/automation": ("automation.html", "text/html"),
+    "/automation.js": ("automation.js", "text/javascript"),
+    "/automation.css": ("automation.css", "text/css"),
     "/documents": ("documents.html", "text/html"),
     "/documents.js": ("documents.js", "text/javascript"),
     "/documents.css": ("documents.css", "text/css"),
@@ -420,6 +426,8 @@ class WorkbenchServer(ThreadingHTTPServer):
         self.documents = DocumentStore(self.root)
         self.obligations = ObligationStore(self.root, documents=self.documents, studio=self.studio)
         self.document_pump = DocumentPump(self.documents) if start_worker else None
+        self.paper_automation = PaperAutomationStore(self.root, documents=self.documents)
+        self.paper_pump = PaperPump(self.paper_automation) if start_worker else None
         self.csrf = secrets.token_urlsafe(32)
         self.assets = {
             route: ((self.root / "mra/web" / filename).read_bytes(), mime)
@@ -470,11 +478,13 @@ class WorkbenchServer(ThreadingHTTPServer):
             self.article_recheck_pump.thread.start()
         if self.document_pump:
             self.document_pump.thread.start()
+        if self.paper_pump:
+            self.paper_pump.thread.start()
 
     def server_close(self):
         # Stop both queues before either join can wait for a provider read or a
         # bounded checker attempt. Construction also uses this path when bind() fails.
-        for pump in (self.document_pump, self.article_recheck_pump, self.pump):
+        for pump in (self.paper_pump, self.document_pump, self.article_recheck_pump, self.pump):
             if pump:
                 pump.stopped.set()
                 pump.wake.set()
@@ -485,6 +495,8 @@ class WorkbenchServer(ThreadingHTTPServer):
             self.pump.close()
         if self.document_pump:
             self.document_pump.close()
+        if self.paper_pump:
+            self.paper_pump.close()
 
     def catalog(self):
         cases = json.loads((self.root / "evals/golden_cases.json").read_text(encoding="utf-8"))
@@ -746,6 +758,9 @@ class WorkbenchHandler(BaseHTTPRequestHandler):
                         "document_worker": self.server.document_pump.snapshot()
                         if self.server.document_pump
                         else {"state": "EXTERNAL", "error": None},
+                        "paper_worker": self.server.paper_pump.snapshot()
+                        if self.server.paper_pump
+                        else {"state": "EXTERNAL", "error": None},
                     },
                 )
             if self.path == "/v1/tasks":
@@ -774,6 +789,8 @@ class WorkbenchHandler(BaseHTTPRequestHandler):
                 )
             research_parts = self.path.split("/")
             if document_web.dispatch(self, write):
+                return
+            if paper_web.dispatch(self, write):
                 return
             if obligation_web.dispatch(self, write):
                 return

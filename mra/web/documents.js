@@ -9,6 +9,7 @@
   const uid = prefix => prefix + '-' + crypto.randomUUID();
   const pendingMutations = new Map();
   const el = (tag, text, className) => {const node=document.createElement(tag);if(text!==undefined)node.textContent=text;if(className)node.className=className;return node;};
+  const automationLink=el('a','自动处理全文 →','button secondary');automationLink.href='/automation';document.querySelector('.document-toolbar').append(automationLink);
   const linkStates={LOCATED:'来源已定位 · 适用关系待核对',SELF_REFERENCE:'当前片段内位置 · 已包含于原文',MISSING_TARGET:'原文中未找到锚点',AMBIGUOUS_TARGET:'锚点重复或多义',MULTIPLE_FRAGMENTS:'目标包含多个片段 · 需人工整理完整范围',UNINDEXED_TARGET:'目标未形成可用片段',DIFFERENT_DOCUMENT:'跨文档链接 · 需另行核对',NO_FRAGMENT:'没有片段锚点',INVALID_LINK:'链接格式待核对',UNSAFE_SCHEME:'链接类型不作自动定位',INVALID_FRAGMENT:'锚点编码或格式待核对',BASE_URL_REQUIRES_REVIEW:'原文设有 base 地址 · 相对链接需人工核对',AMBIGUOUS_HREF_ATTRIBUTE:'同一链接有多个 href · 不自动选择'};
   const htmlReferencePanel=el('details',undefined,'document-html-references');htmlReferencePanel.id='di-html-references';htmlReferencePanel.hidden=true;$('di-review').before(htmlReferencePanel);
   function message(text, error = false) {$('di-message').textContent=text;$('di-message').classList.toggle('error',error);}
@@ -57,6 +58,7 @@
   }
   function renderJob() {
     if(!record)return;
+    automationLink.href='/automation#'+encodeURIComponent(record.document_id);
     $('di-job').hidden=false;$('di-empty').hidden=true;
     $('di-job-title').textContent=states[record.state]||record.state;
     const option=[...$('di-documents').options].find(x=>x.value===record.document_id);

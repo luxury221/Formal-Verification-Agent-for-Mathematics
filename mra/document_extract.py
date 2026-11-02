@@ -12,6 +12,7 @@ import re
 import subprocess
 
 from .article_source import index_html
+from .document_html_refs import IMPLEMENTATION as HTML_REFERENCES_SHA256, enrich, target_labels
 
 MAX_BLOCKS = 1500
 MAX_TEXT = 524288
@@ -96,7 +97,7 @@ def block(kind, text, source, span, **extra):
     }
 
 
-def html_blocks(name, text):
+def html_blocks(name, text, citation=""):
     inventory = index_html(text)
     kinds = {
         "definition_candidate": "definition",
@@ -120,6 +121,7 @@ def html_blocks(name, text):
                 source_slice_sha256=item["source_slice_sha256"],
             )
         )
+    enrich(result, text, name, citation)
     sections = [
         {"title": x["title"], "source": name, "anchor": x["id"]} for x in inventory["sections"]
     ]
@@ -477,7 +479,7 @@ def extract(root, directory, inputs, output, progress):
     tex = {n: t for n, t in sources.items() if n.lower().endswith(".tex")}
     if html:
         try:
-            blocks, sections, extra = html_blocks(html[0], sources[html[0]])
+            blocks, sections, extra = html_blocks(html[0], sources[html[0]], inputs.get("url", ""))
             selected, method = html[0], "HTML_SOURCE"
             warnings.extend(extra)
         except ValueError as error:
@@ -537,7 +539,7 @@ def extract(root, directory, inputs, output, progress):
         item.setdefault("page_match", "NO_PDF")
         item["original_text_sha256"] = sha(item["text"].encode())
         item["math_verdict"], item["evidence_level"] = "UNKNOWN", "E0"
-        for label in item.get("labels", []) + ([item["label"]] if item.get("label") else []):
+        for label in target_labels(item):
             labels.setdefault(label, []).append(item["id"])
     for item in blocks:
         refs = item.get("reference_labels", [])
@@ -557,6 +559,12 @@ def extract(root, directory, inputs, output, progress):
         "method": method,
         "selected_source": selected,
         "extractor_sha256": sha(Path(__file__).read_bytes()),
+        "extraction_components": {
+            "document_html_refs_sha256": HTML_REFERENCES_SHA256,
+            "article_source_sha256": sha(
+                Path(__file__).with_name("article_source.py").read_bytes()
+            ),
+        },
         "extraction_tools": tools,
         "model_calls": 0,
         "lean_executions": 0,

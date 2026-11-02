@@ -3,6 +3,7 @@
   const $ = id => document.getElementById(id);
   const node = (tag, text, cls) => {const n=document.createElement(tag);if(text!==undefined)n.textContent=text;if(cls)n.className=cls;return n;};
   const roles={statement:'原始陈述',definition:'定义 / 记号',assumption:'前提条件',proof:'证明片段',context:'上下文'};
+  const htmlLinkStates={LOCATED:'来源已定位 · 适用关系待核对',SELF_REFERENCE:'当前片段内位置 · 已包含于原文',MISSING_TARGET:'未找到锚点',AMBIGUOUS_TARGET:'锚点重复或多义',MULTIPLE_FRAGMENTS:'目标包含多个片段',UNINDEXED_TARGET:'目标未形成可用片段',DIFFERENT_DOCUMENT:'跨文档链接',NO_FRAGMENT:'没有片段锚点',INVALID_LINK:'链接格式待核对',UNSAFE_SCHEME:'链接类型不作自动定位',INVALID_FRAGMENT:'锚点编码或格式待核对',BASE_URL_REQUIRES_REVIEW:'原文 base 地址需人工核对',AMBIGUOUS_HREF_ATTRIBUTE:'多个 href 待人工核对'};
   const checks={sources:'所用原文片段对应完整',objects:'对象、类型与空间一致',definitions:'定义与记号已完整展开',quantifiers:'量词顺序与范围一致',assumptions:'全部前提保留，未添加条件',conclusion:'全部子结论与边界情形保留',dependencies:'依赖与引用完整，未冒充已证假设'};
   let session, catalog, report=null, current='', selected='', selectedSources=[], fragment='', dirty=false, epoch=0, preview=null, evidence=null, transfers=[], busy=false;
   const pending = new Map();
@@ -155,7 +156,15 @@
     if(value.cues.not_expanded)panel.append(node('p',value.cues.not_expanded+' 处词面线索未展开，请回原文核对。','ob-muted'));
     if(value.reference_hints.length){
       panel.append(node('h4','原文显式引用'));
-      for(const ref of value.reference_hints)panel.append(node('p',ref.label+' · '+(ref.status==='UNREVIEWED_TARGET'?'来源已定位，依赖待审核':'未定位、多义或不可读')+(ref.targets.length?' · '+ref.targets.join('、'):''),'ob-muted'));
+      for(const ref of value.reference_hints){
+        panel.append(node('p',ref.label+' · '+(ref.status==='UNREVIEWED_TARGET'?'来源已定位，依赖待审核':'未定位、多义或不可读')+(ref.targets.length?' · '+ref.targets.join('、'):''),'ob-muted'));
+        if(ref.status==='UNREVIEWED_TARGET')for(const bid of ref.targets){const button=node('button','查看引用片段 '+bid,'button secondary');button.type='button';button.addEventListener('click',()=>showDraftSource(bid));panel.append(button);}
+      }
+    }
+    if(value.html_links?.length){
+      const detail=node('details',undefined,'ob-html-links');detail.append(node('summary','HTML 原文链接 · '+value.html_links.length+' 处'),node('p','位置指向最初的 HTML 文件；跨文档目标不会自动下载。','ob-muted'));
+      for(const link of value.html_links){const row=node('div',undefined,'ob-html-link');row.append(node('strong',htmlLinkStates[link.status]||link.status),node('code',link.href||'（空链接）'),node('p','原 HTML 字符 '+link.span.join('–'),'ob-muted'));detail.append(row);}
+      panel.append(detail);
     }
     if(value.nearby_context.length){
       panel.append(node('h4','邻近上下文 · 未自动加入'));

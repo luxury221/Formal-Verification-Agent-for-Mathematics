@@ -6,9 +6,12 @@ from pathlib import Path
 import re
 
 from .domain import digest
+from .document_html_refs import IMPLEMENTATION as HTML_REFERENCES_SHA256, target_labels
 
 SCHEMA = "source-obligation-drafts-v1"
-IMPLEMENTATION = hashlib.sha256(Path(__file__).read_bytes()).hexdigest()
+IMPLEMENTATION = hashlib.sha256(
+    Path(__file__).read_bytes() + HTML_REFERENCES_SHA256.encode()
+).hexdigest()
 MAX_BATCH = 16
 QUESTIONS = [
     "核对对象、类型和空间，逐项填写量词顺序及其范围。",
@@ -93,6 +96,7 @@ def candidate(source, block_id):
         "content": None,
         "issues": [],
         "reference_hints": [],
+        "html_links": deepcopy(primary.get("html_references", [])),
         "cues": cues(primary["text"]),
         "nearby_context": nearby(source, index),
         "math_verdict": "UNKNOWN",
@@ -104,14 +108,15 @@ def candidate(source, block_id):
         )
         return result
     refs = list(dict.fromkeys(primary.get("reference_labels", [])))
-    if len(refs) > 20:
+    foreign_links = list(
+        dict.fromkeys(r["href"] for r in primary.get("html_references", []) if r["label"] is None)
+    )
+    if len(refs) + len(foreign_links) > 20:
         result["issues"].append("显式引用超过每条义务 20 项上限；请人工整理，引用不会被截断。")
         return result
     labels = {}
     for block in source["blocks"]:
-        for label in set(
-            block.get("labels", []) + ([block["label"]] if block.get("label") else [])
-        ):
+        for label in target_labels(block):
             labels.setdefault(label, []).append(block["id"])
     sources = [{"block_id": block_id, "role": "statement"}]
     definitions, references, questions = [], [], deepcopy(QUESTIONS)
@@ -141,6 +146,15 @@ def candidate(source, block_id):
     if any(x["status"] == "UNRESOLVED_OR_AMBIGUOUS" for x in result["reference_hints"]):
         questions.append(
             "存在未定位、多义、自指或不可读的显式引用；请回原文逐项解决，不自动建立证明依赖。"
+        )
+    references.extend("HTML 引用（未自动定位）：" + href for href in foreign_links)
+    if any(r["status"] not in ("LOCATED", "SELF_REFERENCE") for r in result["html_links"]):
+        questions.append(
+            "HTML 链接含未唯一定位或跨文档引用；请核对链接原文、目标范围和适用条件，不把来源定位当作已证依赖。"
+        )
+    if result["html_links"] and primary.get("extracted_text", primary["text"]) != primary["text"]:
+        questions.append(
+            "HTML 链接位置来自最初的源文件，当前陈述已有文字修正；请重新核对每条引用的适用范围。"
         )
     if len(sources) > 24:
         result["issues"].append("所需显式来源超过 24 个上限；请人工整理，不自动删除来源。")

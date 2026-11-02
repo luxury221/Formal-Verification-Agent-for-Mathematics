@@ -2,3 +2,10 @@
 .document-structure .document-detail{margin:20px 0 0;padding:22px 0 0;border:0;border-top:1px solid #dce3d2;border-radius:0}.document-structure .document-detail .document-fields{grid-template-columns:1fr}.document-structure .document-detail h2{font-size:17px}
 
 .document-page-image[data-zoom="150"] img{width:150%;max-width:none}.document-page-image[data-zoom="200"] img{width:200%;max-width:none}#di-zoom{margin-bottom:12px}.document-page input:not([type=checkbox]),.document-page select,.document-page textarea{font-family:inherit;font-size:12px;line-height:1.8}
+.document-html-references{margin:20px 0;padding:16px;background:#f7f9f2;border:1px solid #dce5d3;border-radius:6px;min-width:0}
+.document-html-references summary{cursor:pointer;font-size:12px;color:#617e4e;line-height:1.9}
+.document-html-reference{padding:13px 0;border-top:1px solid #e1e7da;overflow-wrap:anywhere}
+.document-html-reference strong,.document-html-reference code,.document-html-reference small{display:block;font-size:11px;line-height:1.9;margin:5px 0;color:#6b805b}
+.document-html-reference code{font-size:10px;color:#87977a;white-space:pre-wrap;word-break:break-all}
+.document-html-reference small{color:#909e85;font-size:10px}
+.document-html-reference .button{white-space:normal;max-width:100%;margin-top:7px}

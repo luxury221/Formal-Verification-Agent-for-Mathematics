@@ -21,3 +21,7 @@
 .ob-draft-issue{font-size:12px;line-height:1.9;color:#926746;border:1px solid #e8d7c4;background:#fff8ef;padding:12px;border-radius:5px;overflow-wrap:anywhere}
 @media(max-width:900px){.ob-draft-grid{grid-template-columns:1fr}.ob-draft-list{max-height:380px}.ob-draft-preview{max-height:620px}}
 @media(max-width:760px){.ob-draft-panel>summary{font-size:16px}.ob-draft-grid{gap:16px}.ob-draft-preview{padding:16px}.ob-draft-row{padding:13px}.ob-draft-preview blockquote{padding:13px}}
+.ob-html-links{margin:22px 0;padding:15px;background:#f7f9f2;border:1px solid #dce5d1;border-radius:6px}
+.ob-html-link{padding:10px 0;border-top:1px solid #e0e7d7;overflow-wrap:anywhere}
+.ob-html-link strong,.ob-html-link code{display:block;font-size:11px;line-height:1.9;color:#6b805b;margin:5px 0}
+.ob-html-link code{font-size:10px;white-space:pre-wrap;word-break:break-all;color:#87977a}

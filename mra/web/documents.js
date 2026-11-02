@@ -9,6 +9,8 @@
   const uid = prefix => prefix + '-' + crypto.randomUUID();
   const pendingMutations = new Map();
   const el = (tag, text, className) => {const node=document.createElement(tag);if(text!==undefined)node.textContent=text;if(className)node.className=className;return node;};
+  const linkStates={LOCATED:'来源已定位 · 适用关系待核对',SELF_REFERENCE:'当前片段内位置 · 已包含于原文',MISSING_TARGET:'原文中未找到锚点',AMBIGUOUS_TARGET:'锚点重复或多义',MULTIPLE_FRAGMENTS:'目标包含多个片段 · 需人工整理完整范围',UNINDEXED_TARGET:'目标未形成可用片段',DIFFERENT_DOCUMENT:'跨文档链接 · 需另行核对',NO_FRAGMENT:'没有片段锚点',INVALID_LINK:'链接格式待核对',UNSAFE_SCHEME:'链接类型不作自动定位',INVALID_FRAGMENT:'锚点编码或格式待核对',BASE_URL_REQUIRES_REVIEW:'原文设有 base 地址 · 相对链接需人工核对',AMBIGUOUS_HREF_ATTRIBUTE:'同一链接有多个 href · 不自动选择'};
+  const htmlReferencePanel=el('details',undefined,'document-html-references');htmlReferencePanel.id='di-html-references';htmlReferencePanel.hidden=true;$('di-review').before(htmlReferencePanel);
   function message(text, error = false) {$('di-message').textContent=text;$('di-message').classList.toggle('error',error);}
   function endpoint(id = current, suffix = '') {return '/v1/documents/'+encodeURIComponent(id)+suffix;}
   async function api(path, data) {
@@ -158,10 +160,24 @@
     $('di-detail-text').replaceChildren(document.createTextNode(b.kind==='equation'&&!mathDelimited?'\\['+b.text+'\\]':b.text));
     $('di-original-text').textContent=b.extracted_text;$('di-review-kind').value=b.kind;$('di-review-text').value=b.text;$('di-review-note').value=b.note||'';$('di-reviewed').checked=b.extraction_reviewed;
     $('di-dependencies').textContent=(b.dependencies.length?b.dependencies.join('、'):'未识别显式依赖')+(b.unresolved_references?.length?'；未解析：'+b.unresolved_references.join('、'):'')+'。隐含依赖及全部前提仍需语义核对。';
+    renderHtmlLinks(b);
     if(b.pages.length){page=b.pages[0];renderPage();}
     const sourceIndex=record.files.findIndex(x=>x.name===b.source);
     if(sourceIndex>=0){$('di-source-select').value=String(sourceIndex);loadSource().catch(e=>message(e.message,true));}
     renderBlocks();$('di-detail').scrollIntoView({behavior:'smooth',block:'nearest'});
+  }
+  function renderHtmlLinks(block){
+    const links=block.html_references||[];htmlReferencePanel.hidden=!links.length;
+    htmlReferencePanel.replaceChildren(el('summary','HTML 原文中的显式链接 · '+links.length+' 处'),el('p','字符位置指向最初的 HTML 源文件。文字修正后仍需核对引用关系；来源定位不表示数学依赖已确认。','document-muted'));
+    for(const ref of links){
+      const card=el('div',undefined,'document-html-reference');
+      card.append(el('strong',linkStates[ref.status]||ref.status),el('code',ref.href||'（空链接）'),el('small','原 HTML 字符 '+ref.span.join('–')));
+      if(ref.status==='LOCATED'){
+        const target=draft.blocks.find(b=>b.source===block.source&&b.span[0]===ref.target_block_span[0]&&b.span[1]===ref.target_block_span[1]);
+        if(target){const button=el('button','查看引用片段 '+target.id,'button secondary');button.type='button';button.addEventListener('click',()=>openBlock(target.id));card.append(button);}
+      }
+      htmlReferencePanel.append(card);
+    }
   }
   function renderExports(){
     $('di-article-links').replaceChildren(...draft.exports.map(x=>{const link=el('a','打开全文整理记录 · 修订 '+x.revision);link.href='/articles#'+x.article_id;return link;}));

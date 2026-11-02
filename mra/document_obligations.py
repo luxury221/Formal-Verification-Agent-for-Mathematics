@@ -11,6 +11,7 @@ from .document_intake import DocumentStore, read_json, request_id
 from .domain import digest
 from .formalizer import exact_object
 from .model_service import text_field
+from . import obligation_drafts as drafts
 from .research_flow import atomic, identifier, lease
 from .research_protocol import BACKENDS, source_request, texts
 from .research_studio import StudioStore
@@ -217,6 +218,40 @@ class ObligationStore:
                 REVIEW_ITEMS
             ):
                 raise ValueError("Incomplete semantic acceptance")
+        imports = row.get("draft_imports", {})
+        if not isinstance(imports, dict) or len(imports) > LIMITS["obligations"]:
+            raise ValueError("Invalid automatic draft history")
+        for bid, receipt in imports.items():
+            exact_object(
+                receipt,
+                {
+                    "obligation_id",
+                    "initial_content_fingerprint",
+                    "generator",
+                    "plan_fingerprint",
+                    "import_revision",
+                },
+                "Source draft import receipt",
+            )
+            oid = receipt["obligation_id"]
+            initial = next((v for v in row["versions"] if v["id"] == oid), None)
+            revision = receipt["import_revision"]
+            if (
+                bid not in blocks
+                or blocks[bid]["kind"] != "claim"
+                or oid != drafts.obligation_id(row["source_fingerprint"], bid)
+                or not initial
+                or initial["content_fingerprint"] != receipt["initial_content_fingerprint"]
+                or initial["content"]["conclusion"] != blocks[bid]["text"]
+                or {"block_id": bid, "role": "statement"} not in initial["content"]["sources"]
+                or type(revision) is not int
+                or not 1 <= revision <= row["revision"]
+                or row["events"][revision - 1]["kind"] != "SOURCE_DRAFTS_IMPORTED_WITHOUT_REVIEW"
+                or receipt["generator"] != drafts.SCHEMA
+                or not isinstance(receipt["plan_fingerprint"], str)
+                or not re.fullmatch(r"[a-f0-9]{64}", receipt["plan_fingerprint"])
+            ):
+                raise ValueError("Automatic draft provenance changed")
         return row, source
 
     @staticmethod
@@ -381,6 +416,151 @@ class ObligationStore:
             row["versions"].append(item)
 
         return self.change(key, data, "OBLIGATION_VERSION_SAVED", action)
+
+    @staticmethod
+    def draft_fingerprint(row):
+        return digest(
+            {
+                "source": row["source_fingerprint"],
+                "revision": row["revision"],
+                "generator": drafts.SCHEMA,
+                "implementation": drafts.IMPLEMENTATION,
+                "limits": LIMITS,
+                "fields": sorted(FIELDS),
+            }
+        )
+
+    def _draft(self, row, source, bid):
+        text_field(bid, "Source fragment ID", 160)
+        value = drafts.candidate(source, bid)
+        value["obligation_id"] = drafts.obligation_id(row["source_fingerprint"], bid)
+        receipt = row.get("draft_imports", {}).get(bid)
+        value["imported_obligation_id"] = receipt["obligation_id"] if receipt else None
+        if not receipt and value["obligation_id"] in row["obligations"]:
+            value["issues"].append("候选编号已被其他义务占用；保留原义务，不自动覆盖。")
+        if value["content"] is not None:
+            if len(complete_statement(value["content"])) > 8000 and value["content"]["definitions"]:
+                value["content"]["definitions"] = ""
+                value["content"]["questions"].append(
+                    "引用定义未填入定义栏：完整目标超过 8000 字符预算，完整定义仍保留在关联来源；请人工整理后补全。"
+                )
+            try:
+                value["content"] = validate_content(
+                    value["content"], {b["id"]: b for b in source["blocks"]}
+                )
+            except ValueError as error:
+                value["content"] = None
+                value["issues"].append(str(error))
+        value["status"] = "IMPORTED" if receipt else "BLOCKED" if value["issues"] else "READY"
+        return value
+
+    def draft_plan(self, key, data):
+        exact_object(data, set(), "Prepare source draft inventory")
+        row, source = self.read(key)
+        self.require_current(source)
+        candidates = []
+        for block in source["blocks"]:
+            if block["kind"] != "claim":
+                continue
+            item = self._draft(row, source, block["id"])
+            candidates.append(
+                {
+                    "block_id": block["id"],
+                    "title": item["title"],
+                    "characters": len(block["text"]),
+                    "obligation_id": item["obligation_id"],
+                    "status": item["status"],
+                    "issues": item["issues"],
+                    "unreviewed_references": len(item["reference_hints"]),
+                }
+            )
+        return {
+            "schema": drafts.SCHEMA,
+            "dossier_id": key,
+            "revision": row["revision"],
+            "source_fingerprint": row["source_fingerprint"],
+            "plan_fingerprint": self.draft_fingerprint(row),
+            "generator_sha256": drafts.IMPLEMENTATION,
+            "candidates": candidates,
+            "coverage": {
+                "source_blocks": len(source["blocks"]),
+                "claim_fragments": len(candidates),
+                "nonclaim_fragments": len(source["blocks"]) - len(candidates),
+                "not_a_complete_mathematical_inventory": True,
+            },
+            "limits": {
+                "batch": drafts.MAX_BATCH,
+                "obligations_remaining": LIMITS["obligations"] - len(row["obligations"]),
+                "versions_remaining": LIMITS["versions"] - len(row["versions"]),
+                "actions_remaining": LIMITS["actions"] - row["revision"],
+            },
+            "automatic_semantic_generation": False,
+            "model_calls": 0,
+            "lean_executions": 0,
+            "whole_article_verified": False,
+            "math_verdict": "UNKNOWN",
+            "evidence_level": "E0",
+        }
+
+    def draft_preview(self, key, data):
+        exact_object(data, {"block_id", "plan_fingerprint"}, "Preview an unreviewed source draft")
+        row, source = self.read(key)
+        self.require_current(source)
+        if data["plan_fingerprint"] != self.draft_fingerprint(row):
+            raise ValueError("Source draft plan changed; prepare the current inventory again")
+        value = self._draft(row, source, data["block_id"])
+        value.update(
+            schema=drafts.SCHEMA,
+            plan_fingerprint=data["plan_fingerprint"],
+            source_fingerprint=row["source_fingerprint"],
+        )
+        return value
+
+    def import_drafts(self, key, data):
+        exact_object(
+            data,
+            {"request_id", "expected_revision", "plan_fingerprint", "block_ids"},
+            "Import unreviewed source drafts",
+        )
+        ids = texts(data["block_ids"], "Selected claim fragments", drafts.MAX_BATCH, 160)
+        if not ids or len(ids) != len(set(ids)):
+            raise ValueError("Select 1–16 distinct claim fragments")
+
+        def action(row, source):
+            if data["plan_fingerprint"] != self.draft_fingerprint(row):
+                raise ValueError("Source draft plan changed; prepare the current inventory again")
+            values = [self._draft(row, source, bid) for bid in ids]
+            if any(v["status"] == "BLOCKED" for v in values):
+                raise ValueError(
+                    "One or more selected drafts exceed limits or conflict; no drafts were imported"
+                )
+            new = [v for v in values if v["status"] != "IMPORTED"]
+            if len({v["obligation_id"] for v in new}) != len(new):
+                raise ValueError("Generated draft IDs conflict; no drafts were imported")
+            if (
+                len(row["obligations"]) + len(new) > LIMITS["obligations"]
+                or len(row["versions"]) + len(new) > LIMITS["versions"]
+            ):
+                raise ValueError("Obligation or version capacity reached; no drafts were imported")
+            for value in new:
+                content, oid = value["content"], value["obligation_id"]
+                item = {
+                    "id": oid,
+                    "version": 1,
+                    "content": content,
+                    "content_fingerprint": digest(content),
+                }
+                row["obligations"][oid] = item
+                row["versions"].append(item)
+                row.setdefault("draft_imports", {})[value["block_id"]] = {
+                    "obligation_id": oid,
+                    "initial_content_fingerprint": item["content_fingerprint"],
+                    "generator": drafts.SCHEMA,
+                    "plan_fingerprint": data["plan_fingerprint"],
+                    "import_revision": row["revision"] + 1,
+                }
+
+        return self.change(key, data, "SOURCE_DRAFTS_IMPORTED_WITHOUT_REVIEW", action)
 
     def extraction_review(self, key, data):
         exact_object(
@@ -888,6 +1068,9 @@ class ObligationStore:
             "backends": BACKENDS,
             "candidate_contract": "Structured proposals require separate source extraction review, semantic review and existing verifier checks",
             "automatic_semantic_generation": False,
+            "automatic_draft_preparation": True,
+            "draft_generator": drafts.SCHEMA,
+            "draft_batch_limit": drafts.MAX_BATCH,
             "model_calls": 0,
             "whole_article_verified": False,
         }

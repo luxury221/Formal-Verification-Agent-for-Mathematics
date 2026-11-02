@@ -6,6 +6,7 @@
   const checks={sources:'所用原文片段对应完整',objects:'对象、类型与空间一致',definitions:'定义与记号已完整展开',quantifiers:'量词顺序与范围一致',assumptions:'全部前提保留，未添加条件',conclusion:'全部子结论与边界情形保留',dependencies:'依赖与引用完整，未冒充已证假设'};
   let session, catalog, report=null, current='', selected='', selectedSources=[], fragment='', dirty=false, epoch=0, preview=null, evidence=null, transfers=[], busy=false;
   const pending = new Map();
+  let draftPlan=null;
   const recheckButton=node('button','复核这条义务的当前证据','button secondary');recheckButton.id='ob-recheck';recheckButton.type='button';const recheckActions=node('div',undefined,'ob-actions');recheckActions.append(recheckButton);$('ob-links').before(recheckActions);
   const lines = id => $(id).value.split('\n').map(x=>x.trim()).filter(Boolean);
   const endpoint = (action='', id=current) => '/v1/obligations/'+encodeURIComponent(id)+(action?'/'+action:'');
@@ -37,6 +38,7 @@
   async function choose(key){const token=++epoch;current=key;report=null;selected='';dirty=false;invalidate();$('ob-workspace').hidden=true;$('ob-empty').hidden=Boolean(key);$('ob-export').disabled=true;message('');if(!key)return;const value=await api(endpoint('',key));if(token!==epoch)return;report=value;render();$('ob-create-panel').open=false;$('ob-dossiers').value=key;}
   function render(){
     if(!report)return;
+    resetDrafts();
     $('ob-workspace').hidden=false;$('ob-empty').hidden=true;$('ob-export').disabled=false;
     $('ob-title').textContent=report.source.title;
     $('ob-source-state').textContent='原文修订 r'+report.source.document_revision+' · 整理修订 r'+report.revision+' · '+({CURRENT:'正在整理固定版本',SUPERSEDED:'原文已有新修订；此记录仅供历史回看',SOURCE_CHANGED:'原文件身份发生变化；当前证据不可用',SOURCE_UNAVAILABLE:'原文件不可用；当前证据不可用'}[report.source_state]||report.source_state);
@@ -79,6 +81,111 @@
   function reviewer(){const value=$('ob-reviewer').value.trim();if(!value)throw Error('请填写本地审核人。');return value;}
   function note(){const value=$('ob-review-note').value.trim();if(!value)throw Error('请填写此次审核说明。');return value;}
   async function semantic(decision){saved();if(!preview)throw Error('请先展开当前完整对照。');await update('review',{obligation_id:selected,preview_fingerprint:preview.preview_fingerprint,decision,reviewer:reviewer(),note:note(),confirmations:[...$('ob-confirmations').querySelectorAll('input:checked')].map(x=>x.value)});message(decision==='accept'?'语义对应已记录，数学状态仍需真实验证。':'审核决定已记录，旧确认不会自动恢复。');}
+  function resetDrafts(){
+    draftPlan=null;
+    $('ob-draft-inventory').hidden=true;
+    $('ob-draft-list').replaceChildren();
+    $('ob-draft-preview').replaceChildren(node('p','先查看候选的原文、引用和待处理事项。','ob-muted'));
+    $('ob-draft-plan').disabled=report.source_state!=='CURRENT';
+  }
+  function draftReady(){
+    if(!report||report.source_state!=='CURRENT')throw Error('请从当前原文版本建立整理记录。');
+    if(dirty)throw Error('请先保存当前义务的编辑，再生成或建立候选草稿。');
+  }
+  function selectedDrafts(){return [...$('ob-draft-list').querySelectorAll('input:checked')].map(input=>input.value);}
+  function draftCount(){
+    const count=selectedDrafts().length;
+    const capacity=Math.min(draftPlan.limits.obligations_remaining,draftPlan.limits.versions_remaining);
+    $('ob-draft-count').textContent='已选择 '+count+' 条 · 本记录还可建立 '+capacity+' 条'+(draftPlan.limits.actions_remaining?'':' · 修改次数已用尽');
+    $('ob-draft-import').disabled=count===0||count>draftPlan.limits.batch||count>capacity||!draftPlan.limits.actions_remaining;
+  }
+  function showDraftSource(bid){
+    fragment=bid;$('ob-source-search').value='';renderFragments();
+    $('ob-fragment-text').scrollIntoView({behavior:'smooth',block:'center'});
+  }
+  async function loadDraftPlan(){
+    draftReady();
+    const id=current,token=epoch,value=await api(endpoint('draft-plan'),{});
+    if(id!==current||token!==epoch)return;
+    draftPlan=value;
+    $('ob-draft-preview').replaceChildren(node('p','先查看候选的原文、引用和待处理事项。','ob-muted'));
+    $('ob-draft-inventory').hidden=false;
+    const ready=value.candidates.filter(x=>x.status==='READY').length;
+    const imported=value.candidates.filter(x=>x.status==='IMPORTED').length;
+    $('ob-draft-coverage').textContent='识别到 '+value.candidates.length+' 处陈述 · 可建立 '+ready+' 条 · 已整理 '+imported+' 条 · 待人工处理 '+(value.candidates.length-ready-imported)+' 条。仅覆盖已识别的陈述片段，不代表已穷尽全文命题和推理。';
+    const rows=value.candidates.map(item=>{
+      const card=node('div',undefined,'ob-draft-row');
+      const label=node('label',undefined,'ob-check'),input=node('input');
+      input.type='checkbox';input.value=item.block_id;input.disabled=item.status!=='READY';
+      input.addEventListener('change',draftCount);
+      label.append(input,node('span',item.title||item.block_id));
+      const meta=node('p',item.block_id+' · '+item.characters+' 字符 · '+({READY:'待整理',IMPORTED:'已有草稿',BLOCKED:'需人工处理'}[item.status]),'ob-muted');
+      const view=node('button','查看原文与线索','button secondary');view.type='button';
+      view.addEventListener('click',guarded(async()=>{await previewDraft(item.block_id);}));
+      card.append(label,meta,view);
+      if(item.status==='IMPORTED'){
+        const open=node('button','打开已有义务','button secondary');open.type='button';
+        open.addEventListener('click',()=>{if(keepEdits()){selectObligation(item.obligation_id);$('ob-edit').scrollIntoView({behavior:'smooth',block:'start'});}});
+        card.append(open);
+      }
+      return card;
+    });
+    $('ob-draft-list').replaceChildren(...rows);
+    if(!rows.length)$('ob-draft-list').append(node('p','没有识别到陈述片段。可回导入页核对分类，或手工添加数学义务；这不表示论文中没有命题。','ob-muted'));
+    draftCount();
+  }
+  async function previewDraft(bid){
+    if(!draftPlan)throw Error('请先整理当前版本的候选。');
+    const id=current,token=epoch,plan=draftPlan.plan_fingerprint;
+    const value=await api(endpoint('draft-preview'),{block_id:bid,plan_fingerprint:plan});
+    if(id!==current||token!==epoch||draftPlan?.plan_fingerprint!==plan)return;
+    const panel=$('ob-draft-preview'),block=report.source.blocks.find(b=>b.id===bid);
+    panel.replaceChildren(node('h3',value.title));
+    if(value.status==='IMPORTED')panel.append(node('p','这里展示来源规则生成的草稿。已有义务保留其编辑与审核，请从列表打开查看。','ob-muted'));
+    for(const issue of value.issues)panel.append(node('p',issue,'ob-draft-issue'));
+    panel.append(node('p','固定片段全文；前提与结论尚未拆分。','ob-muted'),node('blockquote',block.text,'mra-math ob-draft-quote'));
+    const original=node('button','在左侧对照完整原文','button secondary');original.type='button';original.addEventListener('click',()=>showDraftSource(bid));panel.append(original);
+    if(value.content?.definitions)panel.append(node('h4','显式引用的定义原文 · 适用范围待审'),node('pre',value.content.definitions));
+    if(value.cues.items.length){
+      panel.append(node('h4','词面线索 · 不代替数学拆分'));
+      for(const cue of value.cues.items){
+        panel.append(node('p',cue.kinds.map(k=>({objects:'对象',assumptions:'条件',quantifiers:'量词'}[k])).join(' / ')+' · 片段字符 '+cue.span.join('–'),'ob-muted'),node('blockquote',cue.quote,'ob-draft-cue'));
+      }
+    }
+    if(value.cues.not_expanded)panel.append(node('p',value.cues.not_expanded+' 处词面线索未展开，请回原文核对。','ob-muted'));
+    if(value.reference_hints.length){
+      panel.append(node('h4','原文显式引用'));
+      for(const ref of value.reference_hints)panel.append(node('p',ref.label+' · '+(ref.status==='UNREVIEWED_TARGET'?'来源已定位，依赖待审核':'未定位、多义或不可读')+(ref.targets.length?' · '+ref.targets.join('、'):''),'ob-muted'));
+    }
+    if(value.nearby_context.length){
+      panel.append(node('h4','邻近上下文 · 未自动加入'));
+      for(const ref of value.nearby_context){
+        const button=node('button',ref.block_id+' · '+({definition:'定义',notation:'记号',passage:'段落',proof:'证明'}[ref.kind]),'button secondary');button.type='button';
+        button.addEventListener('click',()=>showDraftSource(ref.block_id));panel.append(button);
+      }
+    }
+    if(value.content){
+      panel.append(node('h4','建立后需要逐项解决'));
+      const questions=node('ul');for(const question of value.content.questions)questions.append(node('li',question));panel.append(questions);
+    }
+    panel.scrollTop=0;
+  }
+  $('ob-draft-plan').addEventListener('click',guarded(async()=>{message('正在整理固定原文中的候选陈述与引用线索。');await loadDraftPlan();message('候选已整理。先查看原文与待处理事项，再选择要建立的草稿。');}));
+  $('ob-draft-select').addEventListener('click',()=>{
+    if(!draftPlan)return;
+    let left=draftPlan.limits.actions_remaining?Math.min(draftPlan.limits.batch,draftPlan.limits.obligations_remaining,draftPlan.limits.versions_remaining):0;
+    for(const input of $('ob-draft-list').querySelectorAll('input')){input.checked=!input.disabled&&left>0;if(input.checked)left--;}
+    draftCount();
+  });
+  $('ob-draft-import').addEventListener('click',guarded(async()=>{
+    draftReady();if(!draftPlan)throw Error('请先整理候选。');
+    const ids=selectedDrafts();if(!ids.length)throw Error('请先选择要建立的候选。');
+    const first=draftPlan.candidates.find(c=>c.block_id===ids[0]).obligation_id;
+    const fingerprint=draftPlan.plan_fingerprint;
+    await update('import-drafts',{plan_fingerprint:fingerprint,block_ids:ids},first);
+    await loadDraftPlan();
+    message('所选草稿已建立，陈述全文保留。请逐项补全语义并解决问题；当前均未验证。');
+  }));
   $('ob-edit').addEventListener('input',markDirty);
   $('ob-edit').addEventListener('submit',guarded(async event=>{event.preventDefault();const oid=$('ob-id').value;await update('save',{obligation_id:oid,content:content()},oid);message('完整义务已保存。请分别核对提取与数学语义。');}));
   $('ob-source-search').addEventListener('input',()=>{if(report)renderFragments();});

@@ -22,6 +22,9 @@ def dispatch(handler, write):
         return True
     if len(parts) == 5 and write:
         actions = {
+            "draft-plan": store.draft_plan,
+            "draft-preview": store.draft_preview,
+            "import-drafts": store.import_drafts,
             "save": store.save,
             "source-review": store.extraction_review,
             "review-preview": store.review_preview,

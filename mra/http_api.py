@@ -68,9 +68,19 @@ from . import article_recheck_web
 from .article_rechecks import ArticleRecheckStore
 from .article_recheck_worker import ArticleRecheckPump
 from .math_assets import MATH_ASSETS
+from .document_intake import DocumentStore, DocumentPump
+from . import document_web
+from .document_obligations import ObligationStore
+from . import obligation_web
 
 MAX_BODY = 196608
 ASSETS = {
+    "/documents": ("documents.html", "text/html"),
+    "/documents.js": ("documents.js", "text/javascript"),
+    "/documents.css": ("documents.css", "text/css"),
+    "/obligations": ("obligations.html", "text/html"),
+    "/obligations.js": ("obligations.js", "text/javascript"),
+    "/obligations.css": ("obligations.css", "text/css"),
     "/articles": ("articles.html", "text/html"),
     "/articles.js": ("articles.js", "text/javascript"),
     "/articles.css": ("articles.css", "text/css"),
@@ -407,6 +417,9 @@ class WorkbenchServer(ThreadingHTTPServer):
         self.studio = StudioStore(self.root)
         self.article_audits = ArticleAuditStore(self.root)
         self.article_rechecks = ArticleRecheckStore(self.root, articles=self.article_audits)
+        self.documents = DocumentStore(self.root)
+        self.obligations = ObligationStore(self.root, documents=self.documents, studio=self.studio)
+        self.document_pump = DocumentPump(self.documents) if start_worker else None
         self.csrf = secrets.token_urlsafe(32)
         self.assets = {
             route: ((self.root / "mra/web" / filename).read_bytes(), mime)
@@ -455,11 +468,13 @@ class WorkbenchServer(ThreadingHTTPServer):
             self.pump.thread.start()
         if self.article_recheck_pump:
             self.article_recheck_pump.thread.start()
+        if self.document_pump:
+            self.document_pump.thread.start()
 
     def server_close(self):
         # Stop both queues before either join can wait for a provider read or a
         # bounded checker attempt. Construction also uses this path when bind() fails.
-        for pump in (self.article_recheck_pump, self.pump):
+        for pump in (self.document_pump, self.article_recheck_pump, self.pump):
             if pump:
                 pump.stopped.set()
                 pump.wake.set()
@@ -468,6 +483,8 @@ class WorkbenchServer(ThreadingHTTPServer):
             self.article_recheck_pump.close()
         if self.pump:
             self.pump.close()
+        if self.document_pump:
+            self.document_pump.close()
 
     def catalog(self):
         cases = json.loads((self.root / "evals/golden_cases.json").read_text(encoding="utf-8"))
@@ -661,7 +678,8 @@ class WorkbenchHandler(BaseHTTPRequestHandler):
         # Script execution and style elements remain restricted to local files.
         style_attributes = (
             " style-src-attr 'unsafe-inline';"
-            if self.path in ("/proof", "/analysis", "/articles", "/studio")
+            if self.path
+            in ("/proof", "/analysis", "/articles", "/studio", "/documents", "/obligations")
             else ""
         )
         self.send_header(
@@ -725,6 +743,9 @@ class WorkbenchHandler(BaseHTTPRequestHandler):
                         if self.server.article_recheck_pump
                         else {"state": "EXTERNAL", "error": None},
                         "idea_model": model_status(self.server.root),
+                        "document_worker": self.server.document_pump.snapshot()
+                        if self.server.document_pump
+                        else {"state": "EXTERNAL", "error": None},
                     },
                 )
             if self.path == "/v1/tasks":
@@ -752,6 +773,10 @@ class WorkbenchHandler(BaseHTTPRequestHandler):
                     },
                 )
             research_parts = self.path.split("/")
+            if document_web.dispatch(self, write):
+                return
+            if obligation_web.dispatch(self, write):
+                return
             if research_capacity_web.dispatch(self, write):
                 return
             if article_recheck_web.dispatch(self, write):

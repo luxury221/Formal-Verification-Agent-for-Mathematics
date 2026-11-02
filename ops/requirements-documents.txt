@@ -1,0 +1,5 @@
+# Document intake only; the mathematical verifier has no new dependencies.
+pypdf==6.10.0
+pypdfium2==5.9.0
+Pillow==12.2.0
+typing_extensions==4.16.0

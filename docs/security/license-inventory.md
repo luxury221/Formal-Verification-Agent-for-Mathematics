@@ -1,5 +1,10 @@
 # 许可与依赖清单
 
+2026-11-01：论文导入新增独立、可选的本地 PDF/OCR 工具环境。固定版本、
+用途、许可及保留的 wheel/Debian 通知见
+[document-ingestion-v1](../dependencies/document-ingestion-v1.md)。不用于数学
+证据签发，不采用本机已有的 AGPL PDF 库；Lean/Mathlib 采用记录未更改。
+
 <!-- MRA087 -->
 
 2026-10-29 · MRA087 当前状态；下文旧阶段原样保留。

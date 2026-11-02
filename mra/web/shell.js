@@ -30,7 +30,7 @@
   const icon = (name, extra='') => `<svg class="icon ${extra}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${paths[name] || paths.paper}</svg>`;
   const escape = value => String(value ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const nav = [
-    ['/', 'home', '研究总览'], ['/studio','idea','通用研究','新'], ['/ideas','idea','猜想探索'], ['/research','flow','研究项目'], ['/typed-research','code','数学研究','新'], ['/analysis','leaf','分析研究','新'], ['/proof','flow','分析证明组合','新'], ['/pde','leaf','PDE 研究','新'], ['/articles','paper','全文推理','新'], ['/papers','paper','单定理审查','试验'],
+    ['/', 'home', '研究总览'], ['/studio','idea','通用研究','新'], ['/ideas','idea','猜想探索'], ['/research','flow','研究项目'], ['/typed-research','code','数学研究','新'], ['/analysis','leaf','分析研究','新'], ['/proof','flow','分析证明组合','新'], ['/pde','leaf','PDE 研究','新'], ['/documents','upload','论文导入','新'], ['/obligations','paper','数学义务','新'], ['/articles','paper','全文推理','新'], ['/papers','paper','单定理审查','试验'],
     ['/library','graph','知识图谱','私有'], ['/mathlib','code','Mathlib 实验','新'], ['/campaigns','flow','研究批次'], ['/compositions','flow','引理组合'], ['/proof-library','graph','组合成果库'], ['/verify','verify','形式验证'],
     ['/evaluations','chart','评测中心'], ['/activity','clock','研究记录'],
     ['/workflow','flow','产品全景'], ['/settings','settings','工作区设置']
